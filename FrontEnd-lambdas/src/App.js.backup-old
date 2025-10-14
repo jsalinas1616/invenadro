@@ -1,0 +1,777 @@
+import React, { useState, useEffect } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+import { 
+  Container, 
+  Row, 
+  Col, 
+  Card, 
+  Form, 
+  Button, 
+  Alert, 
+  ProgressBar,
+  Navbar
+} from 'react-bootstrap';
+import { 
+  FaCloudUploadAlt, 
+  FaCog, 
+  FaDownload, 
+  FaChartLine, 
+  FaArrowUp,
+  FaSpinner
+} from 'react-icons/fa';
+import { useDropzone } from 'react-dropzone';
+import * as XLSX from 'xlsx';
+import lambdaService from './services/lambdaService';
+
+// Registrar componentes de Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
+function App() {
+  // Estados del componente
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [config, setConfig] = useState({
+    factorRedondeo: 0.5,
+    joroba: 3.5,
+    diasInversionDeseados: 27.25,
+    diasDeInverionReporteSubido: 30,
+    precioMaximo: 3000 
+  });
+  const [error, setError] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [processingStage, setProcessingStage] = useState('');
+  const [overallProgress, setOverallProgress] = useState(0);
+  const [progressDetails, setProgressDetails] = useState('');
+  
+  // Estados específicos para lambdas
+  const [processId, setProcessId] = useState(null);
+  const [status, setStatus] = useState('idle');
+  const [pollingInterval, setPollingInterval] = useState(null);
+  
+  // Debug: Log cuando cambia la configuración
+  useEffect(() => {
+    console.log('Estado config actualizado:', config);
+  }, [config]);
+
+  // Polling para verificar estado del proceso Lambda
+  useEffect(() => {
+    if (processId && status !== 'COMPLETED' && status !== 'FAILED') {
+      const interval = setInterval(async () => {
+        try {
+          console.log(`[LAMBDA] Consultando estado para processId: ${processId}`);
+          const statusData = await lambdaService.checkProcessStatus(processId);
+          console.log(`[LAMBDA] Estado recibido:`, statusData);
+          
+          setStatus(statusData.status);
+          
+          // Actualizar progreso basado en estado
+          const progressMap = {
+            'RUNNING': 10,
+            'PROCESSING': 40,
+            'PROCESSED': 60,
+            'CHECKING': 80,
+            'CHECKED': 90,
+            'DOWNLOADING': 95,
+            'COMPLETED': 100
+          };
+          
+          setOverallProgress(progressMap[statusData.status] || 0);
+          setProcessingStage(lambdaService.getReadableStatus(statusData.status));
+          
+          if (statusData.status === 'COMPLETED') {
+            // Descargar resultado
+            const resultData = await lambdaService.downloadResult(processId);
+            setResult(resultData);
+            setLoading(false);
+            clearInterval(interval);
+          } else if (statusData.status === 'FAILED') {
+            setError('El procesamiento falló. Revisa los logs en AWS.');
+            setLoading(false);
+            clearInterval(interval);
+          }
+        } catch (err) {
+          console.error('[LAMBDA] Error consultando estado:', err);
+          setError(`Error consultando estado: ${err.message}`);
+          setLoading(false);
+          clearInterval(interval);
+        }
+      }, 5000); // Consultar cada 5 segundos
+      
+      setPollingInterval(interval);
+      
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    }
+  }, [processId, status]);
+
+  // 📋 VALIDAR COLUMNAS DEL EXCEL
+  const validarColumnasExcel = async (archivo) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          const data = e.target.result;
+          const workbook = XLSX.read(data, { type: 'binary' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          
+          // Convertir a JSON para obtener headers
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          const headers = jsonData[0] || [];
+          
+          console.log('Headers encontrados:', headers);
+          
+          // Columnas requeridas (actualizado según el nuevo flujo)
+          const columnasRequeridas = [
+            'Línea Terapéutica',
+            'Genérico',
+            'Material',
+            'EAN/UPC',
+            'Descripción',
+            'Tipo de Venta',
+            'Costo',
+            'P. Farmacia',
+            'P. Público',
+            'Stock',
+            'Customer'
+          ];
+          
+          // Verificar que existan las columnas requeridas
+          const columnasFaltantes = columnasRequeridas.filter(col => 
+            !headers.some(header => 
+              header && header.toString().trim().toLowerCase() === col.toLowerCase()
+            )
+          );
+          
+          if (columnasFaltantes.length > 0) {
+            reject(new Error(`Faltan las siguientes columnas en el Excel: ${columnasFaltantes.join(', ')}`));
+            return;
+          }
+          
+          // Validar que tenga datos (más de solo headers)
+          if (jsonData.length <= 1) {
+            reject(new Error('El archivo Excel no contiene datos, solo headers'));
+            return;
+          }
+          
+          console.log(`✅ Validación exitosa. Encontradas ${jsonData.length - 1} filas de datos`);
+          resolve(true);
+          
+        } catch (error) {
+          console.error('Error validando Excel:', error);
+          reject(new Error(`Error leyendo el archivo Excel: ${error.message}`));
+        }
+      };
+      
+      reader.onerror = () => {
+        reject(new Error('Error leyendo el archivo'));
+      };
+      
+      reader.readAsBinaryString(archivo);
+    });
+  };
+
+  // 📤 MANEJAR SUBIDA DE ARCHIVO
+  const handleFileUpload = async () => {
+    if (!file) {
+      setError('Por favor selecciona un archivo Excel');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      setResult(null);
+      setUploadProgress(0);
+      setOverallProgress(0);
+      setProcessingStage('Validando archivo...');
+      
+      // 1. Validar archivo Excel
+      await validarColumnasExcel(file);
+      setOverallProgress(10);
+      setProcessingStage('Archivo validado, iniciando procesamiento...');
+      
+      // 2. Enviar a Lambda a través del servicio
+      console.log('[LAMBDA] Iniciando procesamiento con configuración:', config);
+      const response = await lambdaService.initiateProcessing(file, config);
+      
+      console.log('[LAMBDA] Respuesta del initiate:', response);
+      
+      if (response.processId) {
+        setProcessId(response.processId);
+        setStatus('RUNNING');
+        setOverallProgress(15);
+        setProcessingStage('Proceso iniciado en AWS...');
+      } else {
+        throw new Error('No se recibió processId del servidor');
+      }
+      
+    } catch (err) {
+      console.error('[LAMBDA] Error en handleFileUpload:', err);
+      setError(`Error: ${err.message}`);
+      setLoading(false);
+      setOverallProgress(0);
+      setProcessingStage('');
+    }
+  };
+
+  // 🗂️ MANEJAR SELECCIÓN DE ARCHIVO
+  const onDrop = (acceptedFiles) => {
+    const selectedFile = acceptedFiles[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setError(null);
+      setResult(null);
+      console.log('Archivo seleccionado:', selectedFile.name);
+    }
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.ms-excel': ['.xls']
+    },
+    multiple: false,
+    disabled: loading
+  });
+
+  // 🔄 FUNCIÓN PARA RESETEAR TODO
+  const resetAll = () => {
+    setFile(null);
+    setResult(null);
+    setError(null);
+    setLoading(false);
+    setUploadProgress(0);
+    setOverallProgress(0);
+    setProcessingStage('');
+    setProgressDetails('');
+    setProcessId(null);
+    setStatus('idle');
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
+    }
+  };
+
+  // 📊 CONFIGURAR DATOS DEL GRÁFICO
+  const chartData = result ? {
+    labels: result.optimizacion?.historialIteraciones?.map((_, index) => `Iteración ${index + 1}`) || [],
+    datasets: [
+      {
+        label: 'Diferencia vs Objetivo',
+        data: result.optimizacion?.historialIteraciones?.map(iter => iter.diferencia) || [],
+        borderColor: 'rgb(40, 167, 69)',
+        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+        borderWidth: 2,
+        pointBackgroundColor: result.optimizacion?.historialIteraciones?.map(iter => iter.esMejor ? 'gold' : 'rgb(40, 167, 69)') || [],
+        pointBorderColor: result.optimizacion?.historialIteraciones?.map(iter => iter.esMejor ? 'orange' : 'rgb(40, 167, 69)') || [],
+        pointRadius: result.optimizacion?.historialIteraciones?.map(iter => iter.esMejor ? 8 : 5) || [],
+        fill: true,
+        tension: 0.1
+      },
+      {
+        label: 'Objetivo (Diferencia = 0)',
+        data: result.optimizacion?.historialIteraciones?.map(() => 0) || [],
+        borderColor: 'rgb(220, 53, 69)',
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        pointRadius: 0,
+        fill: false
+      }
+    ]
+  } : null;
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 20
+        }
+      },
+      title: {
+        display: true,
+        text: 'Optimización del Factor de Redondeo'
+      },
+      tooltip: {
+        filter: function(tooltipItem) {
+          // Solo mostrar tooltip para el primer dataset (línea verde)
+          return tooltipItem.datasetIndex === 0;
+        },
+        callbacks: {
+          title: function(context) {
+            const index = context[0].dataIndex;
+            const iter = result.optimizacion.historialIteraciones[index];
+            return `Iteración ${index + 1}${iter.esMejor ? ' ⭐ MEJOR' : ''}`;
+          },
+          label: function(context) {
+            const index = context.dataIndex;
+            const iter = result.optimizacion.historialIteraciones[index];
+            
+            // Calcular días de inversión alcanzados usando regla de tres
+            // Si Monto Venta Mostrador ($2.222.995,00) = 30 días, entonces iter.inversion = X días
+            const montoVentaMostrador = parseFloat(result.inversionOriginal.replace(/\./g, '').replace(',', '.')) || 0;
+            const diasAlcanzados = montoVentaMostrador > 0 ? (iter.inversion * 30) / montoVentaMostrador : 0;
+            const meta = config.diasInversionDeseados;
+            const diferenciaDias = diasAlcanzados - meta;
+            
+            return [
+              `Factor: ${iter.factor.toFixed(2)}`,
+              `Inversión: $${iter.inversion.toLocaleString('es-ES', {minimumFractionDigits: 2})}`,
+              `Diferencia: $${iter.diferencia.toLocaleString('es-ES', {minimumFractionDigits: 2})}`,
+              `Días Alcanzados: ${diasAlcanzados.toFixed(2)}`,
+              `Meta: ${meta} días`,
+              `Resultado: ${diferenciaDias > 0 ? '+' : ''}${diferenciaDias.toFixed(2)} días`
+            ];
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Diferencia ($)'
+        },
+        ticks: {
+          callback: function(value) {
+            return '$' + value.toLocaleString('es-ES');
+          }
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Iteraciones'
+        }
+      }
+    }
+  };
+
+  return (
+    <div className="App">
+      {/* NAVBAR */}
+      <Navbar bg="dark" variant="dark" className="mb-4">
+        <Container>
+          <Navbar.Brand href="#home" className="d-flex align-items-center">
+            <img
+              src="/logo-invenadro.png"
+              width="40"
+              height="40"
+              className="d-inline-block align-top me-2"
+              alt="Invenadro"
+            />
+            Sistema de Optimización de Factor de Redondeo
+          </Navbar.Brand>
+        </Container>
+      </Navbar>
+
+      <Container fluid>
+        <Row>
+          {/* PANEL IZQUIERDO - CONFIGURACIÓN */}
+          <Col lg={4} className="mb-4">
+            <Card className="shadow-sm h-100">
+              <Card.Header className="bg-primary text-white">
+                <h6 className="mb-0 d-flex align-items-center">
+                  <FaCog className="me-2" />
+                  Configuración y Carga
+                </h6>
+              </Card.Header>
+              <Card.Body>
+                {/* Dropzone */}
+                <div {...getRootProps()} className={`dropzone ${isDragActive ? 'active' : ''}`}>
+                  <input {...getInputProps()} />
+                  <FaCloudUploadAlt size={32} className="text-muted mb-2" />
+                  {file ? (
+                    <div className="text-center">
+                      <div className="fw-bold text-success">{file.name}</div>
+                      <small className="text-muted">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </small>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <div className="fw-bold">
+                        {isDragActive ? 'Suelta el archivo aquí' : 'Arrastra un archivo Excel aquí'}
+                      </div>
+                      <small className="text-muted">o haz clic para seleccionar</small>
+                      <div className="mt-2">
+                        <small className="text-muted">Formatos soportados: .xlsx, .xls</small>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Configuración de parámetros */}
+                <div className="mt-4">
+                  <h6 className="mb-3">⚙️ Parámetros de Optimización</h6>
+                  
+                  <Form.Group className="mb-3">
+                    <Form.Label>Factor de Redondeo</Form.Label>
+                    <Form.Control
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="1"
+                      value={config.factorRedondeo}
+                      onChange={(e) => setConfig(prev => ({
+                        ...prev,
+                        factorRedondeo: parseFloat(e.target.value)
+                      }))}
+                      disabled={loading}
+                    />
+                    <Form.Text className="text-muted">
+                      Valor entre 0 y 1 (ej: 0.5)
+                    </Form.Text>
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Joroba (%)</Form.Label>
+                    <Form.Control
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={config.joroba}
+                      onChange={(e) => setConfig(prev => ({
+                        ...prev,
+                        joroba: parseFloat(e.target.value)
+                      }))}
+                      disabled={loading}
+                    />
+                    <Form.Text className="text-muted">
+                      Porcentaje de joroba (ej: 3.5)
+                    </Form.Text>
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Días de Inversión Deseados</Form.Label>
+                    <Form.Control
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={config.diasInversionDeseados}
+                      onChange={(e) => setConfig(prev => ({
+                        ...prev,
+                        diasInversionDeseados: parseFloat(e.target.value)
+                      }))}
+                      disabled={loading}
+                    />
+                    <Form.Text className="text-muted">
+                      Días objetivo para la inversión
+                    </Form.Text>
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Días de Inversión Reporte Subido</Form.Label>
+                    <Form.Control
+                      type="number"
+                      step="1"
+                      min="1"
+                      value={config.diasDeInverionReporteSubido}
+                      onChange={(e) => setConfig(prev => ({
+                        ...prev,
+                        diasDeInverionReporteSubido: parseInt(e.target.value)
+                      }))}
+                      disabled={loading}
+                    />
+                    <Form.Text className="text-muted">
+                      Días de referencia del reporte
+                    </Form.Text>
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Precio Máximo ($)</Form.Label>
+                    <Form.Control
+                      type="number"
+                      step="1"
+                      min="0"
+                      value={config.precioMaximo}
+                      onChange={(e) => setConfig(prev => ({
+                        ...prev,
+                        precioMaximo: parseInt(e.target.value)
+                      }))}
+                      disabled={loading}
+                    />
+                    <Form.Text className="text-muted">
+                      Precio máximo para considerar productos
+                    </Form.Text>
+                  </Form.Group>
+                </div>
+
+                {/* Botones de acción */}
+                <div className="button-area mt-3">
+                  <div className="d-flex">
+                    <Button
+                      variant="primary"
+                      onClick={handleFileUpload}
+                      disabled={!file || loading}
+                      className="me-2"
+                    >
+                      {loading ? (
+                        <>
+                          <FaSpinner className="fa-spin me-2" />
+                          Procesando...
+                        </>
+                      ) : (
+                        <>
+                          <FaArrowUp className="me-2" />
+                          Procesar
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      variant="outline-secondary"
+                      onClick={resetAll}
+                      disabled={loading}
+                    >
+                      Limpiar
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Progreso */}
+                {loading && (
+                  <div className="mt-4">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span className="fw-bold">Progreso General</span>
+                      <span className="text-muted">{overallProgress}%</span>
+                    </div>
+                    <ProgressBar 
+                      now={overallProgress} 
+                      variant={overallProgress === 100 ? "success" : "primary"}
+                      animated={overallProgress < 100}
+                    />
+                    {processingStage && (
+                      <small className="text-muted d-block mt-2">{processingStage}</small>
+                    )}
+                    {progressDetails && (
+                      <small className="text-info d-block mt-1">{progressDetails}</small>
+                    )}
+                  </div>
+                )}
+
+                {/* Estado del proceso Lambda */}
+                {processId && (
+                  <div className="mt-3">
+                    <Card bg="light">
+                      <Card.Body className="py-2">
+                        <small className="text-muted">
+                          <strong>Process ID:</strong> {processId}<br/>
+                          <strong>Estado:</strong> {lambdaService.getReadableStatus(status)}
+                        </small>
+                      </Card.Body>
+                    </Card>
+                  </div>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+
+          {/* PANEL DERECHO - RESULTADOS */}
+          <Col lg={8}>
+            {/* Error Alert */}
+            {error && (
+              <Alert variant="danger" dismissible onClose={() => setError(null)}>
+                <strong>Error:</strong> {error}
+              </Alert>
+            )}
+
+            {/* Resultados */}
+            {result && (
+              <>
+                {/* Resultados principales */}
+                <Card className="shadow-sm mb-4">
+                  <Card.Header className="bg-success text-white">
+                    <h6 className="mb-0 d-flex align-items-center">
+                      <FaChartLine className="me-2" />
+                      Resultados de Optimización
+                    </h6>
+                  </Card.Header>
+                  <Card.Body>
+                    <Row>
+                      <Col md={6}>
+                        <div className="metric-card">
+                          <div className="metric-label">Factor Óptimo</div>
+                          <div className="metric-value text-primary">
+                            {result.factorOptimo?.toFixed(2)}
+                          </div>
+                        </div>
+                      </Col>
+                      <Col md={6}>
+                        <div className="metric-card">
+                          <div className="metric-label">Inversión Original</div>
+                          <div className="metric-value text-info">
+                            {result.inversionOriginal}
+                          </div>
+                        </div>
+                      </Col>
+                      <Col md={6}>
+                        <div className="metric-card">
+                          <div className="metric-label">Inversión Deseada</div>
+                          <div className="metric-value text-warning">
+                            {result.inversionDeseada}
+                          </div>
+                        </div>
+                      </Col>
+                      <Col md={6}>
+                        <div className="metric-card">
+                          <div className="metric-label">Resultado Monto Algoritmo</div>
+                          <div className="metric-value text-success">
+                            {result.sumaTotal}
+                          </div>
+                        </div>
+                      </Col>
+                      <Col md={6}>
+                        <div className="metric-card">
+                          <div className="metric-label">Diferencia Final</div>
+                          <div className="metric-value text-dark">
+                            {(() => {
+                              // Parsear inversionDeseada y sumaOptimoVentaFinal
+                              const inversionDeseada = parseFloat(result.inversionDeseada.replace(/\./g, '').replace(',', '.')) || 0;
+                              const sumaOptimoVentaFinal = parseFloat(result.sumaOptimoVentaFinal.replace(/\./g, '').replace(',', '.')) || 0;
+                              
+                              // Calcular diferencia
+                              const diferencia = Math.abs(inversionDeseada - sumaOptimoVentaFinal);
+                              
+                              return `$${diferencia.toLocaleString('es-ES', {minimumFractionDigits: 2})}`;
+                            })()}
+                          </div>
+                        </div>
+                      </Col>
+                      <Col md={6}>
+                        <div className="metric-card">
+                          <div className="metric-label">Días de Inversión Alcanzados</div>
+                          <div className="metric-value text-primary">
+                            {(() => {
+                              // Calcular días usando regla de tres
+                              const montoVentaMostrador = parseFloat(result.inversionOriginal.replace(/\./g, '').replace(',', '.')) || 0;
+                              const resultadoAlgoritmo = parseFloat(result.sumaTotal.replace(/\./g, '').replace(',', '.')) || 0;
+                              const diasAlcanzados = montoVentaMostrador > 0 ? (resultadoAlgoritmo * 30) / montoVentaMostrador : 0;
+                              
+                              return `${diasAlcanzados.toFixed(2)} días`;
+                            })()}
+                          </div>
+                        </div>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </Card>
+
+                {/* Gráfico de optimización */}
+                {result.optimizacion?.historialIteraciones && (
+                  <Card className="shadow-sm mb-4">
+                    <Card.Header className="bg-info text-white">
+                      <h6 className="mb-0">📈 Historial de Optimización</h6>
+                    </Card.Header>
+                    <Card.Body>
+                      <div style={{ height: '400px' }}>
+                        <Line data={chartData} options={chartOptions} />
+                      </div>
+                      <div className="mt-3">
+                        <small className="text-muted">
+                          <strong>📌 Cómo leer el gráfico:</strong> Cada punto representa una iteración del algoritmo. 
+                          Los puntos dorados (⭐) indican la mejor solución encontrada. 
+                          El objetivo es que la diferencia se acerque lo más posible a cero.
+                        </small>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                )}
+
+                {/* Botón de descarga */}
+                <div className="text-center">
+                  <Button
+                    variant="success"
+                    size="lg"
+                    onClick={() => {
+                      const dataStr = JSON.stringify(result, null, 2);
+                      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                      const exportFileDefaultName = 'resultado_optimizacion.json';
+                      const linkElement = document.createElement('a');
+                      linkElement.setAttribute('href', dataUri);
+                      linkElement.setAttribute('download', exportFileDefaultName);
+                      linkElement.click();
+                    }}
+                  >
+                    <FaDownload className="me-2" />
+                    Descargar Resultados Completos
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Estado de carga */}
+            {loading && !result && (
+              <Card className="shadow-sm">
+                <Card.Body className="text-center py-5">
+                  <FaSpinner className="fa-spin text-primary mb-3" size="3em" />
+                  <h5>Procesando archivo...</h5>
+                  <p className="text-muted">
+                    Este proceso puede tardar varios minutos dependiendo del tamaño del archivo.
+                  </p>
+                  {processingStage && (
+                    <div className="mt-3">
+                      <ProgressBar 
+                        now={overallProgress} 
+                        variant="primary" 
+                        animated 
+                      />
+                      <small className="text-muted d-block mt-2">{processingStage}</small>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            )}
+
+            {/* Estado inicial */}
+            {!loading && !result && !error && (
+              <Card className="shadow-sm">
+                <Card.Body className="text-center py-5">
+                  <FaChartLine className="text-muted mb-3" size="3em" />
+                  <h5>¡Bienvenido al Sistema de Optimización!</h5>
+                  <p className="text-muted">
+                    Selecciona un archivo Excel y configura los parámetros para comenzar.
+                  </p>
+                </Card.Body>
+              </Card>
+            )}
+          </Col>
+        </Row>
+      </Container>
+    </div>
+  );
+}
+
+export default App;

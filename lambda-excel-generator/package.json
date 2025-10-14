@@ -1,0 +1,21 @@
+{
+  "name": "lambda-excel-generator",
+  "version": "1.0.0",
+  "description": "Lambda para generar archivos Excel por cliente bajo demanda",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1469.0",
+    "xlsx": "^0.18.5"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "excel",
+    "xlsx"
+  ],
+  "author": "",
+  "license": "ISC"
+}

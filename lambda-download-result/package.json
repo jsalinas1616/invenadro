@@ -1,0 +1,16 @@
+{
+  "name": "lambda-download-result",
+  "version": "1.0.0",
+  "description": "Lambda que genera y guarda el resultado final",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-s3": "^3.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["aws", "lambda", "download-result"],
+  "author": "",
+  "license": "ISC"
+}

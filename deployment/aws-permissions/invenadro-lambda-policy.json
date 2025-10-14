@@ -1,0 +1,67 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:us-east-1:975130647458:log-group:/aws/lambda/invenadro-*:*"
+    },
+    {
+      "Sid": "DynamoDBAccess",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:975130647458:table/invenadro-jobs-dev",
+        "arn:aws:dynamodb:us-east-1:975130647458:table/invenadro-jobs-dev/index/*"
+      ]
+    },
+    {
+      "Sid": "S3Access",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::invenadro-uploads-dev",
+        "arn:aws:s3:::invenadro-uploads-dev/*",
+        "arn:aws:s3:::invenadro-results-dev",
+        "arn:aws:s3:::invenadro-results-dev/*"
+      ]
+    },
+    {
+      "Sid": "StepFunctionsAccess",
+      "Effect": "Allow",
+      "Action": [
+        "states:StartExecution",
+        "states:DescribeExecution",
+        "states:StopExecution",
+        "states:ListExecutions"
+      ],
+      "Resource": "arn:aws:states:us-east-1:975130647458:stateMachine:InvenadroStateMachine*"
+    },
+    {
+      "Sid": "LambdaInvokeAccess",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": "arn:aws:lambda:us-east-1:975130647458:function:invenadro-dev-*"
+    }
+  ]
+}
+

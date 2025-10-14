@@ -1,0 +1,394 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Estilos personalizados para mantener el diseño corporativo verde */
+
+/* Variables de colores corporativos */
+:root {
+  --primary-green: #648a26;
+  --light-green: #8ab346;
+  --dark-green: #4a6b1d;
+  --medium-green: #6b8f32;
+}
+
+/* Override Bootstrap navbar */
+.navbar-primary {
+  background-color: var(--primary-green) !important;
+}
+
+/* Cards con bordes redondeados y sombras profesionales */
+.card {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+  border: none !important;
+}
+
+.card-header {
+  border-radius: 12px 12px 0 0 !important;
+  border-bottom: 1px solid #e9ecef !important;
+}
+
+/* Botones personalizados */
+.btn-primary {
+  background-color: var(--primary-green) !important;
+  border-color: var(--primary-green) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--dark-green) !important;
+  border-color: var(--dark-green) !important;
+}
+
+.btn-outline-success {
+  color: var(--primary-green) !important;
+  border-color: var(--primary-green) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+}
+
+.btn-outline-success:hover {
+  background-color: var(--primary-green) !important;
+  border-color: var(--primary-green) !important;
+}
+
+/* Zona de dropzone personalizada */
+.dropzone {
+  min-height: 140px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  border: 2px dashed #dee2e6 !important;
+  transition: all 0.3s ease !important;
+  border-radius: 8px !important;
+  margin-bottom: 0.5rem !important;
+  padding: 1rem !important;
+}
+
+.dropzone:hover {
+  border-color: var(--primary-green) !important;
+  background-color: rgba(100, 138, 38, 0.05) !important;
+}
+
+.dropzone.active {
+  border-color: var(--primary-green) !important;
+  background-color: rgba(100, 138, 38, 0.1) !important;
+}
+
+/* Cards de métricas con efectos hover */
+.metric-card {
+  transition: transform 0.2s ease !important;
+  border-radius: 12px !important;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px) !important;
+}
+
+/* Colores de texto corporativos */
+.text-corporate {
+  color: var(--primary-green) !important;
+}
+
+.text-corporate-light {
+  color: var(--light-green) !important;
+}
+
+.text-corporate-dark {
+  color: var(--dark-green) !important;
+}
+
+/* Progress bar personalizada */
+.progress-bar {
+  background-color: var(--primary-green) !important;
+}
+
+/* Form controls con mejor styling */
+.form-control {
+  border-radius: 6px !important;
+  border: 1px solid #ced4da !important;
+}
+
+.form-control:focus {
+  border-color: var(--primary-green) !important;
+  box-shadow: 0 0 0 0.2rem rgba(100, 138, 38, 0.25) !important;
+}
+
+/* Badge personalizado */
+.badge-corporate {
+  background-color: rgba(255,255,255,0.2) !important;
+  color: white !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+  font-weight: 600 !important;
+}
+
+/* Iconos con colores corporativos */
+.icon-primary {
+  color: var(--primary-green) !important;
+}
+
+/* Backgrounds para métricas */
+.bg-metric-1 {
+  background-color: var(--primary-green) !important;
+}
+
+.bg-metric-2 {
+  background-color: var(--light-green) !important;
+}
+
+.bg-metric-3 {
+  background-color: var(--dark-green) !important;
+}
+
+.bg-metric-4 {
+  background-color: var(--medium-green) !important;
+}
+
+/* Altura mínima para las cards de métricas */
+.metric-card-body {
+  min-height: 140px !important;
+}
+
+/* Animación para el spinner */
+.fa-spin {
+  animation: fa-spin 2s infinite linear !important;
+}
+
+@keyframes fa-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(359deg);
+  }
+}
+
+/* Alert personalizado */
+.alert-danger {
+  border-radius: 8px !important;
+  border: none !important;
+}
+
+/* Fondo general */
+.app-background {
+  background-color: #f5f5f5 !important;
+}
+
+/* Responsividad mejorada */
+@media (max-width: 768px) {
+  .metric-card-body {
+    min-height: 120px !important;
+  }
+  
+  .card-header h6 {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Mejoras para la zona de upload y botones */
+.upload-card {
+  min-height: 320px !important;
+}
+
+.upload-card .card-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
+}
+
+/* Área de botones mejorada */
+.button-area {
+  margin-top: 0.5rem !important;
+  padding-top: 0.5rem !important;
+}
+
+.button-area .d-flex {
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+  justify-content: flex-start !important;
+}
+
+.button-area .btn {
+  flex: 0 0 auto !important;
+  min-width: 140px !important;
+  white-space: nowrap !important;
+  padding: 0.5rem 1rem !important;
+}
+
+/* Progress area mejorada */
+.progress-area {
+  margin: 0.5rem 0 !important;
+  padding: 0.75rem !important;
+  background-color: #f8f9fa !important;
+  border-radius: 8px !important;
+  border: 1px solid #e9ecef !important;
+}
+
+/* Async mode indicator - REMOVED (no longer used) */
+
+/* Responsive para móviles */
+@media (max-width: 576px) {
+  .dropzone {
+    min-height: 150px !important;
+    padding: 1rem !important;
+  }
+  
+  .button-area .d-flex {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .button-area .btn {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 120px !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .button-area .btn:last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  .upload-card {
+    min-height: 280px !important;
+  }
+  
+  .progress-area {
+    margin: 0.25rem 0 !important;
+    padding: 0.5rem !important;
+  }
+}
+
+/* Responsive para tablets */
+@media (max-width: 992px) and (min-width: 577px) {
+  .button-area .d-flex {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .button-area .btn {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .button-area .btn:last-child {
+    margin-bottom: 0 !important;
+  }
+}
+
+/* Fix para el layout de información del sistema */
+.info-card {
+  min-height: 400px !important;
+}
+
+.info-card .card-body {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.info-section {
+  margin-bottom: 1rem !important;
+}
+
+.info-section:last-child {
+  margin-top: auto !important;
+}
+
+/* Custom download button hover styles */
+.download-btn-custom {
+  background-color: transparent !important;  /* Siempre transparente por defecto */
+  border-color: #198754 !important;          /* Siempre borde verde */
+}
+
+.download-btn-custom svg {
+  color: #198754 !important;                 /* Ícono verde por defecto */
+}
+
+.download-btn-custom:hover:not(:disabled) {
+  background-color: #198754 !important;      /* Fondo verde en hover */
+  border-color: #198754 !important;          /* Mantener borde verde */
+  transform: none !important;
+}
+
+.download-btn-custom:hover:not(:disabled) svg {
+  color: white !important;                   /* Ícono blanco en hover */
+}
+
+.download-btn-custom:disabled {
+  background-color: #198754 !important;  /* Fondo verde cuando está descargando */
+  border-color: #198754 !important;      /* Borde verde */
+  opacity: 0.8 !important;               /* Menos opacidad pero visible */
+  cursor: not-allowed;
+}
+
+.download-btn-custom:disabled svg {
+  color: white !important;               /* Spinner blanco */
+}
+
+/* Evitar hover cuando está deshabilitado */
+.download-btn-custom:disabled:hover {
+  background-color: #198754 !important;
+  transform: none !important;
+}
+
+/* Botón de toggle para mostrar/ocultar configuración */
+.btn-outline-secondary, .btn-outline-primary {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: white !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-green) !important;
+  border-color: var(--primary-green) !important;
+  color: white !important;
+}
+
+/* Los estilos de Amplify Authenticator ahora están en src/styles/CustomAuth.css */

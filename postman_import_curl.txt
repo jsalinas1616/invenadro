@@ -1,0 +1,12 @@
+# Template de curl para importar en Postman
+# NOTA: Actualizar las URLs después de crear tu API Gateway
+
+# ⚠️ REEMPLAZA 'TU_NUEVO_API_GATEWAY_ID' con el ID que obtengas después de crear API Gateway
+
+curl --location 'https://TU_NUEVO_API_GATEWAY_ID.execute-api.us-east-1.amazonaws.com/dev/calcular-redondeo' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+--data '@postman_payload.json'
+
+# Después de la migración, el API Gateway ID será algo como: abc123xyz9
+# Ejemplo: https://abc123xyz9.execute-api.us-east-1.amazonaws.com/dev/calcular-redondeo

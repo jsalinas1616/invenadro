@@ -1,0 +1,66 @@
+# Dependencias
+node_modules/
+package-lock.json
+
+# Archivos de build
+dist/
+build/
+*.zip
+
+# Configuración local sensible
+.env
+.env.local
+.env.*.local
+deployment/config-environments.local.json
+deployment/cognito-ids.txt
+
+# AWS y credenciales
+.aws/
+*.pem
+*.key
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs.txt
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+
+# Backups
+*.backup
+*_BACKUP_*
+*_OLD.*
+*_NEW.*
+
+# Frontend específico
+FrontEnd-lambdas/build/
+FrontEnd-lambdas/.env
+FrontEnd-lambdas/coverage/
+
+# Archivos de test de gran tamaño
+postman_payload.json
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Archivos de deployment
+deployment/*.txt
+
+# Variables de entorno
+.envrc
+

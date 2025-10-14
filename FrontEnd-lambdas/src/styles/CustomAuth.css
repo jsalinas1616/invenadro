@@ -1,0 +1,449 @@
+/* ========================================
+   CUSTOM AUTHENTICATOR - ESTILOS PREMIUM
+   ======================================== */
+
+/* ========================================
+   ESTILOS SOLO PARA PANTALLA DE LOGIN
+   ======================================== */
+
+/* Cuando NO hay usuario autenticado, Amplify muestra el formulario */
+[data-amplify-authenticator]:not([data-amplify-authenticated]) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  overflow: auto !important;
+  background: linear-gradient(135deg, #648a26 0%, #4a6b1d 50%, #8ab346 100%) !important;
+}
+
+/* Ocultar body background cuando está el login */
+body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
+  background: transparent !important;
+  overflow: hidden !important;
+}
+
+/* Patrón decorativo en el fondo del login */
+[data-amplify-authenticator]:not([data-amplify-authenticated])::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+  animation: patternFloat 20s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes patternFloat {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+/* Contenedor del formulario (solo login) */
+[data-amplify-authenticator]:not([data-amplify-authenticated]) .auth-container,
+[data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-form] {
+  max-width: 500px;
+  width: 90%;
+  z-index: 10;
+  position: relative;
+}
+
+/* Card del login (solo login) */
+[data-amplify-authenticator]:not([data-amplify-authenticated]) .auth-card,
+[data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-form] {
+  background: rgba(30, 30, 30, 0.95) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(138, 179, 70, 0.3) !important;
+  border-radius: 24px !important;
+  animation: cardSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.auth-card-body {
+  padding: 2.5rem !important;
+}
+
+/* Header personalizado */
+.auth-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-logo {
+  height: 150px;
+  width: auto;
+  margin-bottom: 1.5rem;
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.auth-title {
+  color: #8ab346;
+  font-size: 1.85rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px rgba(138, 179, 70, 0.3);
+}
+
+.auth-subtitle {
+  color: #b8b8b8;
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Footer personalizado */
+.auth-footer {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.auth-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #444, transparent);
+  margin: 1.5rem 0;
+}
+
+.auth-lock-icon {
+  font-size: 1.2rem;
+}
+
+/* ========================================
+   AMPLIFY UI - SIMPLIFICADO
+   ======================================== */
+
+/* Contenedor base - TODO visible por defecto */
+[data-amplify-authenticator] {
+  background: transparent !important;
+}
+
+/* Formulario de Amplify - estilos bonitos */
+[data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-form],
+[data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-router] {
+  max-width: 450px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  background: rgba(30, 30, 30, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(138, 179, 70, 0.3) !important;
+  border-radius: 24px !important;
+  padding: 2.5rem !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+[data-amplify-authenticator] * {
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #ffffff !important;
+}
+
+/* Ocultar VISUALMENTE los tabs pero mantenerlos en el DOM */
+[data-amplify-authenticator] [role="tablist"],
+[data-amplify-authenticator] .amplify-tabs__list {
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Ocultar tabs container visualmente */
+[data-amplify-authenticator] [data-amplify-tabs] {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
+
+/* Asegurar que el formulario siga visible */
+[data-amplify-authenticator] [data-amplify-router-content],
+[data-amplify-authenticator] [role="tabpanel"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* OCULTAR headings duplicados */
+[data-amplify-authenticator] [data-amplify-heading],
+[data-amplify-authenticator] h1,
+[data-amplify-authenticator] h2:not(.auth-title),
+[data-amplify-authenticator] h3 {
+  display: none !important;
+}
+
+/* Formulario visible */
+[data-amplify-authenticator] [data-amplify-form],
+[data-amplify-authenticator] form {
+  display: block !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Labels visibles y estilizados */
+[data-amplify-authenticator] label {
+  display: block !important;
+  color: #e0e0e0 !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  margin-bottom: 0.625rem !important;
+}
+
+/* Ocultar Legend "Iniciar sesión" SÚPER AGRESIVO */
+[data-amplify-authenticator] legend,
+[data-amplify-authenticator] fieldset > legend,
+[data-amplify-authenticator] [data-amplify-fieldset] > legend,
+legend {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* Campos del formulario */
+[data-amplify-authenticator] [data-amplify-field],
+[data-amplify-authenticator] [data-amplify-fieldset] {
+  display: block !important;
+  margin-bottom: 1.5rem !important;
+  position: relative !important;
+}
+
+/* Inputs estilizados - TODOS iguales */
+[data-amplify-authenticator] input {
+  display: block !important;
+  width: 100% !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  padding: 0.875rem 1.125rem !important;
+  font-size: 1rem !important;
+  color: #ffffff !important;
+  background: #3a3a3a !important;
+  border: 2px solid #444 !important;
+  border-radius: 10px !important;
+  transition: all 0.3s ease !important;
+  box-sizing: border-box !important;
+}
+
+[data-amplify-authenticator] input::placeholder {
+  color: #999 !important;
+}
+
+[data-amplify-authenticator] input:focus {
+  outline: none !important;
+  border-color: #8ab346 !important;
+  background: #404040 !important;
+  box-shadow: 0 0 0 3px rgba(138, 179, 70, 0.1) !important;
+}
+
+/* Input de password con espacio para el ojo */
+[data-amplify-authenticator] input[type="password"] {
+  padding-right: 3.5rem !important;
+}
+
+/* Contenedor del campo de contraseña - RELATIVO */
+[data-amplify-authenticator] .amplify-passwordfield,
+[data-amplify-authenticator] [data-amplify-field]:has(input[type="password"]) {
+  position: relative !important;
+}
+
+/* Field group horizontal - ajustar para posicionamiento */
+[data-amplify-authenticator] .amplify-field-group--horizontal {
+  position: relative !important;
+  width: 100% !important;
+}
+
+/* Contenedor outer-end del botón - POSICIÓN ABSOLUTA */
+[data-amplify-authenticator] .amplify-field-group__outer-end {
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  z-index: 10 !important;
+  pointer-events: all !important;
+}
+
+/* Botón del ojo - ESTILIZADO Y DENTRO DEL INPUT */
+[data-amplify-authenticator] .amplify-field__show-password,
+[data-amplify-authenticator] button[aria-label*="password"],
+[data-amplify-authenticator] button[aria-label*="Show password"],
+[data-amplify-authenticator] button[aria-label*="Hide password"] {
+  position: static !important;
+  background: transparent !important;
+  border: none !important;
+  color: #8ab346 !important;
+  padding: 0 1rem !important;
+  width: auto !important;
+  height: 100% !important;
+  min-height: auto !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-amplify-authenticator] .amplify-field__show-password:hover {
+  color: #a0c856 !important;
+  transform: scale(1.1) !important;
+}
+
+/* BOTÓN SUBMIT - ESTILO CORPORATIVO PROFESIONAL */
+[data-amplify-authenticator] button[type="submit"],
+[data-amplify-authenticator] form button[type="submit"],
+[data-amplify-authenticator] [data-amplify-form] button[type="submit"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  height: 54px !important;
+  min-height: 54px !important;
+  max-height: 54px !important;
+  padding: 0 2rem !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  
+  /* Tipografía corporativa */
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  color: #ffffff !important;
+  text-transform: uppercase !important;
+  
+  /* Color corporativo sólido - Sin gradientes */
+  background: #648a26 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  
+  /* Sombra sutil y profesional */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+/* Hover corporativo - Elegante y sutil */
+[data-amplify-authenticator] button[type="submit"]:hover {
+  background: #7a9d30 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Active corporativo */
+[data-amplify-authenticator] button[type="submit"]:active {
+  background: #5a7a20 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(0px) !important;
+}
+
+/* Disabled state */
+[data-amplify-authenticator] button[type="submit"]:disabled {
+  background: #cccccc !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* Links (¿Olvidaste tu contraseña?) */
+[data-amplify-authenticator] a,
+[data-amplify-authenticator] button[data-variation="link"] {
+  display: block !important;
+  color: #8ab346 !important;
+  text-decoration: none !important;
+  font-size: 0.95rem !important;
+  text-align: center !important;
+  margin-top: 1rem !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0.5rem !important;
+}
+
+[data-amplify-authenticator] a:hover,
+[data-amplify-authenticator] button[data-variation="link"]:hover {
+  color: #a0c856 !important;
+  text-decoration: underline !important;
+}
+
+/* Botones secundarios (Back to Sign In, etc) */
+[data-amplify-authenticator] button[data-variation="link"],
+[data-amplify-authenticator] button:not([type="submit"]):not([aria-label*="password"]) {
+  background: transparent !important;
+  color: #8ab346 !important;
+  border: none !important;
+  height: auto !important;
+  min-height: auto !important;
+  padding: 0.5rem !important;
+  font-size: 0.95rem !important;
+  text-decoration: none !important;
+}
+
+/* Ocultar textos molestos */
+[data-amplify-authenticator] [data-amplify-password-strength-text],
+[data-amplify-authenticator] [aria-live="polite"] {
+  display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .auth-card-body {
+    padding: 2rem 1.5rem !important;
+  }
+
+  .auth-title {
+    font-size: 1.5rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.9rem;
+  }
+}

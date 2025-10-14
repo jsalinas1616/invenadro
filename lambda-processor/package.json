@@ -1,0 +1,21 @@
+{
+  "name": "lambda-processor",
+  "version": "1.0.0",
+  "description": "Lambda que procesa archivos Excel para calcular factor de redondeo",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-s3": "^3.856.0",
+    "@aws-sdk/s3-request-presigner": "^3.856.0",
+    "axios": "^1.10.0",
+    "bignumber.js": "^9.1.2",
+    "exceljs": "^4.4.0",
+    "xlsx": "^0.18.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["aws", "lambda", "excel", "factor-redondeo"],
+  "author": "",
+  "license": "ISC"
+}

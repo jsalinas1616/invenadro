@@ -1,0 +1,354 @@
+{
+  "Comment": "Step Function v35 - Arquitectura completa con soporte para single y multi-cliente",
+  "StartAt": "ValidarEntrada",
+  "States": {
+    "ValidarEntrada": {
+      "Type": "Choice",
+      "Comment": "Valida parámetros de entrada",
+      "Choices": [
+        {
+          "Variable": "$.s3Bucket",
+          "IsPresent": true,
+          "Next": "AnalizarYSepararClientes"
+        }
+      ],
+      "Default": "EntradaInvalida"
+    },
+    
+    "AnalizarYSepararClientes": {
+      "Type": "Task",
+      "Comment": "Analiza el archivo y determina si es single o multi-cliente",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:975130647458:function:factor-redondeo-lambda-dev-client-separator:$LATEST",
+        "Payload.$": "$"
+      },
+      "ResultPath": "$.separationResult",
+      "Next": "DecidirFlujo",
+      "TimeoutSeconds": 900,
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ErrorSeparacion",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    
+    "DecidirFlujo": {
+      "Type": "Choice",
+      "Comment": "Decide el flujo según el número de clientes",
+      "Choices": [
+        {
+          "Variable": "$.separationResult.Payload.tipoProcesso",
+          "StringEquals": "SINGLE_CLIENT",
+          "Next": "ProcesarClienteUnico"
+        },
+        {
+          "Variable": "$.separationResult.Payload.tipoProcesso",
+          "StringEquals": "MULTI_CLIENT",
+          "Next": "EsperarProcesosMultiples"
+        }
+      ],
+      "Default": "ErrorTipoDesconocido"
+    },
+    
+    "ProcesarClienteUnico": {
+      "Type": "Task",
+      "Comment": "Procesa archivo con un solo cliente",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:975130647458:function:factor-redondeo-lambda-dev-processor:$LATEST",
+        "Payload": {
+          "s3Bucket.$": "$.s3Bucket",
+          "s3Key.$": "$.s3Key",
+          "customConfig.$": "$.customConfig",
+          "processId.$": "$.processId",
+          "tipoProcesso": "SINGLE_CLIENT"
+        }
+      },
+      "ResultPath": "$.processingResult",
+      "Next": "VerificarEstadoUnico",
+      "TimeoutSeconds": 900,
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ErrorProcesamiento",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    
+    "VerificarEstadoUnico": {
+      "Type": "Task",
+      "Comment": "Verifica que el procesamiento de cliente único fue exitoso",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:975130647458:function:factor-redondeo-lambda-dev-status-checker:$LATEST",
+        "Payload": {
+          "processId.$": "$.processId",
+          "checkType": "SINGLE_CLIENT_VERIFICATION"
+        }
+      },
+      "ResultPath": "$.statusResult",
+      "Next": "GenerarResultadoFinal",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ]
+    },
+    
+    "EsperarProcesosMultiples": {
+      "Type": "Wait",
+      "Comment": "Espera a que los procesos múltiples se inicien",
+      "Seconds": 30,
+      "Next": "MonitorearProcesosMultiples"
+    },
+    
+    "MonitorearProcesosMultiples": {
+      "Type": "Task",
+      "Comment": "Monitorea el progreso de los procesos paralelos",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:975130647458:function:factor-redondeo-lambda-dev-status-checker:$LATEST",
+        "Payload": {
+          "processId.$": "$.processId",
+          "checkType": "MULTI_CLIENT_MONITORING",
+          "executions.$": "$.separationResult.Payload.executions"
+        }
+      },
+      "ResultPath": "$.monitoringResult",
+      "Next": "EvaluarEstadoProcesos",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ]
+    },
+    
+    "EvaluarEstadoProcesos": {
+      "Type": "Choice",
+      "Comment": "Evalúa si todos los procesos paralelos han terminado",
+      "Choices": [
+        {
+          "Variable": "$.monitoringResult.Payload.allCompleted",
+          "BooleanEquals": true,
+          "Next": "AgregarResultados"
+        },
+        {
+          "Variable": "$.monitoringResult.Payload.hasErrors",
+          "BooleanEquals": true,
+          "Next": "ManejarErroresParciales"
+        }
+      ],
+      "Default": "EsperarMasProcesos"
+    },
+    
+    "EsperarMasProcesos": {
+      "Type": "Wait",
+      "Comment": "Espera más tiempo antes de volver a verificar",
+      "Seconds": 60,
+      "Next": "MonitorearProcesosMultiples"
+    },
+    
+    "ManejarErroresParciales": {
+      "Type": "Choice",
+      "Comment": "Decide si continuar con resultados parciales",
+      "Choices": [
+        {
+          "Variable": "$.monitoringResult.Payload.successfulCount",
+          "NumericGreaterThan": 0,
+          "Next": "AgregarResultadosParciales"
+        }
+      ],
+      "Default": "ErrorTodosProcesos"
+    },
+    
+    "AgregarResultados": {
+      "Type": "Task",
+      "Comment": "Agrega todos los resultados de clientes múltiples",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:975130647458:function:factor-redondeo-lambda-dev-client-aggregator:$LATEST",
+        "Payload": {
+          "processId.$": "$.processId",
+          "s3Bucket.$": "$.s3Bucket",
+          "executions.$": "$.separationResult.Payload.executions",
+          "tipoAggregation": "COMPLETE"
+        }
+      },
+      "ResultPath": "$.aggregationResult",
+      "Next": "GenerarResultadoFinal",
+      "TimeoutSeconds": 600,
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ]
+    },
+    
+    "AgregarResultadosParciales": {
+      "Type": "Task",
+      "Comment": "Agrega resultados parciales cuando algunos procesos fallaron",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:975130647458:function:factor-redondeo-lambda-dev-client-aggregator:$LATEST",
+        "Payload": {
+          "processId.$": "$.processId",
+          "s3Bucket.$": "$.s3Bucket",
+          "executions.$": "$.separationResult.Payload.executions",
+          "tipoAggregation": "PARTIAL",
+          "errores.$": "$.monitoringResult.Payload.errors"
+        }
+      },
+      "ResultPath": "$.aggregationResult",
+      "Next": "GenerarResultadoFinal"
+    },
+    
+    "GenerarResultadoFinal": {
+      "Type": "Task",
+      "Comment": "Genera el resultado final y lo prepara para descarga",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:975130647458:function:factor-redondeo-lambda-dev-download-result:$LATEST",
+        "Payload": {
+          "processId.$": "$.processId",
+          "s3Bucket.$": "$.s3Bucket"
+        }
+      },
+      "ResultPath": "$.downloadResult",
+      "Next": "ProcesoCompletado",
+      "TimeoutSeconds": 300,
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ]
+    },
+    
+    "ProcesoCompletado": {
+      "Type": "Succeed",
+      "Comment": "Proceso completado exitosamente"
+    },
+    
+    "EntradaInvalida": {
+      "Type": "Fail",
+      "Error": "InvalidInput",
+      "Cause": "Parámetros de entrada inválidos"
+    },
+    
+    "ErrorSeparacion": {
+      "Type": "Task",
+      "Comment": "Actualiza DynamoDB con estado FAILED cuando falla la separación",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:975130647458:function:factor-redondeo-lambda-dev-status-checker:$LATEST",
+        "Payload": {
+          "processId.$": "$.processId",
+          "status": "FAILED",
+          "message": "Error durante el análisis y separación de clientes. El archivo puede ser demasiado grande o tener un formato inválido.",
+          "errorDetails.$": "$.error"
+        }
+      },
+      "Next": "ErrorSeparacionFinal",
+      "ResultPath": null
+    },
+    
+    "ErrorSeparacionFinal": {
+      "Type": "Fail",
+      "Error": "ClientSeparationError",
+      "Cause": "Error durante el análisis y separación de clientes"
+    },
+    
+    "ErrorTipoDesconocido": {
+      "Type": "Fail",
+      "Error": "UnknownProcessType",
+      "Cause": "Tipo de proceso no reconocido después del análisis"
+    },
+    
+    "ErrorProcesamiento": {
+      "Type": "Task",
+      "Comment": "Actualiza DynamoDB con estado FAILED cuando falla el procesamiento",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:975130647458:function:factor-redondeo-lambda-dev-status-checker:$LATEST",
+        "Payload": {
+          "processId.$": "$.processId",
+          "status": "FAILED",
+          "message": "Error durante el procesamiento del archivo. Revisa el formato y los datos.",
+          "errorDetails.$": "$.error"
+        }
+      },
+      "Next": "ErrorProcesamientoFinal",
+      "ResultPath": null
+    },
+    
+    "ErrorProcesamientoFinal": {
+      "Type": "Fail",
+      "Error": "ProcessingError",
+      "Cause": "Error durante el procesamiento del archivo"
+    },
+    
+    "ErrorTodosProcesos": {
+      "Type": "Fail",
+      "Error": "AllProcessesFailed",
+      "Cause": "Todos los procesos de clientes fallaron"
+    }
+  }
+}

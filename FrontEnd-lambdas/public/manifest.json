@@ -1,0 +1,39 @@
+{
+  "short_name": "Factor Redondeo",
+  "name": "Sistema de Optimización de Factores de Redondeo",
+  "description": "Sistema profesional para optimización de inventario con algoritmo de factor de redondeo dinámico",
+  "icons": [
+    {
+      "src": "favicon-invenadro.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "favicon-invenadro.png",
+      "type": "image/png",
+      "sizes": "32x32",
+      "purpose": "any"
+    },
+    {
+      "src": "logo-invenadro-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo-invenadro-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#648a26",
+  "background_color": "#f5f5f5",
+  "scope": "/",
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "es-MX",
+  "dir": "ltr"
+}

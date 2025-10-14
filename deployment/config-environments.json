@@ -1,0 +1,126 @@
+{
+  "description": "Configuración centralizada de ambientes - Factor de Redondeo",
+  "project_name": "invenadro",
+  "_note": "Este archivo define configuraciones independientes por ambiente para evitar conflictos con otros proyectos",
+  
+  "environments": {
+    "dev": {
+      "project_prefix": "invenadro",
+      "aws": {
+        "region": "us-east-1",
+        "account_id": "975130647458"
+      },
+      "api_gateway": {
+        "id": "PENDIENTE_CREAR",
+        "stage": "dev",
+        "base_url": "https://PENDIENTE_CREAR.execute-api.us-east-1.amazonaws.com/dev"
+      },
+      "cognito": {
+        "user_pool_id": "PENDIENTE_CREAR",
+        "user_pool_client_id": "PENDIENTE_CREAR",
+        "user_pool_name": "invenadro-users-dev"
+      },
+      "s3": {
+        "uploads_bucket": "invenadro-uploads-dev",
+        "results_bucket": "invenadro-results-dev",
+        "frontend_bucket": "invenadro-frontend-dev"
+      },
+      "dynamodb": {
+        "jobs_table": "invenadro-jobs-dev"
+      },
+      "lambda": {
+        "prefix": "invenadro-dev",
+        "functions": {
+          "initiator": "invenadro-dev-initiator",
+          "client_separator": "invenadro-dev-client-separator",
+          "processor": "invenadro-dev-processor",
+          "status_checker": "invenadro-dev-status-checker",
+          "client_aggregator": "invenadro-dev-client-aggregator",
+          "download_result": "invenadro-dev-download-result",
+          "excel_generator": "invenadro-dev-excel-generator",
+          "get_presigned_url": "invenadro-dev-get-presigned-url"
+        }
+      },
+      "step_function": {
+        "name": "InvenadroStateMachine",
+        "arn": "arn:aws:states:us-east-1:975130647458:stateMachine:InvenadroStateMachine"
+      },
+      "frontend": {
+        "allowed_origins": [
+          "http://invenadro-frontend-dev.s3-website-us-east-1.amazonaws.com",
+          "http://localhost:3000",
+          "http://localhost:3001"
+        ]
+      }
+    },
+    
+    "prod": {
+      "project_prefix": "invenadro",
+      "aws": {
+        "region": "us-east-1",
+        "account_id": "975130647458"
+      },
+      "api_gateway": {
+        "id": "PENDIENTE_CREAR",
+        "stage": "prod",
+        "base_url": "https://PENDIENTE_CREAR.execute-api.us-east-1.amazonaws.com/prod"
+      },
+      "cognito": {
+        "user_pool_id": "PENDIENTE_CREAR",
+        "user_pool_client_id": "PENDIENTE_CREAR",
+        "user_pool_name": "invenadro-users-prod"
+      },
+      "s3": {
+        "uploads_bucket": "invenadro-uploads-prod",
+        "results_bucket": "invenadro-results-prod",
+        "frontend_bucket": "invenadro-frontend-prod"
+      },
+      "dynamodb": {
+        "jobs_table": "invenadro-jobs-prod"
+      },
+      "lambda": {
+        "prefix": "invenadro-prod",
+        "functions": {
+          "initiator": "invenadro-prod-initiator",
+          "client_separator": "invenadro-prod-client-separator",
+          "processor": "invenadro-prod-processor",
+          "status_checker": "invenadro-prod-status-checker",
+          "client_aggregator": "invenadro-prod-client-aggregator",
+          "download_result": "invenadro-prod-download-result",
+          "excel_generator": "invenadro-prod-excel-generator",
+          "get_presigned_url": "invenadro-prod-get-presigned-url"
+        }
+      },
+      "step_function": {
+        "name": "InvenadroStateMachineProd",
+        "arn": "arn:aws:states:us-east-1:975130647458:stateMachine:InvenadroStateMachineProd"
+      },
+      "frontend": {
+        "allowed_origins": [
+          "https://invenadro.tu-dominio.com",
+          "http://invenadro-frontend-prod.s3-website-us-east-1.amazonaws.com"
+        ]
+      }
+    }
+  },
+  
+  "deployment_notes": {
+    "importante": [
+      "Este archivo NO debe ser commiteado a git con valores reales de producción",
+      "Usar variables de entorno para credenciales sensibles",
+      "Actualizar TODOS los archivos que usan hardcoded values después de crear la infraestructura"
+    ],
+    "orden_creacion": [
+      "1. Crear buckets S3 (uploads, results, frontend)",
+      "2. Crear tabla DynamoDB",
+      "3. Crear User Pool de Cognito",
+      "4. Crear API Gateway",
+      "5. Crear funciones Lambda con nuevos nombres",
+      "6. Crear Step Function con nuevo nombre",
+      "7. Configurar permisos y policies",
+      "8. Actualizar frontend con nuevas URLs y IDs",
+      "9. Probar end-to-end"
+    ]
+  }
+}
+
