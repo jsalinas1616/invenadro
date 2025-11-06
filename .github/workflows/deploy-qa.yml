@@ -1,0 +1,83 @@
+name: Deploy to QA
+
+on:
+  push:
+    branches:
+      - qa
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  STAGE: qa
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install service dependencies
+        run: |
+          cd services/simplicidad
+          npm install
+          cd ../frontend
+          npm install
+
+      - name: Deploy Backend
+        run: |
+          cd services/simplicidad
+          npx serverless deploy --stage ${{ env.STAGE }} --verbose
+
+      - name: Build Frontend
+        run: |
+          cd FrontEnd-lambdas
+          npm install
+          npm run build
+
+      - name: Deploy Frontend
+        run: |
+          cd services/frontend
+          npx serverless deploy --stage ${{ env.STAGE }} --verbose
+
+      - name: Get Backend Deployment Info
+        run: |
+          cd services/simplicidad
+          npx serverless info --stage ${{ env.STAGE }}
+
+      - name: Get Frontend Deployment Info
+        run: |
+          cd services/frontend
+          npx serverless info --stage ${{ env.STAGE }}
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Deployment to ${{ env.STAGE }} completed successfully!"
+          echo "🚀 Check your AWS console for the deployed resources"
+
+      - name: Notify Failure
+        if: failure()
+        run: |
+          echo "❌ Deployment to ${{ env.STAGE }} failed!"
+          echo "Check the logs above for details"

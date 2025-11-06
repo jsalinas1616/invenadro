@@ -1,0 +1,22 @@
+{
+  "name": "invenadro-frontend",
+  "version": "1.0.0",
+  "description": "Invenadro Frontend Service - React App on S3 + CloudFront",
+  "private": true,
+  "scripts": {
+    "deploy:dev": "serverless deploy --stage dev --verbose",
+    "deploy:qa": "serverless deploy --stage qa --verbose",
+    "deploy:prod": "serverless deploy --stage prod --verbose",
+    "remove:dev": "serverless remove --stage dev",
+    "remove:qa": "serverless remove --stage qa",
+    "remove:prod": "serverless remove --stage prod",
+    "sync:dev": "serverless s3sync --stage dev",
+    "sync:qa": "serverless s3sync --stage qa",
+    "sync:prod": "serverless s3sync --stage prod"
+  },
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-s3-sync": "^3.1.0",
+    "serverless-cloudfront-invalidate": "^1.12.0"
+  }
+}

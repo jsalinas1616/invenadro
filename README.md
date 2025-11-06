@@ -1,321 +1,253 @@
-# 🏥 Invenadro - Sistema de Optimización de Factor de Redondeo
+# 🚀 Invenadro
 
-Sistema de optimización de inventarios farmacéuticos mediante cálculo de Factor de Redondeo, implementado con arquitectura serverless en AWS.
+Sistema serverless completo: Backend (Lambdas + Step Functions) + Frontend (React + CloudFront).
 
----
+## ⚡ Quick Start
 
-## 🚨 IMPORTANTE: ANTES DE HACER DEPLOY
+### Prerequisitos
+```bash
+# Node.js 20+
+node --version
 
-**Este proyecto requiere infraestructura AWS independiente.** 
+# Serverless Framework
+npm install -g serverless
 
-Si eres nuevo en este proyecto:
+# AWS CLI configurado
+aws configure
+```
+
+### Deploy Completo (Backend + Frontend)
 
 ```bash
-# Lee esto primero (5 minutos)
-cat EMPEZAR_AQUI.md
+# 1. Instalar todas las dependencias
+npm run install:all
+
+# 2. Configurar ambiente
+cp .env.template .env.dev
+# Edita .env.dev con tu AWS_ACCOUNT_ID
+
+# 3. Deploy TODO (backend + frontend)
+npm run deploy:all:dev
 ```
 
-Si vas a hacer deploy:
+### Deploy Individual
 
 ```bash
-# Verifica que la infraestructura existe
-./deployment/scripts/verify-infrastructure.sh
+# Solo backend
+npm run deploy:simplicidad:dev
+
+# Solo frontend  
+npm run deploy:frontend:dev
 ```
+
+### 🎉 ¡Listo!
+
+Outputs del deploy:
+- ✅ **Backend:** API Gateway URL, Cognito User Pool
+- ✅ **Frontend:** CloudFront URL (https://d123456789.cloudfront.net)
 
 ---
 
-## 📋 Resumen Ejecutivo
+## 🏗️ Arquitectura
 
-Este sistema procesa archivos Excel de inventario farmacéutico para calcular el factor de redondeo óptimo mediante optimización algorítmica. 
+```
+Frontend (React) → CloudFront (CDN) → S3 (hosting)
+                        ↓
+            API Gateway + Cognito
+                        ↓
+              8 Lambda Functions
+                        ↓
+           Step Functions (Orquestación)
+                        ↓
+              S3 + DynamoDB
+```
 
-**Características principales:**
-- ✅ Procesamiento asíncrono (el usuario no espera)
-- ✅ Soporte para múltiples clientes simultáneos
-- ✅ Arquitectura serverless 100% en AWS
-- ✅ Interfaz web moderna con React
-- ✅ Autenticación con AWS Cognito
+**Stack completo:**
+- **Frontend:** React app en S3 + CloudFront
+- **Backend:** 8 Lambdas + Step Functions
+- **API:** API Gateway con Cognito auth
+- **Storage:** S3 buckets + DynamoDB
 
 ---
 
-## 🏗️ Arquitectura General
-
-```
-┌─────────────┐    ┌──────────────┐    ┌─────────────────┐
-│   Frontend  │───▶│API Gateway + │───▶│  Step Function  │
-│   (React)   │    │   Cognito    │    │  (Orquestador)  │
-└─────────────┘    └──────────────┘    └─────────────────┘
-                           │                       │
-                           ▼                       ▼
-                   ┌──────────────┐      ┌─────────────────┐
-                   │     S3       │      │   DynamoDB      │
-                   │ (Archivos)   │      │  (Estados)      │
-                   └──────────────┘      └─────────────────┘
-                                              │
-                                              ▼
-                                    ┌─────────────────┐
-                                    │  8 Funciones    │
-                                    │    Lambda       │
-                                    └─────────────────┘
-```
-
----
-
-## 🚀 Inicio Rápido
-
-### Para Desarrolladores Nuevos
-
-1. **Lee la advertencia sobre infraestructura:**
-   ```bash
-   cat EMPEZAR_AQUI.md
-   ```
-
-2. **Verifica prerequisitos:**
-   ```bash
-   which aws      # AWS CLI instalado
-   which node     # Node.js 20.x
-   which jq       # JSON processor
-   aws sts get-caller-identity  # Credenciales configuradas
-   ```
-
-3. **Verifica el estado de la infraestructura:**
-   ```bash
-   ./deployment/scripts/verify-infrastructure.sh
-   ```
-
-4. **Si falta infraestructura, sigue la guía:**
-   ```bash
-   cat deployment/QUICK_START.md
-   ```
-
-### Para Deploy de Código (Infraestructura Ya Existe)
-
-```bash
-# Re-desplegar todas las Lambdas
-./deployment/scripts/2-create-lambdas.sh
-
-# Re-desplegar frontend
-cd FrontEnd-lambdas
-npm run build
-aws s3 sync build/ s3://invenadro-frontend-dev --delete
-```
-
----
-
-## 📁 Estructura del Proyecto
+## 📁 Estructura
 
 ```
 invenadro/
-├── FrontEnd-lambdas/          # Frontend React
-│   ├── src/
-│   │   ├── components/        # Componentes React
-│   │   ├── services/          # API clients
-│   │   └── aws-config.js      # Config de Cognito
-│   └── package.json
+├── services/
+│   ├── simplicidad/              # Backend
+│   │   ├── serverless.yml       # 8 Lambdas + Step Functions
+│   │   ├── functions/           # Código de Lambdas
+│   │   ├── resources/           # DynamoDB, S3, Cognito, IAM
+│   │   └── stepfunctions/       # State machine definition
+│   │
+│   └── frontend/                 # Frontend Deploy
+│       ├── serverless.yml       # S3 + CloudFront
+│       └── package.json
 │
-├── lambda-initiator/          # Punto de entrada del proceso
-├── lambda-client-separator/   # Separa datos por cliente
-├── lambda-processor/          # Motor de optimización
-├── lambda-status-checker/     # Monitorea estado de procesos
-├── lambda-client-aggregator/  # Consolida resultados
-├── lambda-download-result/    # Genera respuesta final
-├── lambda-excel-generator/    # Genera Excel por cliente
-├── lambda-get-presigned-url/  # Genera URLs de subida
+├── FrontEnd-lambdas/             # Código React
+│   ├── src/                     # Fuentes React
+│   ├── public/
+│   └── build/                   # Build output
 │
-├── infrastructure/
-│   └── step-function.json     # Definición de Step Function
-│
-└── deployment/                # 🎯 Scripts y documentación
-    ├── QUICK_START.md         # Guía de inicio rápido
-    ├── scripts/               # Scripts de automatización
-    └── aws-permissions/       # Políticas IAM
+└── .github/workflows/            # CI/CD
+    ├── deploy-dev.yml           # Backend + Frontend automático
+    ├── deploy-qa.yml
+    └── deploy-prod.yml
 ```
 
 ---
 
-## 🔧 Componentes Principales
+## 🌍 Ambientes
 
-### Backend (8 Funciones Lambda)
+| Ambiente | Rama | Deploy | Recursos |
+|----------|------|--------|----------|
+| **DEV** | `dev` | Automático | `invenadro-*-dev-*` |
+| **QA** | `qa` | Automático | `invenadro-*-qa-*` |
+| **PROD** | `main` | Manual | `invenadro-*-prod-*` |
 
-1. **lambda-initiator** - Recibe archivo, inicia Step Function
-2. **lambda-client-separator** - Analiza y separa clientes
-3. **lambda-processor** - Motor principal de optimización
-4. **lambda-status-checker** - Monitorea estado de ejecuciones
-5. **lambda-client-aggregator** - Consolida resultados
-6. **lambda-download-result** - Genera respuesta para API
-7. **lambda-excel-generator** - Genera Excel individual por cliente
-8. **lambda-get-presigned-url** - Genera URLs para subir archivos a S3
-
-### Frontend (React)
-
-- **App.js** - Componente principal
-- **services/lambdaService.js** - Cliente API
-- **components/** - Componentes reutilizables
-- **aws-config.js** - Configuración de Cognito
-
-### Infraestructura AWS
-
-- **API Gateway** - Endpoints REST con autenticación Cognito
-- **Step Functions** - Orquestación de workflows
-- **S3 Buckets** - Almacenamiento de archivos y resultados
-- **DynamoDB** - Base de datos para tracking de procesos
-- **Cognito User Pool** - Autenticación de usuarios
+Cada ambiente tiene su propia infraestructura aislada:
+- Backend: `invenadro-simplicidad-{stage}-*`
+- Frontend: `invenadro-frontend-{stage}`
 
 ---
 
-## 📊 Flujo de Procesamiento
+## 🛠️ Comandos
 
-### 1. Usuario Sube Archivo
-
-Usuario selecciona archivo Excel y configuración → Frontend llama a API Gateway → Lambda Initiator recibe y sube a S3 → Inicia Step Function
-
-### 2. Análisis y Separación
-
-Step Function invoca Client Separator → Analiza cuántos clientes hay → Si es un cliente: procesamiento directo → Si son múltiples: crea ejecuciones paralelas
-
-### 3. Procesamiento (Motor de Optimización)
-
-Lambda Processor ejecuta por cada cliente → Aplica algoritmo de optimización → Calcula factor óptimo → Genera historial de convergencia → Guarda resultados en S3
-
-### 4. Consolidación
-
-Si múltiples clientes: Client Aggregator consolida → Genera vista general → Status Checker verifica estado
-
-### 5. Resultado Final
-
-Download Result prepara respuesta → Usuario puede descargar Excel consolidado → O Excel individual por cliente
-
----
-
-## 🔐 Autenticación
-
-El sistema usa **AWS Cognito** para autenticación:
-
-- Login con email y contraseña
-- JWT tokens con expiración de 60 minutos
-- Refresh tokens para sesiones extendidas
-- Todos los endpoints protegidos con Cognito Authorizer
-
----
-
-## 📊 Estados del Proceso
-
-| Estado | Descripción |
-|--------|-------------|
-| `RUNNING` | Proceso iniciado |
-| `SEPARATING_CLIENTS` | Analizando archivo |
-| `PROCESSING_SINGLE` | Procesando cliente único |
-| `PROCESSING_MULTI` | Procesando múltiples clientes |
-| `COMPLETED` | Proceso completado exitosamente |
-| `FAILED` | Error en el proceso |
-
----
-
-## 🛠️ Comandos Útiles
-
-### Verificación
-
+### Deploy
 ```bash
-# Estado de infraestructura
-./deployment/scripts/verify-infrastructure.sh
+# Deploy completo (backend + frontend)
+npm run deploy:all:dev
+npm run deploy:all:qa
+npm run deploy:all:prod
 
-# Ver logs de una Lambda
-aws logs tail /aws/lambda/invenadro-dev-processor --follow
+# Deploy solo backend
+npm run deploy:simplicidad:dev
 
-# Listar recursos
-aws lambda list-functions | grep invenadro
-aws s3 ls | grep invenadro
+# Deploy solo frontend
+npm run deploy:frontend:dev
+
+# Build frontend sin deploy
+npm run build:frontend
 ```
 
-### Deployment
-
+### Info
 ```bash
-# Re-desplegar una Lambda específica
-cd lambda-processor
-zip -r lambda-processor-deploy.zip . -x "*.zip"
-aws lambda update-function-code \
-  --function-name invenadro-dev-processor \
-  --zip-file fileb://lambda-processor-deploy.zip
+# Ver info backend
+npm run info:backend:dev
 
-# Re-desplegar frontend
-cd FrontEnd-lambdas
-npm run build
-aws s3 sync build/ s3://invenadro-frontend-dev --delete
+# Ver info frontend  
+npm run info:frontend:dev
 ```
 
-### Testing
-
+### Logs
 ```bash
-# Test de API (actualiza el script primero)
-./test_curl.sh
-
-# Ver ejecuciones de Step Function
-aws stepfunctions list-executions \
-  --state-machine-arn arn:aws:states:us-east-1:975130647458:stateMachine:InvenadroStateMachine
+npm run logs:initiator:dev
+npm run logs:processor:dev
 ```
 
----
-
-## 📚 Documentación Completa
-
-- **`EMPEZAR_AQUI.md`** - ⚠️ Lee esto PRIMERO
-- **`README_MIGRATION.md`** - Guía de migración de infraestructura
-- **`deployment/QUICK_START.md`** - Tutorial paso a paso
-- **`deployment/MIGRATION_PLAN.md`** - Plan técnico completo
-- **`deployment/INDEX.md`** - Índice de toda la documentación
-
----
-
-## 🆘 Troubleshooting
-
-### Error: "Function not found"
-
+### Remover
 ```bash
-# Verificar que existen las Lambdas
-aws lambda list-functions | grep invenadro
+# Remover backend
+npm run remove:simplicidad:dev
 
-# Si no existen, crearlas
-./deployment/scripts/2-create-lambdas.sh
+# Remover frontend
+npm run remove:frontend:dev
 ```
 
-### Error: "Bucket does not exist"
+---
 
+## 📊 CI/CD (GitHub Actions)
+
+### Setup:
+1. Crear OIDC role en AWS
+2. Agregar secret `AWS_ROLE_ARN` en GitHub
+
+### Flujo automático:
+```
+Push a dev → Build React → Deploy Backend → Deploy Frontend → ✅
+Push a qa → Build React → Deploy Backend → Deploy Frontend → ✅
+Push a main → Aprobación → Deploy Backend → Deploy Frontend → ✅
+```
+
+---
+
+## 🌐 Frontend Details
+
+### Stack:
+- **Hosting:** S3 bucket (private)
+- **CDN:** CloudFront distribution
+- **SSL:** Gratis con CloudFront
+- **Cache:** Assets con max-age 1 año
+- **SPA:** Routing con fallback a index.html
+
+### URLs después del deploy:
+```
+DEV:  https://d123abc.cloudfront.net
+QA:   https://d456def.cloudfront.net
+PROD: https://d789ghi.cloudfront.net
+```
+
+### Custom domain (opcional):
+Ver `services/frontend/serverless.yml` para configurar ACM certificate.
+
+---
+
+## 🔐 Seguridad
+
+Backend:
+- ✅ Account IDs en `.env.*` (gitignored)
+- ✅ Cognito authentication
+- ✅ IAM least privilege
+- ✅ S3 buckets privados
+
+Frontend:
+- ✅ CloudFront HTTPS only
+- ✅ CORS configurado
+- ✅ S3 bucket privado (acceso vía CloudFront)
+- ✅ Cache busting para assets
+
+---
+
+## 💰 Costos Estimados
+
+### Por ambiente (DEV/QA):
+- Backend (Lambdas + Step Functions): $2-5/mes
+- Frontend (S3 + CloudFront): $1-2/mes
+- DynamoDB: $0 (free tier)
+- **Total: ~$5-10/mes**
+
+### PROD:
+Variable según tráfico. CloudFront free tier:
+- 1 TB salida/mes gratis
+- 10M requests HTTP/mes gratis
+
+---
+
+## 📚 Docs
+
+- **`docs/DEPLOY.md`** - Guía completa de deployment
+- **`docs/ARCHITECTURE.md`** - Arquitectura detallada
+- **`PROXIMOS_PASOS.md`** - Siguiente fase
+- **`.env.template`** - Variables necesarias
+
+---
+
+## 🔧 Troubleshooting
+
+### Frontend no actualiza después del deploy:
 ```bash
-# Verificar buckets
-aws s3 ls | grep invenadro
-
-# Si no existen, crear infraestructura
-./deployment/scripts/1-create-infrastructure.sh
+# CloudFront cachea contenido, espera ~5 minutos
+# O fuerza invalidación:
+cd services/frontend
+serverless cloudfrontInvalidate --stage dev
 ```
 
-### Error: "CORS policy"
-
-Verificar CORS en API Gateway y en las Lambdas que los `ALLOWED_ORIGINS` incluyen tu frontend URL.
-
----
-
-## 📞 Soporte
-
-**Antes de preguntar:**
-
-1. Lee `EMPEZAR_AQUI.md`
-2. Ejecuta `./deployment/scripts/verify-infrastructure.sh`
-3. Revisa logs en CloudWatch
-4. Consulta `deployment/INDEX.md` para más documentación
+### Error de CORS en frontend:
+Verifica que el API Gateway URL en React app coincide con el deployed.
 
 ---
 
-## 🎯 Próximos Pasos
+**🚀 Powered by Serverless Framework + GitHub Actions + CloudFront**
 
-1. **Si eres nuevo:** Lee `EMPEZAR_AQUI.md`
-2. **Si vas a migrar:** Lee `README_MIGRATION.md`
-3. **Si vas a hacer deploy:** Ejecuta `./deployment/scripts/verify-infrastructure.sh`
-4. **Si necesitas ayuda:** Consulta `deployment/INDEX.md`
-
----
-
-## 📄 Licencia
-
-Proyecto interno - Todos los derechos reservados
-
-**Última actualización:** Octubre 2025  
-**Estado:** ✅ Documentación completa, infraestructura pendiente de crear
+Propietario: Julian Salinas

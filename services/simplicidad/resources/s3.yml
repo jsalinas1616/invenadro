@@ -1,0 +1,118 @@
+Resources:
+  # Bucket para almacenar logs de acceso S3
+  S3LogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ${self:service}-${self:provider.stage}-s3-logs
+      AccessControl: LogDeliveryWrite
+      LoggingConfiguration:
+        DestinationBucketName: ${self:service}-${self:provider.stage}-s3-logs
+        LogFilePrefix: s3-logs-access-logs/
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldLogs
+            Status: Enabled
+            ExpirationInDays: 90
+      Tags:
+        - Key: Name
+          Value: ${self:service}-${self:provider.stage}-s3-logs
+        - Key: Project
+          Value: invenadro
+        - Key: Service
+          Value: simplicidad
+        - Key: Stage
+          Value: ${self:provider.stage}
+
+  UploadsBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: S3LogsBucket
+    Properties:
+      BucketName: ${self:service}-${self:provider.stage}-uploads
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucket
+        LogFilePrefix: uploads-access-logs/
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - DELETE
+            AllowedHeaders:
+              - '*'
+            MaxAge: 3000
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldUploads
+            Status: Enabled
+            ExpirationInDays: 7
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Name
+          Value: ${self:service}-${self:provider.stage}-uploads
+        - Key: Project
+          Value: invenadro
+        - Key: Service
+          Value: simplicidad
+        - Key: Stage
+          Value: ${self:provider.stage}
+
+  ResultsBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: S3LogsBucket
+    Properties:
+      BucketName: ${self:service}-${self:provider.stage}-results
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucket
+        LogFilePrefix: results-access-logs/
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - '*'
+            AllowedMethods:
+              - GET
+            AllowedHeaders:
+              - '*'
+            MaxAge: 3000
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldResults
+            Status: Enabled
+            ExpirationInDays: 30
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Name
+          Value: ${self:service}-${self:provider.stage}-results
+        - Key: Project
+          Value: invenadro
+        - Key: Service
+          Value: simplicidad
+        - Key: Stage
+          Value: ${self:provider.stage}

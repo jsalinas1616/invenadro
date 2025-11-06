@@ -63,4 +63,20 @@ deployment/*.txt
 
 # Variables de entorno
 .envrc
+.env
+.env.*
+!.env.template
+
+# Perfiles de cuentas AWS (pueden contener IDs sensibles)
+deployment/profiles/
+
+# Archivos de configuración con Account IDs (usar templates en su lugar)
+deployment/config-environments.local.json
+deployment/scripts/*-local.sh
+
+# Serverless Framework
+.serverless/
+.build/
+services/*/.serverless/
+services/*/. build/
 

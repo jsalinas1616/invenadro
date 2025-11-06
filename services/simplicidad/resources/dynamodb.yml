@@ -1,0 +1,25 @@
+Resources:
+  JobsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:service}-${self:provider.stage}-jobs
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: processId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: processId
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Name
+          Value: ${self:service}-${self:provider.stage}-jobs
+        - Key: Project
+          Value: invenadro
+        - Key: Service
+          Value: simplicidad
+        - Key: Stage
+          Value: ${self:provider.stage}

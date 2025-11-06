@@ -1,0 +1,53 @@
+{
+  "name": "invenadro",
+  "version": "1.0.0",
+  "description": "Invenadro - Sistema de procesamiento de factor de redondeo",
+  "private": true,
+  "scripts": {
+    "deploy:simplicidad:dev": "cd services/simplicidad && serverless deploy --stage dev --verbose",
+    "deploy:simplicidad:qa": "cd services/simplicidad && serverless deploy --stage qa --verbose",
+    "deploy:simplicidad:prod": "cd services/simplicidad && serverless deploy --stage prod --verbose",
+    "deploy:frontend:dev": "cd FrontEnd-lambdas && npm run build && cd ../services/frontend && serverless deploy --stage dev --verbose",
+    "deploy:frontend:qa": "cd FrontEnd-lambdas && npm run build && cd ../services/frontend && serverless deploy --stage qa --verbose",
+    "deploy:frontend:prod": "cd FrontEnd-lambdas && npm run build && cd ../services/frontend && serverless deploy --stage prod --verbose",
+    "deploy:all:dev": "npm run deploy:simplicidad:dev && npm run deploy:frontend:dev",
+    "deploy:all:qa": "npm run deploy:simplicidad:qa && npm run deploy:frontend:qa",
+    "deploy:all:prod": "npm run deploy:simplicidad:prod && npm run deploy:frontend:prod",
+    "remove:simplicidad:dev": "cd services/simplicidad && serverless remove --stage dev",
+    "remove:simplicidad:qa": "cd services/simplicidad && serverless remove --stage qa",
+    "remove:simplicidad:prod": "cd services/simplicidad && serverless remove --stage prod",
+    "remove:frontend:dev": "cd services/frontend && serverless remove --stage dev",
+    "remove:frontend:qa": "cd services/frontend && serverless remove --stage qa",
+    "remove:frontend:prod": "cd services/frontend && serverless remove --stage prod",
+    "info:backend:dev": "cd services/simplicidad && serverless info --stage dev",
+    "info:backend:qa": "cd services/simplicidad && serverless info --stage qa",
+    "info:backend:prod": "cd services/simplicidad && serverless info --stage prod",
+    "info:frontend:dev": "cd services/frontend && serverless info --stage dev",
+    "info:frontend:qa": "cd services/frontend && serverless info --stage qa",
+    "info:frontend:prod": "cd services/frontend && serverless info --stage prod",
+    "logs:initiator:dev": "cd services/simplicidad && serverless logs -f initiator --stage dev --tail",
+    "logs:processor:dev": "cd services/simplicidad && serverless logs -f processor --stage dev --tail",
+    "build:frontend": "cd FrontEnd-lambdas && npm install && npm run build",
+    "install:all": "npm install && cd services/simplicidad && npm install && cd ../frontend && npm install && cd ../../FrontEnd-lambdas && npm install",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jsalinas1616/invenadro.git"
+  },
+  "keywords": [
+    "serverless",
+    "aws",
+    "lambda",
+    "step-functions"
+  ],
+  "author": "Julian Salinas",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "serverless": "^3.38.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

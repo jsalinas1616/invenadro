@@ -1,0 +1,263 @@
+service: invenadro-simplicidad
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-step-functions
+  - serverless-dotenv-plugin
+  - serverless-iam-roles-per-function
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${env:AWS_REGION, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  
+  # Configuración de logs
+  logs:
+    restApi: true
+  
+  # Tags globales
+  tags:
+    Project: invenadro
+    Service: simplicidad
+    Stage: ${self:provider.stage}
+    ManagedBy: serverless
+  
+  # Variables de entorno globales para todas las Lambdas
+  environment:
+    STAGE: ${self:provider.stage}
+    SERVICE_NAME: ${self:service}
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+    JOBS_TABLE: ${self:service}-${self:provider.stage}-jobs
+    UPLOADS_BUCKET: ${self:service}-${self:provider.stage}-uploads
+    RESULTS_BUCKET: ${self:service}-${self:provider.stage}-results
+    STEP_FUNCTION_ARN: !GetAtt ProcessingStateMachine.Arn
+
+# Funciones Lambda
+functions:
+  initiator:
+    name: ${self:service}-${self:provider.stage}-initiator
+    handler: functions/initiator/index.handler
+    timeout: 300
+    memorySize: 512
+    environment:
+      PROCESSOR_STEP_FUNCTION_ARN: !GetAtt ProcessingStateMachine.Arn
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - states:StartExecution
+        Resource: !GetAtt ProcessingStateMachine.Arn
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource: !GetAtt JobsTable.Arn
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+        Resource:
+          - !Sub "${UploadsBucket.Arn}/*"
+    events:
+      - http:
+          path: /calcular-redondeo
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  clientSeparator:
+    name: ${self:service}-${self:provider.stage}-client-separator
+    handler: functions/client-separator/index.handler
+    timeout: 900
+    memorySize: 1024
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+        Resource:
+          - !Sub "${UploadsBucket.Arn}/*"
+          - !Sub "${ResultsBucket.Arn}/*"
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: !GetAtt JobsTable.Arn
+
+  processor:
+    name: ${self:service}-${self:provider.stage}-processor
+    handler: functions/processor/index.handler
+    timeout: 900
+    memorySize: 3008
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+        Resource:
+          - !Sub "${UploadsBucket.Arn}/*"
+          - !Sub "${ResultsBucket.Arn}/*"
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+          - dynamodb:GetItem
+        Resource: !GetAtt JobsTable.Arn
+
+  statusChecker:
+    name: ${self:service}-${self:provider.stage}-status-checker
+    handler: functions/status-checker/index.handler
+    timeout: 60
+    memorySize: 256
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+          - dynamodb:Query
+        Resource: !GetAtt JobsTable.Arn
+      - Effect: Allow
+        Action:
+          - states:DescribeExecution
+          - states:ListExecutions
+        Resource: !GetAtt ProcessingStateMachine.Arn
+    events:
+      - http:
+          path: /calcular-redondeo/status/{processId}
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  clientAggregator:
+    name: ${self:service}-${self:provider.stage}-client-aggregator
+    handler: functions/client-aggregator/index.handler
+    timeout: 600
+    memorySize: 2048
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+        Resource:
+          - !Sub "${ResultsBucket.Arn}/*"
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource: !GetAtt JobsTable.Arn
+
+  downloadResult:
+    name: ${self:service}-${self:provider.stage}-download-result
+    handler: functions/download-result/index.handler
+    timeout: 300
+    memorySize: 512
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+        Resource: !Sub "${ResultsBucket.Arn}/*"
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: !GetAtt JobsTable.Arn
+    events:
+      - http:
+          path: /calcular-redondeo/download/{processId}
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  excelGenerator:
+    name: ${self:service}-${self:provider.stage}-excel-generator
+    handler: functions/excel-generator/index.handler
+    timeout: 300
+    memorySize: 1024
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+        Resource: !Sub "${ResultsBucket.Arn}/*"
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: !GetAtt JobsTable.Arn
+    events:
+      - http:
+          path: /excel/{processId}/{clienteId}
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getPresignedUrl:
+    name: ${self:service}-${self:provider.stage}-get-presigned-url
+    handler: functions/get-presigned-url/index.handler
+    timeout: 60
+    memorySize: 256
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+        Resource: !Sub "${UploadsBucket.Arn}/*"
+    events:
+      - http:
+          path: /get-presigned-url
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+# Step Functions State Machine
+stepFunctions:
+  stateMachines:
+    ProcessingStateMachine:
+      name: ${self:service}-${self:provider.stage}-StateMachine
+      definition: ${file(stepfunctions/processing.yml)}
+      role: !GetAtt StepFunctionRole.Arn
+
+# CloudFormation Resources
+resources:
+  - ${file(resources/dynamodb.yml)}
+  - ${file(resources/s3.yml)}
+  - ${file(resources/cognito.yml)}
+  - ${file(resources/api-gateway.yml)}
+  - ${file(resources/iam.yml)}
+
+# Outputs
+  - Outputs:
+      ApiGatewayUrl:
+        Description: API Gateway URL
+        Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${self:provider.stage}"
+      
+      StateMachineArn:
+        Description: Step Function State Machine ARN
+        Value: !GetAtt ProcessingStateMachine.Arn
+      
+      JobsTableName:
+        Description: DynamoDB Jobs Table Name
+        Value: !Ref JobsTable
+      
+      UploadsBucketName:
+        Description: S3 Uploads Bucket Name
+        Value: !Ref UploadsBucket
+      
+      ResultsBucketName:
+        Description: S3 Results Bucket Name
+        Value: !Ref ResultsBucket
+      
+      UserPoolId:
+        Description: Cognito User Pool ID
+        Value: !Ref CognitoUserPool
+      
+      UserPoolClientId:
+        Description: Cognito User Pool Client ID
+        Value: !Ref CognitoUserPoolClient
+

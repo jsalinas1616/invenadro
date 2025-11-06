@@ -1,0 +1,187 @@
+service: invenadro-frontend
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-s3-sync
+  - serverless-cloudfront-invalidate
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${env:AWS_REGION, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  
+  tags:
+    Project: invenadro
+    Service: frontend
+    Stage: ${self:provider.stage}
+    ManagedBy: serverless
+
+custom:
+  # Configuración S3 Sync
+  s3Sync:
+    - bucketName: ${self:service}-${self:provider.stage}
+      localDir: ../../FrontEnd-lambdas/build
+      deleteRemoved: true
+      acl: public-read
+      defaultContentType: text/html
+      params:
+        - index.html:
+            CacheControl: 'no-cache'
+        - "*.js":
+            CacheControl: 'public, max-age=31536000, immutable'
+        - "*.css":
+            CacheControl: 'public, max-age=31536000, immutable'
+        - "*.png":
+            CacheControl: 'public, max-age=31536000, immutable'
+        - "*.jpg":
+            CacheControl: 'public, max-age=31536000, immutable'
+        - "*.svg":
+            CacheControl: 'public, max-age=31536000, immutable'
+
+  # Configuración CloudFront Invalidation
+  cloudfrontInvalidate:
+    - distributionIdKey: CloudFrontDistributionId
+      items:
+        - '/*'
+
+resources:
+  Resources:
+    # S3 Bucket para Frontend
+    FrontendBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-${self:provider.stage}
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedMethods:
+                - GET
+                - HEAD
+              AllowedHeaders:
+                - '*'
+              MaxAge: 3000
+        Tags:
+          - Key: Name
+            Value: ${self:service}-${self:provider.stage}
+          - Key: Project
+            Value: invenadro
+          - Key: Service
+            Value: frontend
+          - Key: Stage
+            Value: ${self:provider.stage}
+
+    # Bucket Policy para acceso público
+    FrontendBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref FrontendBucket
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: '*'
+              Action:
+                - s3:GetObject
+              Resource: !Sub '${FrontendBucket.Arn}/*'
+
+    # CloudFront Origin Access Identity
+    CloudFrontOAI:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: OAI for ${self:service}-${self:provider.stage}
+
+    # CloudFront Distribution
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Enabled: true
+          Comment: CDN for ${self:service}-${self:provider.stage}
+          DefaultRootObject: index.html
+          HttpVersion: http2
+          PriceClass: PriceClass_100
+          
+          Origins:
+            - Id: S3Origin
+              DomainName: !GetAtt FrontendBucket.RegionalDomainName
+              S3OriginConfig:
+                OriginAccessIdentity: ''
+              CustomOriginConfig:
+                HTTPPort: 80
+                HTTPSPort: 443
+                OriginProtocolPolicy: http-only
+          
+          DefaultCacheBehavior:
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+            MinTTL: 0
+            DefaultTTL: 86400
+            MaxTTL: 31536000
+          
+          CustomErrorResponses:
+            - ErrorCode: 403
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+              ErrorCachingMinTTL: 300
+            - ErrorCode: 404
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+              ErrorCachingMinTTL: 300
+          
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: true
+
+  Outputs:
+    FrontendBucketName:
+      Description: Frontend S3 Bucket Name
+      Value: !Ref FrontendBucket
+      Export:
+        Name: ${self:service}-${self:provider.stage}-bucket
+
+    FrontendBucketWebsiteURL:
+      Description: Frontend S3 Website URL
+      Value: !GetAtt FrontendBucket.WebsiteURL
+      Export:
+        Name: ${self:service}-${self:provider.stage}-website-url
+
+    CloudFrontDistributionId:
+      Description: CloudFront Distribution ID
+      Value: !Ref CloudFrontDistribution
+      Export:
+        Name: ${self:service}-${self:provider.stage}-cf-id
+
+    CloudFrontDistributionDomainName:
+      Description: CloudFront Distribution Domain Name
+      Value: !GetAtt CloudFrontDistribution.DomainName
+      Export:
+        Name: ${self:service}-${self:provider.stage}-cf-domain
+
+    CloudFrontURL:
+      Description: CloudFront Distribution URL
+      Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
+      Export:
+        Name: ${self:service}-${self:provider.stage}-url

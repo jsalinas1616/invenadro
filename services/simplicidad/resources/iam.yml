@@ -1,0 +1,48 @@
+Resources:
+  StepFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ${self:service}-${self:provider.stage}-stepfunction-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ${self:service}-${self:provider.stage}-stepfunction-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt InitiatorLambdaFunction.Arn
+                  - !GetAtt ClientSeparatorLambdaFunction.Arn
+                  - !GetAtt ProcessorLambdaFunction.Arn
+                  - !GetAtt StatusCheckerLambdaFunction.Arn
+                  - !GetAtt ClientAggregatorLambdaFunction.Arn
+                  - !GetAtt DownloadResultLambdaFunction.Arn
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
+                  - states:DescribeExecution
+                  - states:StopExecution
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*'
+      Tags:
+        - Key: Name
+          Value: ${self:service}-${self:provider.stage}-stepfunction-role
+        - Key: Project
+          Value: invenadro
+        - Key: Service
+          Value: simplicidad
+        - Key: Stage
+          Value: ${self:provider.stage}
