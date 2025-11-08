@@ -1,0 +1,20 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowAllLambdaLogs",
+            "Effect": "Allow",
+            "Action": [
+                "logs:DescribeLogGroups",
+                "logs:DescribeLogStreams",
+                "logs:CreateLogGroup",
+                "logs:FilterLogEvents",
+                "cloudwatch:GetMetricData",
+                "logs:GetLogEvents",
+                "logs:CreateLogStream",
+                "logs:FilterLogEvents"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

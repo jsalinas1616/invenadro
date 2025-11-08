@@ -1,4 +1,4 @@
-name: Deploy to PROD
+name: Deploy to PROD (nadro-prod)
 
 on:
   push:
@@ -7,12 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: us-east-1
-  STAGE: prod
-
-permissions:
-  id-token: write
-  contents: read
+  AWS_REGION: mx-central-1
+  STAGE: nadro-prod
 
 jobs:
   approve:
@@ -37,21 +33,22 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Configure AWS Credentials
+      - name: Configure AWS Credentials (Cuenta 3 - nadro-prod)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_NADRO_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_NADRO_PROD }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install root dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install service dependencies
         run: |
           cd services/simplicidad
-          npm install
+          npm ci
           cd ../frontend
-          npm install
+          npm ci
 
       - name: Deploy Backend
         run: |
@@ -61,7 +58,7 @@ jobs:
       - name: Build Frontend
         run: |
           cd FrontEnd-lambdas
-          npm install
+          npm ci
           npm run build
 
       - name: Deploy Frontend

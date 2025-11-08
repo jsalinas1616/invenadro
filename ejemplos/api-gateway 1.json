@@ -1,0 +1,48 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowListRestApis",
+      "Effect": "Allow",
+      "Action": "apigateway:GET",
+      "Resource": "arn:aws:apigateway:us-east-1::/restapis"
+    },
+    {
+      "Sid": "AllowCreateRestApis",
+      "Effect": "Allow",
+      "Action": "apigateway:POST",
+      "Resource": "arn:aws:apigateway:us-east-1::/restapis"
+    },
+    {
+      "Sid": "ManageSpecificRestApis",
+      "Effect": "Allow",
+      "Action": [
+        "apigateway:GET",
+        "apigateway:POST",
+        "apigateway:PUT",
+        "apigateway:PATCH",
+        "apigateway:DELETE"
+      ],
+      "Resource": [
+        "arn:aws:apigateway:us-east-1::/restapis/*",
+        "arn:aws:apigateway:us-east-1::/restapis/*/resources/*",
+        "arn:aws:apigateway:us-east-1::/restapis/*/methods/*",
+        "arn:aws:apigateway:us-east-1::/restapis/*/stages/*",
+        "arn:aws:apigateway:us-east-1::/restapis/*/deployments/*"
+      ]
+    },
+    {
+      "Sid": "AllowLambdaIntegration",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:GetFunction",
+        "lambda:InvokeFunction"
+      ],
+      "Resource": [
+        "arn:aws:lambda:us-east-1:573066395874:function:nadro-useast1-prod-account-statement-function",
+        "arn:aws:lambda:us-east-1:573066395874:function:nadro-useast1-prod-credit-limit-function",
+        "arn:aws:lambda:us-east-1:573066395874:function:nadro-useast1-prod-next-delivery-function"
+      ]
+    }
+  ]
+}

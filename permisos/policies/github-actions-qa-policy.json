@@ -1,0 +1,314 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CreateSpecificLambdas",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:CreateFunction"
+      ],
+      "Resource": [
+        "arn:aws:lambda:mx-central-1:975130647458:function:invenadro-simplicidad-jul-qa-*",
+        "arn:aws:lambda:mx-central-1:975130647458:function:invenadro-frontend-jul-qa-*"
+      ]
+    },
+    {
+      "Sid": "UpdateAndManageSpecificLambdas",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:GetFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:AddPermission",
+        "lambda:RemovePermission",
+        "lambda:DeleteFunction",
+        "lambda:PublishVersion",
+        "lambda:ListVersionsByFunction",
+        "lambda:GetPolicy",
+        "lambda:PutFunctionConcurrency",
+        "lambda:DeleteFunctionConcurrency"
+      ],
+      "Resource": [
+        "arn:aws:lambda:mx-central-1:975130647458:function:invenadro-simplicidad-jul-qa-*",
+        "arn:aws:lambda:mx-central-1:975130647458:function:invenadro-frontend-jul-qa-*"
+      ]
+    },
+    {
+      "Sid": "ListLambdaFunctions",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:ListFunctions"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ManageSpecificS3Buckets",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:DeleteBucket",
+        "s3:PutBucketPolicy",
+        "s3:DeleteBucketPolicy",
+        "s3:GetBucketPolicy",
+        "s3:PutBucketVersioning",
+        "s3:GetBucketVersioning",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:PutBucketCORS",
+        "s3:GetBucketCORS",
+        "s3:PutBucketWebsite",
+        "s3:GetBucketWebsite",
+        "s3:DeleteBucketWebsite",
+        "s3:PutBucketLogging",
+        "s3:GetBucketLogging",
+        "s3:PutEncryptionConfiguration",
+        "s3:GetEncryptionConfiguration",
+        "s3:PutLifecycleConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:PutBucketAcl",
+        "s3:GetBucketAcl",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::invenadro-simplicidad-jul-qa-*",
+        "arn:aws:s3:::invenadro-frontend-jul-qa"
+      ]
+    },
+    {
+      "Sid": "ManageS3Objects",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:GetObject",
+        "s3:GetObjectAcl",
+        "s3:DeleteObject",
+        "s3:ListMultipartUploadParts",
+        "s3:AbortMultipartUpload"
+      ],
+      "Resource": [
+        "arn:aws:s3:::invenadro-simplicidad-jul-qa-*/*",
+        "arn:aws:s3:::invenadro-frontend-jul-qa/*"
+      ]
+    },
+    {
+      "Sid": "ListAllS3Buckets",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ManageSpecificDynamoDBTables",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:CreateTable",
+        "dynamodb:DeleteTable",
+        "dynamodb:DescribeTable",
+        "dynamodb:UpdateTable",
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:DescribeTimeToLive",
+        "dynamodb:UpdateTimeToLive",
+        "dynamodb:TagResource",
+        "dynamodb:UntagResource",
+        "dynamodb:ListTagsOfResource"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:mx-central-1:975130647458:table/invenadro-simplicidad-jul-qa-*"
+      ]
+    },
+    {
+      "Sid": "ListDynamoDBTables",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:ListTables"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ManageCloudFormationStacks",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:CreateStack",
+        "cloudformation:UpdateStack",
+        "cloudformation:DeleteStack",
+        "cloudformation:DescribeStacks",
+        "cloudformation:DescribeStackEvents",
+        "cloudformation:DescribeStackResource",
+        "cloudformation:DescribeStackResources",
+        "cloudformation:GetTemplate",
+        "cloudformation:ValidateTemplate",
+        "cloudformation:ListStacks",
+        "cloudformation:ListStackResources",
+        "cloudformation:GetStackPolicy",
+        "cloudformation:SetStackPolicy"
+      ],
+      "Resource": [
+        "arn:aws:cloudformation:mx-central-1:975130647458:stack/invenadro-simplicidad-qa/*",
+        "arn:aws:cloudformation:mx-central-1:975130647458:stack/invenadro-frontend-jul-qa/*"
+      ]
+    },
+    {
+      "Sid": "ListCloudFormationStacks",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:ListStacks"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ManageAPIGateway",
+      "Effect": "Allow",
+      "Action": [
+        "apigateway:GET",
+        "apigateway:POST",
+        "apigateway:PUT",
+        "apigateway:PATCH",
+        "apigateway:DELETE"
+      ],
+      "Resource": [
+        "arn:aws:apigateway:mx-central-1::/restapis",
+        "arn:aws:apigateway:mx-central-1::/restapis/*"
+      ]
+    },
+    {
+      "Sid": "ManageStepFunctions",
+      "Effect": "Allow",
+      "Action": [
+        "states:CreateStateMachine",
+        "states:UpdateStateMachine",
+        "states:DeleteStateMachine",
+        "states:DescribeStateMachine",
+        "states:ListStateMachines",
+        "states:TagResource",
+        "states:UntagResource",
+        "states:ListTagsForResource"
+      ],
+      "Resource": [
+        "arn:aws:states:mx-central-1:975130647458:stateMachine:invenadro-simplicidad-jul-qa-*"
+      ]
+    },
+    {
+      "Sid": "ManageCloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams",
+        "logs:FilterLogEvents",
+        "logs:GetLogEvents",
+        "logs:DeleteLogGroup",
+        "logs:PutRetentionPolicy",
+        "logs:TagLogGroup"
+      ],
+      "Resource": [
+        "arn:aws:logs:mx-central-1:975130647458:log-group:/aws/lambda/invenadro-simplicidad-jul-qa-*",
+        "arn:aws:logs:mx-central-1:975130647458:log-group:/aws/lambda/invenadro-simplicidad-jul-qa-*:*",
+        "arn:aws:logs:mx-central-1:975130647458:log-group:/aws/api-gateway/invenadro-simplicidad-qa",
+        "arn:aws:logs:mx-central-1:975130647458:log-group:/aws/api-gateway/invenadro-simplicidad-qa:*"
+      ]
+    },
+    {
+      "Sid": "ManageCloudWatchMetrics",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricData",
+        "cloudwatch:GetMetricData",
+        "cloudwatch:GetMetricStatistics",
+        "cloudwatch:ListMetrics"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ManageCloudFront",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:CreateDistribution",
+        "cloudfront:GetDistribution",
+        "cloudfront:GetDistributionConfig",
+        "cloudfront:UpdateDistribution",
+        "cloudfront:DeleteDistribution",
+        "cloudfront:TagResource",
+        "cloudfront:ListTagsForResource",
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetInvalidation",
+        "cloudfront:ListInvalidations",
+        "cloudfront:ListDistributions"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ManageIAMRolesForLambda",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:PassRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:GetRolePolicy",
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListRolePolicies",
+        "iam:TagRole",
+        "iam:UntagRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::975130647458:role/invenadro-simplicidad-jul-qa-*",
+        "arn:aws:iam::975130647458:role/invenadro-frontend-jul-qa-*"
+      ]
+    },
+    {
+      "Sid": "ListIAMRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:ListRoles"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ManageCognitoUserPool",
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:CreateUserPool",
+        "cognito-idp:DeleteUserPool",
+        "cognito-idp:DescribeUserPool",
+        "cognito-idp:UpdateUserPool",
+        "cognito-idp:CreateUserPoolClient",
+        "cognito-idp:DeleteUserPoolClient",
+        "cognito-idp:DescribeUserPoolClient",
+        "cognito-idp:UpdateUserPoolClient",
+        "cognito-idp:ListUserPools",
+        "cognito-idp:ListUserPoolClients",
+        "cognito-idp:AdminCreateUser",
+        "cognito-idp:AdminDeleteUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Resource": [
+        "arn:aws:cognito-idp:mx-central-1:975130647458:userpool/*"
+      ]
+    },
+    {
+      "Sid": "GetCallerIdentity",
+      "Effect": "Allow",
+      "Action": [
+        "sts:GetCallerIdentity"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

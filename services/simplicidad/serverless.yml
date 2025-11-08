@@ -9,8 +9,8 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs20.x
-  region: ${env:AWS_REGION, 'us-east-1'}
+  runtime: nodejs22.x
+  region: ${env:AWS_REGION, 'mx-central-1'}
   stage: ${opt:stage, 'dev'}
   
   # Configuración de logs

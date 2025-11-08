@@ -1,14 +1,14 @@
-name: Deploy to QA
+name: Deploy to NADRO-QA
 
 on:
   push:
     branches:
-      - qa
+      - nadro-qa
   workflow_dispatch:
 
 env:
   AWS_REGION: mx-central-1
-  STAGE: jul-qa
+  STAGE: nadro-qa
 
 jobs:
   deploy:
@@ -21,25 +21,25 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
-      - name: Configure AWS Credentials (Cuenta 1 - jul-qa)
+      - name: Configure AWS Credentials (Cuenta 2 - nadro-qa)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_QA }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_QA }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_NADRO_QA }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_NADRO_QA }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install root dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install service dependencies
         run: |
           cd services/simplicidad
-          npm install
+          npm ci
           cd ../frontend
-          npm install
+          npm ci
 
       - name: Deploy Backend
         run: |
@@ -49,7 +49,7 @@ jobs:
       - name: Build Frontend
         run: |
           cd FrontEnd-lambdas
-          npm install
+          npm ci
           npm run build
 
       - name: Deploy Frontend
@@ -78,3 +78,4 @@ jobs:
         run: |
           echo "❌ Deployment to ${{ env.STAGE }} failed!"
           echo "Check the logs above for details"
+

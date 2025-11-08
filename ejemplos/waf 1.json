@@ -1,0 +1,62 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "wafv2:CreateWebACL",
+        "wafv2:UpdateWebACL",
+        "wafv2:GetWebACL",
+        "wafv2:ListWebACLs",
+        "wafv2:AssociateWebACL",
+        "wafv2:DisassociateWebACL",
+        "wafv2:ListResourcesForWebACL",
+        "wafv2:GetWebACLForResource",
+        "wafv2:TagResource",
+        "wafv2:UntagResource"
+      ],
+      "Resource": [
+        "arn:aws:wafv2:us-east-1:573066395874:regional/webacl/*",
+        "arn:aws:wafv2:us-east-1:573066395874:regional/managedruleset/*/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "ec2:DescribeRegions",
+      "Resource": "*"
+    },
+    {
+      "Sid": "WAFManagedRuleSets",
+      "Effect": "Allow",
+      "Action": [
+        "wafv2:DescribeAllManagedProducts",
+        "wafv2:ListAvailableManagedRuleGroups",
+        "wafv2:DescribeManagedRuleGroup",
+        "wafv2:CheckCapacity"
+      ],
+      "Resource": [
+        "arn:aws:wafv2:us-east-1:573066395874:regional/managedruleset/*/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "wafv2:ListWebACLs",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "wafv2:CheckCapacity",
+      "Resource": [
+        "arn:aws:wafv2:us-east-1:573066395874:regional/rulegroup/*/*",
+        "arn:aws:wafv2:us-east-1:573066395874:regional/webacl/*/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "apigateway:SetWebACL",
+      "Resource": [
+        "arn:aws:apigateway:us-east-1::/restapis/pciocoh8i0/stages/prod"
+      ]
+    }
+  ]
+}
