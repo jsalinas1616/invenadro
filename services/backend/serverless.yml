@@ -32,7 +32,7 @@ provider:
     JOBS_TABLE: ${self:service}-${self:provider.stage}-jobs
     UPLOADS_BUCKET: ${self:service}-${self:provider.stage}-uploads
     RESULTS_BUCKET: ${self:service}-${self:provider.stage}-results
-    STEP_FUNCTION_ARN: !GetAtt ProcessingStateMachine.Arn
+    STEP_FUNCTION_ARN: !GetAtt ProcessingStateMachineStepFunctionsStateMachine.Arn
 
 # Funciones Lambda
 functions:
@@ -42,12 +42,12 @@ functions:
     timeout: 300
     memorySize: 512
     environment:
-      PROCESSOR_STEP_FUNCTION_ARN: !GetAtt ProcessingStateMachine.Arn
+      PROCESSOR_STEP_FUNCTION_ARN: !GetAtt ProcessingStateMachineStepFunctionsStateMachine.Arn
     iamRoleStatements:
       - Effect: Allow
         Action:
           - states:StartExecution
-        Resource: !GetAtt ProcessingStateMachine.Arn
+        Resource: !GetAtt ProcessingStateMachineStepFunctionsStateMachine.Arn
       - Effect: Allow
         Action:
           - dynamodb:PutItem
@@ -122,7 +122,7 @@ functions:
         Action:
           - states:DescribeExecution
           - states:ListExecutions
-        Resource: !GetAtt ProcessingStateMachine.Arn
+        Resource: !GetAtt ProcessingStateMachineStepFunctionsStateMachine.Arn
     events:
       - http:
           path: /calcular-redondeo/status/{processId}
@@ -237,7 +237,7 @@ resources:
       
       StateMachineArn:
         Description: Step Function State Machine ARN
-        Value: !GetAtt ProcessingStateMachine.Arn
+        Value: !GetAtt ProcessingStateMachineStepFunctionsStateMachine.Arn
       
       JobsTableName:
         Description: DynamoDB Jobs Table Name
