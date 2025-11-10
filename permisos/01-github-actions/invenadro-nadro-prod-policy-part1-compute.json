@@ -43,6 +43,22 @@
       "Resource": "*"
     },
     {
+      "Sid": "ManageStepFunctions",
+      "Effect": "Allow",
+      "Action": [
+        "states:CreateStateMachine",
+        "states:UpdateStateMachine",
+        "states:DeleteStateMachine",
+        "states:DescribeStateMachine",
+        "states:ListStateMachines",
+        "states:TagResource",
+        "states:UntagResource"
+      ],
+      "Resource": [
+        "arn:aws:states:mx-central-1:CUENTA_NADRO_PROD:stateMachine:invenadro-backend-nadro-prod-*"
+      ]
+    },
+    {
       "Sid": "ManageSpecificS3Buckets",
       "Effect": "Allow",
       "Action": [
