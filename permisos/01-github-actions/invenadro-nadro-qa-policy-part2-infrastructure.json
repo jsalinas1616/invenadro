@@ -20,7 +20,7 @@
         "cloudformation:SetStackPolicy"
       ],
       "Resource": [
-        "arn:aws:cloudformation:mx-central-1:CUENTA_NADRO_QA:stack/invenadro-backend-dev/*",
+        "arn:aws:cloudformation:mx-central-1:CUENTA_NADRO_QA:stack/invenadro-backend-nadro-qa-*",
         "arn:aws:cloudformation:mx-central-1:CUENTA_NADRO_QA:stack/invenadro-frontend-nadro-qa/*"
       ]
     },
@@ -82,8 +82,8 @@
       "Resource": [
         "arn:aws:logs:mx-central-1:CUENTA_NADRO_QA:log-group:/aws/lambda/invenadro-backend-nadro-qa-*",
         "arn:aws:logs:mx-central-1:CUENTA_NADRO_QA:log-group:/aws/lambda/invenadro-backend-nadro-qa-*:*",
-        "arn:aws:logs:mx-central-1:CUENTA_NADRO_QA:log-group:/aws/api-gateway/invenadro-backend-dev",
-        "arn:aws:logs:mx-central-1:CUENTA_NADRO_QA:log-group:/aws/api-gateway/invenadro-backend-dev:*"
+        "arn:aws:logs:mx-central-1:CUENTA_NADRO_QA:log-group:/aws/api-gateway/invenadro-backend-nadro-qa",
+        "arn:aws:logs:mx-central-1:CUENTA_NADRO_QA:log-group:/aws/api-gateway/invenadro-backend-nadro-qa:*"
       ]
     },
     {
