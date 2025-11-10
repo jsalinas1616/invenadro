@@ -22,7 +22,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
       - name: Configure AWS Credentials (Cuenta 2 - nadro-qa)
         uses: aws-actions/configure-aws-credentials@v4
