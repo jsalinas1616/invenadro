@@ -1,0 +1,7 @@
+Resources:
+  ProcessingStateMachineStepFunctionsStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: ${self:service}-${self:provider.stage}-StateMachine
+      RoleArn: !GetAtt StepFunctionRole.Arn
+      Definition: ${file(stepfunctions/processing.yml)}

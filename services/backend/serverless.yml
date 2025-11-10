@@ -3,7 +3,6 @@ service: invenadro-backend
 frameworkVersion: '3'
 
 plugins:
-  - serverless-step-functions
   - serverless-dotenv-plugin
   - serverless-iam-roles-per-function
 
@@ -215,14 +214,6 @@ functions:
             type: COGNITO_USER_POOLS
             authorizerId: !Ref ApiGatewayAuthorizer
 
-# Step Functions State Machine
-stepFunctions:
-  stateMachines:
-    ProcessingStateMachine:
-      name: ${self:service}-${self:provider.stage}-StateMachine
-      definition: ${file(stepfunctions/processing.yml)}
-      role: !GetAtt StepFunctionRole.Arn
-
 # CloudFormation Resources
 resources:
   - ${file(resources/dynamodb.yml)}
@@ -230,6 +221,7 @@ resources:
   - ${file(resources/cognito.yml)}
   - ${file(resources/api-gateway.yml)}
   - ${file(resources/iam.yml)}
+  - ${file(resources/step-functions.yml)}
   - Outputs:
       ApiGatewayUrl:
         Description: API Gateway URL
