@@ -36,14 +36,14 @@ jobs:
 
       - name: Install service dependencies
         run: |
-          cd services/simplicidad
+          cd services/backend
           npm ci
           cd ../frontend
           npm ci
 
       - name: Deploy Backend
         run: |
-          cd services/simplicidad
+          cd services/backend
           npx serverless deploy --stage ${{ env.STAGE }} --verbose
 
       - name: Build Frontend
@@ -59,7 +59,7 @@ jobs:
 
       - name: Get Backend Deployment Info
         run: |
-          cd services/simplicidad
+          cd services/backend
           npx serverless info --stage ${{ env.STAGE }}
 
       - name: Get Frontend Deployment Info

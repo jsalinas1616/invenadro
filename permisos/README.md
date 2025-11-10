@@ -1,102 +1,117 @@
-# Permisos Necesarios para GitHub Actions + Serverless Framework
+# 🔐 Políticas IAM - Invenadro
 
-## 📋 Índice
-
-1. [Verificación de Runtime Lambda](#1-verificación-de-runtime-lambda)
-2. [Usuarios IAM - Cuenta AWS 1](#2-usuarios-iam---cuenta-aws-1)
-3. [Usuario IAM - Cuenta AWS 2](#3-usuario-iam---cuenta-aws-2)
-4. [Usuario IAM - Cuenta AWS 3](#4-usuario-iam---cuenta-aws-3)
-5. [GitHub Secrets](#5-github-secrets)
-6. [Checklist de Validación](#6-checklist-de-validación)
+**Políticas necesarias para desplegar Invenadro en AWS con GitHub Actions**
 
 ---
 
-## 1. Verificación de Runtime Lambda
+## 📋 ÍNDICE
 
-**ANTES DE CONFIGURAR TODO:**
+1. [¿Qué necesito?](#qué-necesito)
+2. [Estructura de Archivos](#estructura-de-archivos)
+3. [Guías de Implementación](#guías-de-implementación)
+4. [Checklist de Validación](#checklist-de-validación)
 
-Verificar si `nodejs22.x` está disponible como runtime de Lambda:
+---
 
-```bash
-aws lambda list-runtimes | grep nodejs
+## ⚡ ¿QUÉ NECESITO?
+
+### **SOLO necesitas las políticas de GitHub Actions**
+
+Las políticas de `01-github-actions/` son suficientes para:
+- ✅ Crear toda la infraestructura (Lambdas, S3, DynamoDB, etc.)
+- ✅ Desplegar con `serverless deploy`
+- ✅ Gestionar los 4 ambientes (jul-dev, jul-qa, nadro-qa, nadro-prod)
+
+**Serverless Framework automáticamente:**
+- Crea los roles IAM para las Lambdas
+- Crea los roles IAM para Step Functions
+- Asigna los permisos correctos a cada recurso
+
+**No necesitas crear roles manualmente.**
+
+---
+
+## 📂 ESTRUCTURA DE ARCHIVOS
+
+```
+permisos/
+├── README.md                              ← Este documento
+│
+└── 01-github-actions/                     ← ⭐ POLÍTICAS PRINCIPALES
+    ├── README.md
+    ├── invenadro-jul-dev-policy-part1-compute.json
+    ├── invenadro-jul-dev-policy-part2-infrastructure.json
+    ├── invenadro-jul-qa-policy-part1-compute.json
+    ├── invenadro-jul-qa-policy-part2-infrastructure.json
+    ├── invenadro-nadro-qa-policy-part1-compute.json
+    ├── invenadro-nadro-qa-policy-part2-infrastructure.json
+    ├── invenadro-nadro-prod-policy-part1-compute.json
+    └── invenadro-nadro-prod-policy-part2-infrastructure.json
 ```
 
-O en AWS Console:
-```
-Lambda → Create function → Runtime dropdown
-```
-
-**Runtimes esperados:**
-- ✅ `nodejs20.x` (seguro disponible)
-- 🤔 `nodejs22.x` (verificar si está disponible)
-
-**Si nodejs22.x NO está disponible:**
-- Notificar al equipo de desarrollo
-- Se cambiará la configuración a `nodejs20.x`
+---
 
 ---
 
-## 2. Usuarios IAM - Cuenta AWS 1
+## 🔑 POLÍTICAS DE GITHUB ACTIONS
 
-**Cuenta:** jul-dev / jul-qa (Cuenta AWS 1: 975130647458)
+**Carpeta:** [`01-github-actions/`](./01-github-actions/)
 
-### A. Crear Usuario IAM para JUL-DEV
+### **Propósito**
+Permitir que GitHub Actions **despliegue toda la infraestructura** de Invenadro.
 
-Ver: [`01-iam-user-dev.md`](./01-iam-user-dev.md)
+### **Cada ambiente necesita 2 políticas**
 
-### B. Crear Usuario IAM para JUL-QA
+Debido al límite de 6,144 caracteres de AWS IAM, cada ambiente requiere 2 políticas inline:
 
-Ver: [`02-iam-user-qa.md`](./02-iam-user-qa.md)
+| Ambiente | Parte 1 (Compute) | Parte 2 (Infrastructure) |
+|----------|-------------------|-------------------------|
+| jul-dev | `invenadro-jul-dev-policy-part1-compute.json` | `invenadro-jul-dev-policy-part2-infrastructure.json` |
+| jul-qa | `invenadro-jul-qa-policy-part1-compute.json` | `invenadro-jul-qa-policy-part2-infrastructure.json` |
+| nadro-qa | `invenadro-nadro-qa-policy-part1-compute.json` | `invenadro-nadro-qa-policy-part2-infrastructure.json` |
+| nadro-prod | `invenadro-nadro-prod-policy-part1-compute.json` | `invenadro-nadro-prod-policy-part2-infrastructure.json` |
 
----
+### **Permisos incluidos**
 
-## 3. Usuario IAM - Cuenta AWS 2
+**Part 1 - Compute & Storage:**
+- Lambda (crear, actualizar, borrar)
+- S3 (buckets y objetos)
+- DynamoDB (tablas)
 
-**Cuenta:** nadro-qa (Cuenta AWS 2)
-
-### A. Crear Usuario IAM para NADRO-QA
-
-Ver: [`04-iam-user-nadro-qa.md`](./04-iam-user-nadro-qa.md)
-
----
-
-## 4. Usuario IAM - Cuenta AWS 3
-
-**Cuenta:** nadro-prod (Cuenta AWS 3)
-
-### A. Crear Usuario IAM for NADRO-PROD
-
-Ver: [`05-iam-user-nadro-prod.md`](./05-iam-user-nadro-prod.md)
-
----
-
-## 5. GitHub Secrets
-
-**Después de crear los usuarios IAM en AWS:**
-
-Ver: [`06-github-secrets.md`](./06-github-secrets.md)
+**Part 2 - Infrastructure & Services:**
+- CloudFormation (stacks)
+- API Gateway
+- Step Functions
+- CloudWatch Logs
+- CloudFront
+- IAM Roles (para lambdas)
+- Cognito User Pools
 
 ---
 
-## 6. Checklist de Validación
+## ✅ CHECKLIST DE VALIDACIÓN
 
 ```
 CUENTA AWS 1 (975130647458 - jul-dev / jul-qa):
 □ Usuario IAM github-actions-jul-dev creado
+□ Política Part 1 (Compute) aplicada
+□ Política Part 2 (Infrastructure) aplicada
 □ Usuario IAM github-actions-jul-qa creado
-□ Access Keys generadas para JUL-DEV
-□ Access Keys generadas para JUL-QA
-□ Access Keys copiadas (4 keys total)
+□ Política Part 1 (Compute) aplicada
+□ Política Part 2 (Infrastructure) aplicada
+□ Access Keys generadas (4 keys total)
 
 CUENTA AWS 2 (nadro-qa):
 □ Usuario IAM github-actions-nadro-qa creado
-□ Access Keys generadas para NADRO-QA
-□ Access Keys copiadas (2 keys)
+□ Política Part 1 (Compute) aplicada
+□ Política Part 2 (Infrastructure) aplicada
+□ Access Keys generadas (2 keys)
 
 CUENTA AWS 3 (nadro-prod):
 □ Usuario IAM github-actions-nadro-prod creado
-□ Access Keys generadas para NADRO-PROD
-□ Access Keys copiadas (2 keys)
+□ Política Part 1 (Compute) aplicada
+□ Política Part 2 (Infrastructure) aplicada
+□ Access Keys generadas (2 keys)
 
 GITHUB:
 □ Secret AWS_ACCESS_KEY_ID_DEV agregado
@@ -108,27 +123,112 @@ GITHUB:
 □ Secret AWS_ACCESS_KEY_ID_NADRO_PROD agregado
 □ Secret AWS_SECRET_ACCESS_KEY_NADRO_PROD agregado
 
-VERIFICACIÓN:
-□ Runtime nodejs22.x o nodejs20.x verificado
+DEPLOY:
 □ Deploy test a jul-dev exitoso
 □ Deploy test a jul-qa exitoso
-□ Deploy test a nadro-qa exitoso
-□ Deploy test a nadro-prod exitoso
+□ Deploy test a nadro-qa exitoso (manual approval)
+□ Deploy test a nadro-prod exitoso (manual approval)
 ```
 
 ---
 
-## 📞 Contacto
+## 🌍 AMBIENTES
 
-**Proyecto:** invenadro
-**Repositorio:** https://github.com/jsalinas1616/invenadro
-**Responsable desarrollo:** Julian Salinas
+| Ambiente | Cuenta AWS | Región | Uso |
+|----------|-----------|--------|-----|
+| **jul-dev** | 975130647458 | mx-central-1 | Desarrollo |
+| **jul-qa** | 975130647458 | mx-central-1 | QA |
+| **nadro-qa** | CUENTA_NADRO_QA | mx-central-1 | QA Cliente |
+| **nadro-prod** | CUENTA_NADRO_PROD | mx-central-1 | Producción |
 
 ---
 
-## 📚 Referencias
+## 🚀 PASOS PARA IMPLEMENTAR
 
-- [AWS IAM Users](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users.html)
-- [AWS Access Keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
-- [GitHub Actions Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
+### 1. Solicitar políticas a Arquitectura/Infraestructura
+
+**Para jul-dev:**
+```
+Necesito estas 2 políticas agregadas a mi grupo IAM:
+
+1. invenadro-jul-dev-policy-part1-compute.json
+   (Lambda, S3, DynamoDB)
+
+2. invenadro-jul-dev-policy-part2-infrastructure.json
+   (CloudFormation, API Gateway, Step Functions, etc.)
+```
+
+**Repetir para cada ambiente:** jul-qa, nadro-qa, nadro-prod
+
+---
+
+### 2. Verificar permisos
+
+```bash
+# Ver qué políticas tienes
+aws iam list-attached-user-policies --user-name TU_USUARIO
+
+# O si estás en un grupo
+aws iam list-attached-group-policies --group-name TU_GRUPO
+```
+
+---
+
+### 3. Hacer el primer deploy
+
+```bash
+# Desarrollo
+npm run deploy:backend:dev
+
+# QA
+npm run deploy:backend:qa
+
+# Nadro QA
+npm run deploy:backend:nadro-qa
+
+# Producción
+npm run deploy:backend:prod
+```
+
+**Nota:** Usa tus credenciales existentes (Access Keys que ya tienes configuradas)
+
+---
+
+## 🔒 SEGURIDAD
+
+### Principios Aplicados
+
+✅ **Mínimo Privilegio**
+- Políticas limitadas a recursos específicos del proyecto
+- Sin wildcards globales (`Resource: "*"`) salvo excepciones justificadas
+
+✅ **Segregación por Ambiente**
+- jul-dev y jul-qa en cuenta 975130647458
+- nadro-qa en su propia cuenta
+- nadro-prod en su propia cuenta
+
+✅ **Naming Convention**
+- Todos los recursos incluyen el ambiente en el nombre
+- Ejemplo: `invenadro-backend-jul-dev-*`
+
+✅ **Políticas Divididas**
+- 2 políticas por ambiente (bajo límite de 6,144 caracteres)
+- Permite granularidad sin exceder límites de AWS
+
+---
+
+## 📞 CONTACTO
+
+**Proyecto:** Invenadro  
+**Repositorio:** https://github.com/jsalinas1616/invenadro  
+**Responsable:** Julián Salinas  
+**Email:** jsalinas1616@gmail.com
+
+---
+
+## 📚 REFERENCIAS
+
+- [AWS IAM Best Practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html)
+- [Lambda Security](https://docs.aws.amazon.com/lambda/latest/dg/lambda-security.html)
+- [Step Functions IAM](https://docs.aws.amazon.com/step-functions/latest/dg/procedure-create-iam-role.html)
 - [Serverless Framework](https://www.serverless.com/framework/docs)

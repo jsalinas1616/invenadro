@@ -1,4 +1,4 @@
-service: invenadro-simplicidad
+service: invenadro-backend
 
 frameworkVersion: '3'
 

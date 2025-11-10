@@ -20,6 +20,6 @@ Resources:
         - Key: Project
           Value: invenadro
         - Key: Service
-          Value: simplicidad
+          Value: backend
         - Key: Stage
           Value: ${self:provider.stage}
