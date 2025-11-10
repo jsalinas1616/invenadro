@@ -68,7 +68,9 @@
         "s3:GetLifecycleConfiguration",
         "s3:PutBucketAcl",
         "s3:GetBucketAcl",
-        "s3:ListBucket"
+        "s3:ListBucket",
+        "s3:PutBucketTagging",
+        "s3:GetBucketTagging"
       ],
       "Resource": [
         "arn:aws:s3:::invenadro-backend-nadro-prod-*",
