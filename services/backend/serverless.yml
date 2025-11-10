@@ -230,8 +230,6 @@ resources:
   - ${file(resources/cognito.yml)}
   - ${file(resources/api-gateway.yml)}
   - ${file(resources/iam.yml)}
-
-# Outputs
   - Outputs:
       ApiGatewayUrl:
         Description: API Gateway URL
