@@ -17,7 +17,11 @@
         "cloudformation:ListStacks",
         "cloudformation:ListStackResources",
         "cloudformation:GetStackPolicy",
-        "cloudformation:SetStackPolicy"
+        "cloudformation:SetStackPolicy",
+        "cloudformation:CreateChangeSet",
+        "cloudformation:DescribeChangeSet",
+        "cloudformation:ExecuteChangeSet",
+        "cloudformation:DeleteChangeSet"
       ],
       "Resource": [
         "arn:aws:cloudformation:mx-central-1:CUENTA_NADRO_PROD:stack/invenadro-backend-nadro-prod-*",

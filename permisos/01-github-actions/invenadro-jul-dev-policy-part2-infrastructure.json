@@ -17,7 +17,11 @@
         "cloudformation:ListStacks",
         "cloudformation:ListStackResources",
         "cloudformation:GetStackPolicy",
-        "cloudformation:SetStackPolicy"
+        "cloudformation:SetStackPolicy",
+        "cloudformation:CreateChangeSet",
+        "cloudformation:DescribeChangeSet",
+        "cloudformation:ExecuteChangeSet",
+        "cloudformation:DeleteChangeSet"
       ],
       "Resource": [
         "arn:aws:cloudformation:mx-central-1:975130647458:stack/invenadro-backend-jul-dev/*",
