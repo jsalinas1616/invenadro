@@ -88,11 +88,13 @@ resources:
               Resource: !Sub '${FrontendBucket.Arn}/*'
 
     # CloudFront Origin Access Identity
-    CloudFrontOAI:
-      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
-      Properties:
-        CloudFrontOriginAccessIdentityConfig:
-          Comment: OAI for ${self:service}-${self:provider.stage}
+    # NOTA: No se usa porque estamos usando S3 Website (CustomOriginConfig)
+    # Si se necesita acceso privado, descomentar y usar S3OriginConfig
+    # CloudFrontOAI:
+    #   Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    #   Properties:
+    #     CloudFrontOriginAccessIdentityConfig:
+    #       Comment: OAI for ${self:service}-${self:provider.stage}
 
     # CloudFront Distribution
     CloudFrontDistribution:
@@ -108,8 +110,6 @@ resources:
           Origins:
             - Id: S3Origin
               DomainName: !GetAtt FrontendBucket.RegionalDomainName
-              S3OriginConfig:
-                OriginAccessIdentity: ''
               CustomOriginConfig:
                 HTTPPort: 80
                 HTTPSPort: 443
