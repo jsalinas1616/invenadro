@@ -66,6 +66,7 @@ Debido al **límite de 6,144 caracteres** de AWS IAM para políticas inline, cad
 - Crear, borrar buckets
 - Subir, leer, borrar objetos
 - Configurar políticas y encriptación
+- **Configurar OwnershipControls** (requerido desde 2024)
 
 #### DynamoDB
 - Crear, actualizar, borrar tablas
