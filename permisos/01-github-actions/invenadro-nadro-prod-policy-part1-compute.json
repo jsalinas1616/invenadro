@@ -139,6 +139,8 @@
         "dynamodb:BatchWriteItem",
         "dynamodb:DescribeTimeToLive",
         "dynamodb:UpdateTimeToLive",
+        "dynamodb:DescribeContinuousBackups",
+        "dynamodb:UpdateContinuousBackups",
         "dynamodb:TagResource",
         "dynamodb:UntagResource",
         "dynamodb:ListTagsOfResource"

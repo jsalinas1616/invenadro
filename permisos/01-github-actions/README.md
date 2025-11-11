@@ -71,6 +71,7 @@ Debido al **límite de 6,144 caracteres** de AWS IAM para políticas inline, cad
 #### DynamoDB
 - Crear, actualizar, borrar tablas
 - Configurar TTL y streams
+- **Configurar ContinuousBackups** (Point-in-time recovery)
 
 #### CloudFormation
 - Crear, actualizar, borrar stacks
