@@ -170,7 +170,9 @@
         "cognito-idp:AdminGetUser",
         "cognito-idp:TagResource",
         "cognito-idp:UntagResource",
-        "cognito-idp:ListTagsForResource"
+        "cognito-idp:ListTagsForResource",
+        "cognito-idp:SetUserPoolMfaConfig",
+        "cognito-idp:GetUserPoolMfaConfig"
       ],
       "Resource": [
         "arn:aws:cognito-idp:mx-central-1:CUENTA_NADRO_PROD:userpool/*"
