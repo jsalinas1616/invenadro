@@ -141,7 +141,7 @@
       "Resource": [
         "arn:aws:iam::CUENTA_NADRO_PROD:role/invenadro-backend-nadro-prod-*",
         "arn:aws:iam::CUENTA_NADRO_PROD:role/invenadro-frontend-nadro-prod-*",
-        "arn:aws:iam::CUENTA_NADRO_PROD:role/serverlessApiGatewayCloudWatchRole"
+        "arn:aws:iam::CUENTA_NADRO_PROD:role/serverlessApiGatewayCloudWatchRole*"
       ]
     },
     {

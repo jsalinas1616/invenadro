@@ -141,7 +141,7 @@
       "Resource": [
         "arn:aws:iam::975130647458:role/invenadro-backend-jul-qa-*",
         "arn:aws:iam::975130647458:role/invenadro-frontend-jul-qa-*",
-        "arn:aws:iam::975130647458:role/serverlessApiGatewayCloudWatchRole"
+        "arn:aws:iam::975130647458:role/serverlessApiGatewayCloudWatchRole*"
       ]
     },
     {
