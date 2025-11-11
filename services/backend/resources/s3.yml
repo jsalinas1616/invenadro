@@ -4,10 +4,11 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: ${self:service}-${self:provider.stage}-s3-logs
-      AccessControl: LogDeliveryWrite
-      LoggingConfiguration:
-        DestinationBucketName: ${self:service}-${self:provider.stage}-s3-logs
-        LogFilePrefix: s3-logs-access-logs/
+      # Removido AccessControl para compatibilidad con BucketOwnerEnforced
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      # Removido LoggingConfiguration para evitar referencia circular
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -116,3 +117,23 @@ Resources:
           Value: backend
         - Key: Stage
           Value: ${self:provider.stage}
+
+  # Política para permitir que S3 escriba logs en el bucket
+  S3LogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn: S3LogsBucket
+    Properties:
+      Bucket: !Ref S3LogsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: S3ServerAccessLogsPolicy
+            Effect: Allow
+            Principal:
+              Service: logging.s3.amazonaws.com
+            Action:
+              - s3:PutObject
+            Resource: !Sub "${S3LogsBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
