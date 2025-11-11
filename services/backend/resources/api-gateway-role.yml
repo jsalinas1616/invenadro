@@ -1,10 +1,10 @@
 Resources:
   # Rol para que API Gateway escriba logs a CloudWatch
-  # Nombre dinámico por ambiente para evitar conflictos
+  # Nombre estático (compartido entre ambientes en la misma cuenta AWS)
   ApiGatewayCloudWatchRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: serverlessApiGatewayCloudWatchRole-${self:provider.stage}
+      RoleName: serverlessApiGatewayCloudWatchRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
