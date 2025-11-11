@@ -18,20 +18,12 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: DeleteOldLogs
-            Status: Enabled
-            ExpirationInDays: 90
-      Tags:
-        - Key: Name
-          Value: ${self:service}-${self:provider.stage}-s3-logs
-        - Key: Project
-          Value: invenadro
-        - Key: Service
-          Value: backend
-        - Key: Stage
-          Value: ${self:provider.stage}
+        LifecycleConfiguration:
+          Rules:
+            - Id: DeleteOldLogs
+              Status: Enabled
+              ExpirationInDays: 90
+        # Tags removidos - Serverless Framework los agrega automáticamente desde provider.tags
 
   UploadsBucket:
     Type: AWS::S3::Bucket
@@ -67,15 +59,7 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      Tags:
-        - Key: Name
-          Value: ${self:service}-${self:provider.stage}-uploads
-        - Key: Project
-          Value: invenadro
-        - Key: Service
-          Value: backend
-        - Key: Stage
-          Value: ${self:provider.stage}
+      # Tags removidos - Serverless Framework los agrega automáticamente desde provider.tags
 
   ResultsBucket:
     Type: AWS::S3::Bucket
@@ -108,15 +92,7 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      Tags:
-        - Key: Name
-          Value: ${self:service}-${self:provider.stage}-results
-        - Key: Project
-          Value: invenadro
-        - Key: Service
-          Value: backend
-        - Key: Stage
-          Value: ${self:provider.stage}
+      # Tags removidos - Serverless Framework los agrega automáticamente desde provider.tags
 
   # Política para permitir que S3 escriba logs en el bucket
   S3LogsBucketPolicy:

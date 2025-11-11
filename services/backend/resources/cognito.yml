@@ -28,11 +28,7 @@ Resources:
         RecoveryMechanisms:
           - Name: verified_email
             Priority: 1
-      UserPoolTags:
-        Name: ${self:service}-${self:provider.stage}-users
-        Project: invenadro
-        Service: backend
-        Stage: ${self:provider.stage}
+      # UserPoolTags removidos - Serverless Framework los agrega automáticamente desde provider.tags
 
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient

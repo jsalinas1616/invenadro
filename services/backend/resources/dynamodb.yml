@@ -14,12 +14,4 @@ Resources:
         StreamViewType: NEW_AND_OLD_IMAGES
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
-      Tags:
-        - Key: Name
-          Value: ${self:service}-${self:provider.stage}-jobs
-        - Key: Project
-          Value: invenadro
-        - Key: Service
-          Value: backend
-        - Key: Stage
-          Value: ${self:provider.stage}
+      # Tags removidos - Serverless Framework los agrega automáticamente desde provider.tags
