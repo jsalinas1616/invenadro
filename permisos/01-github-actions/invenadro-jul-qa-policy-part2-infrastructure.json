@@ -116,7 +116,13 @@
         "cloudfront:CreateInvalidation",
         "cloudfront:GetInvalidation",
         "cloudfront:ListInvalidations",
-        "cloudfront:ListDistributions"
+        "cloudfront:ListDistributions",
+        "cloudfront:CreateCloudFrontOriginAccessIdentity",
+        "cloudfront:GetCloudFrontOriginAccessIdentity",
+        "cloudfront:GetCloudFrontOriginAccessIdentityConfig",
+        "cloudfront:UpdateCloudFrontOriginAccessIdentity",
+        "cloudfront:DeleteCloudFrontOriginAccessIdentity",
+        "cloudfront:ListCloudFrontOriginAccessIdentities"
       ],
       "Resource": "*"
     },

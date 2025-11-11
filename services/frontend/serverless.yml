@@ -71,15 +71,7 @@ resources:
               AllowedHeaders:
                 - '*'
               MaxAge: 3000
-        Tags:
-          - Key: Name
-            Value: ${self:service}-${self:provider.stage}
-          - Key: Project
-            Value: invenadro
-          - Key: Service
-            Value: frontend
-          - Key: Stage
-            Value: ${self:provider.stage}
+        # Tags removidos - Serverless Framework los agrega automáticamente desde provider.tags
 
     # Bucket Policy para acceso público
     FrontendBucketPolicy:

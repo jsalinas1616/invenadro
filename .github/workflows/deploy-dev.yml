@@ -51,6 +51,12 @@ jobs:
           npm install
           npm run build
 
+      - name: Clean Frontend Stack (if corrupted)
+        continue-on-error: true
+        run: |
+          cd services/frontend
+          npx serverless remove --stage ${{ env.STAGE }} --verbose || true
+
       - name: Deploy Frontend
         run: |
           cd services/frontend
