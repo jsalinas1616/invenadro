@@ -14,13 +14,5 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
-      Tags:
-        - Key: Name
-          Value: serverlessApiGatewayCloudWatchRole-${self:provider.stage}
-        - Key: Project
-          Value: invenadro
-        - Key: Stage
-          Value: ${self:provider.stage}
-        - Key: ManagedBy
-          Value: serverless
+      # Tags removidos - Serverless Framework los agrega automáticamente desde provider.tags
 
