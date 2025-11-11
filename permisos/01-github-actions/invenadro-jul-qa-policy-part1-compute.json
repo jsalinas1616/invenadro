@@ -96,7 +96,7 @@
       ],
       "Resource": [
         "arn:aws:s3:::invenadro-backend-jul-qa-*",
-        "arn:aws:s3:::invenadro-frontend-jul-qa"
+        "arn:aws:s3:::invenadro-frontend-jul-qa*"
       ]
     },
     {
@@ -113,7 +113,7 @@
       ],
       "Resource": [
         "arn:aws:s3:::invenadro-backend-jul-qa-*/*",
-        "arn:aws:s3:::invenadro-frontend-jul-qa/*"
+        "arn:aws:s3:::invenadro-frontend-jul-qa*/*"
       ]
     },
     {

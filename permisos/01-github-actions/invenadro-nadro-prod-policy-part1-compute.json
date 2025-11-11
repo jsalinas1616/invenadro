@@ -96,7 +96,7 @@
       ],
       "Resource": [
         "arn:aws:s3:::invenadro-backend-nadro-prod-*",
-        "arn:aws:s3:::invenadro-frontend-nadro-prod"
+        "arn:aws:s3:::invenadro-frontend-nadro-prod*"
       ]
     },
     {
@@ -113,7 +113,7 @@
       ],
       "Resource": [
         "arn:aws:s3:::invenadro-backend-nadro-prod-*/*",
-        "arn:aws:s3:::invenadro-frontend-nadro-prod/*"
+        "arn:aws:s3:::invenadro-frontend-nadro-prod*/*"
       ]
     },
     {
