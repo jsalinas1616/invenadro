@@ -54,8 +54,17 @@ jobs:
       - name: Clean Frontend Stack (if corrupted)
         continue-on-error: true
         run: |
-          cd services/frontend
-          npx serverless remove --stage ${{ env.STAGE }} --verbose || true
+          # Intentar eliminar el stack directamente con CloudFormation
+          aws cloudformation delete-stack \
+            --stack-name invenadro-frontend-${{ env.STAGE }} \
+            --region ${{ env.AWS_REGION }} || true
+          
+          # Esperar a que se complete la eliminación (max 2 minutos)
+          aws cloudformation wait stack-delete-complete \
+            --stack-name invenadro-frontend-${{ env.STAGE }} \
+            --region ${{ env.AWS_REGION }} || true
+          
+          echo "Stack cleanup completed or stack didn't exist"
 
       - name: Deploy Frontend
         run: |
