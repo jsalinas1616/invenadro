@@ -31,7 +31,7 @@ provider:
     JOBS_TABLE: ${self:service}-${self:provider.stage}-jobs
     UPLOADS_BUCKET: ${self:service}-${self:provider.stage}-uploads
     RESULTS_BUCKET: ${self:service}-${self:provider.stage}-results
-    STEP_FUNCTION_ARN: !GetAtt ProcessingStateMachineStepFunctionsStateMachine.Arn
+    STEP_FUNCTION_ARN: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
 
 # Funciones Lambda
 functions:
@@ -41,12 +41,12 @@ functions:
     timeout: 300
     memorySize: 512
     environment:
-      PROCESSOR_STEP_FUNCTION_ARN: !GetAtt ProcessingStateMachineStepFunctionsStateMachine.Arn
+      PROCESSOR_STEP_FUNCTION_ARN: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
     iamRoleStatements:
       - Effect: Allow
         Action:
           - states:StartExecution
-        Resource: !GetAtt ProcessingStateMachineStepFunctionsStateMachine.Arn
+        Resource: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
       - Effect: Allow
         Action:
           - dynamodb:PutItem
@@ -121,7 +121,7 @@ functions:
         Action:
           - states:DescribeExecution
           - states:ListExecutions
-        Resource: !GetAtt ProcessingStateMachineStepFunctionsStateMachine.Arn
+        Resource: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
     events:
       - http:
           path: /calcular-redondeo/status/{processId}
