@@ -13,9 +13,9 @@ provider:
   stage: ${opt:stage, 'dev'}
   
   # Configuración de logs
-  # Deshabilitado temporalmente para evitar creación del rol serverlessApiGatewayCloudWatchRole
+  # Habilitado - el rol se crea automáticamente en resources/api-gateway-role.yml
   logs:
-    restApi: false
+    restApi: true
   
   # Tags globales
   tags:
@@ -223,6 +223,7 @@ resources:
   - ${file(resources/api-gateway.yml)}
   - ${file(resources/iam.yml)}
   - ${file(resources/step-functions.yml)}
+  - ${file(resources/api-gateway-role.yml)}
   - Outputs:
       ApiGatewayUrl:
         Description: API Gateway URL

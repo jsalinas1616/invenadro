@@ -1,0 +1,26 @@
+Resources:
+  # Rol para que API Gateway escriba logs a CloudWatch
+  # Nombre dinámico por ambiente para evitar conflictos
+  ApiGatewayCloudWatchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: serverlessApiGatewayCloudWatchRole-${self:provider.stage}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+      Tags:
+        - Key: Name
+          Value: serverlessApiGatewayCloudWatchRole-${self:provider.stage}
+        - Key: Project
+          Value: invenadro
+        - Key: Stage
+          Value: ${self:provider.stage}
+        - Key: ManagedBy
+          Value: serverless
+
