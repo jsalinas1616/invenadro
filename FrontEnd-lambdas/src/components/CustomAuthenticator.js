@@ -1,7 +1,6 @@
 import React from 'react';
 import { Authenticator, translations } from '@aws-amplify/ui-react';
 import { I18n } from 'aws-amplify/utils';
-import { Container, Card } from 'react-bootstrap';
 import '../styles/CustomAuth.css';
 
 // Configurar traducciones al español

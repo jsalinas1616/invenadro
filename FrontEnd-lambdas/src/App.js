@@ -808,21 +808,6 @@ function App() {
       reader.readAsBinaryString(archivo);
     });
   };
-
-  // Función para descargar JSON
-  const downloadJSON = () => {
-    if (!result) return;
-    
-    const dataStr = JSON.stringify(result, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `resultado_${processId || 'unknown'}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  };
   
   // Sistema simplificado: Solo procesamiento directo (sin polling)
 
