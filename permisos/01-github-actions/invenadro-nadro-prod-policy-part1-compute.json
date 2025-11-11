@@ -30,7 +30,8 @@
         "lambda:DeleteFunctionConcurrency",
         "lambda:TagResource",
         "lambda:UntagResource",
-        "lambda:ListTags"
+        "lambda:ListTags",
+        "lambda:InvokeFunction"
       ],
       "Resource": [
         "arn:aws:lambda:mx-central-1:CUENTA_NADRO_PROD:function:invenadro-backend-nadro-prod-*",
