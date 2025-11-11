@@ -61,6 +61,7 @@ Debido al **límite de 6,144 caracteres** de AWS IAM para políticas inline, cad
 - Crear, actualizar, borrar funciones
 - Gestionar configuración
 - Publicar versiones
+- **Etiquetar funciones** (TagResource)
 
 #### S3
 - Crear, borrar buckets

@@ -27,7 +27,10 @@
         "lambda:ListVersionsByFunction",
         "lambda:GetPolicy",
         "lambda:PutFunctionConcurrency",
-        "lambda:DeleteFunctionConcurrency"
+        "lambda:DeleteFunctionConcurrency",
+        "lambda:TagResource",
+        "lambda:UntagResource",
+        "lambda:ListTags"
       ],
       "Resource": [
         "arn:aws:lambda:mx-central-1:CUENTA_NADRO_QA:function:invenadro-backend-nadro-qa-*",

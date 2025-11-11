@@ -27,7 +27,10 @@
         "lambda:ListVersionsByFunction",
         "lambda:GetPolicy",
         "lambda:PutFunctionConcurrency",
-        "lambda:DeleteFunctionConcurrency"
+        "lambda:DeleteFunctionConcurrency",
+        "lambda:TagResource",
+        "lambda:UntagResource",
+        "lambda:ListTags"
       ],
       "Resource": [
         "arn:aws:lambda:mx-central-1:975130647458:function:invenadro-backend-jul-dev-*",
