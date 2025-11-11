@@ -13,8 +13,9 @@ provider:
   stage: ${opt:stage, 'dev'}
   
   # Configuración de logs
+  # Deshabilitado temporalmente para evitar creación del rol serverlessApiGatewayCloudWatchRole
   logs:
-    restApi: true
+    restApi: false
   
   # Tags globales
   tags:
