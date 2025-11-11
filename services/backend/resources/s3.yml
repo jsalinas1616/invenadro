@@ -18,12 +18,12 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-        LifecycleConfiguration:
-          Rules:
-            - Id: DeleteOldLogs
-              Status: Enabled
-              ExpirationInDays: 90
-        # Tags removidos - Serverless Framework los agrega automáticamente desde provider.tags
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldLogs
+            Status: Enabled
+            ExpirationInDays: 90
+      # Tags removidos - Serverless Framework los agrega automáticamente desde provider.tags
 
   UploadsBucket:
     Type: AWS::S3::Bucket
