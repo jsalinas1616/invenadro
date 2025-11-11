@@ -48,7 +48,8 @@
       ],
       "Resource": [
         "arn:aws:apigateway:mx-central-1::/restapis",
-        "arn:aws:apigateway:mx-central-1::/restapis/*"
+        "arn:aws:apigateway:mx-central-1::/restapis/*",
+        "arn:aws:apigateway:mx-central-1::/tags/*"
       ]
     },
     {
