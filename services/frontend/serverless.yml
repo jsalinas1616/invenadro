@@ -24,7 +24,6 @@ custom:
     - bucketName: ${self:service}-${self:provider.stage}
       localDir: ../../FrontEnd-lambdas/build
       deleteRemoved: true
-      acl: public-read
       defaultContentType: text/html
       params:
         - index.html:
