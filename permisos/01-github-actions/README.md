@@ -82,6 +82,7 @@ Debido al **límite de 6,144 caracteres** de AWS IAM para políticas inline, cad
 #### IAM
 - Crear, actualizar, borrar roles para lambdas
 - Gestionar políticas inline
+- **Crear rol global** `serverlessApiGatewayCloudWatchRole` (necesario para API Gateway)
 
 #### Step Functions
 - Crear, actualizar, borrar máquinas de estado

@@ -140,7 +140,8 @@
       ],
       "Resource": [
         "arn:aws:iam::975130647458:role/invenadro-backend-jul-dev-*",
-        "arn:aws:iam::975130647458:role/invenadro-frontend-jul-dev-*"
+        "arn:aws:iam::975130647458:role/invenadro-frontend-jul-dev-*",
+        "arn:aws:iam::975130647458:role/serverlessApiGatewayCloudWatchRole"
       ]
     },
     {
