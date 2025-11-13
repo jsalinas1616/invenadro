@@ -46,10 +46,39 @@ jobs:
           npx serverless deploy --stage ${{ env.STAGE }} --verbose
 
       - name: Build Frontend
+        env:
+          REACT_APP_STAGE: ${{ env.STAGE }}
         run: |
           cd FrontEnd-lambdas
           npm install
           npm run build
+          echo "✅ Frontend build completado para ambiente: $REACT_APP_STAGE"
+
+      - name: Clean Frontend Stack (if corrupted)
+        continue-on-error: true
+        run: |
+          # Vaciar todos los buckets del frontend antes de eliminar
+          echo "Buscando buckets del frontend..."
+          BUCKETS=$(aws s3 ls | grep "invenadro-frontend-jul-" | awk '{print $3}' || true)
+          
+          for BUCKET in $BUCKETS; do
+            echo "Vaciando bucket: $BUCKET"
+            aws s3 rm s3://$BUCKET --recursive || true
+          done
+          
+          # Eliminar el stack directamente con CloudFormation
+          echo "Eliminando stack..."
+          aws cloudformation delete-stack \
+            --stack-name invenadro-frontend-${{ env.STAGE }} \
+            --region ${{ env.AWS_REGION }} || true
+          
+          # Esperar a que se complete la eliminación
+          echo "Esperando a que se complete la eliminación..."
+          aws cloudformation wait stack-delete-complete \
+            --stack-name invenadro-frontend-${{ env.STAGE }} \
+            --region ${{ env.AWS_REGION }} || true
+          
+          echo "✅ Stack cleanup completed or stack didn't exist"
 
       - name: Deploy Frontend
         run: |

@@ -1,19 +1,28 @@
 // Importar Amplify para obtener el token JWT
 import { fetchAuthSession } from 'aws-amplify/auth';
+// Importar configuración por ambiente
+import { getConfig } from '../config/environments';
 
-// Configuración directa para AWS Lambda - PROYECTO INVENADRO
+// Obtener configuración del ambiente actual
+const env = getConfig();
+
+// Configuración para AWS Lambda - Multi-ambiente
 const config = {
-  lambdaInitiatorUrl: 'https://c9nzcqgz16.execute-api.mx-central-1.amazonaws.com/jul-dev/calcular-redondeo',
-  apiGatewayBaseUrl: 'https://c9nzcqgz16.execute-api.mx-central-1.amazonaws.com/jul-dev',
-  awsRegion: 'mx-central-1',
-  s3ResultsBucket: 'invenadro-backend-jul-dev-results',
-  dynamoDBTable: 'invenadro-backend-jul-dev-jobs',
-  s3UploadsBucket: 'invenadro-backend-jul-dev-uploads',
-  stepFunctionArn: 'arn:aws:states:mx-central-1:975130647458:stateMachine:invenadro-backend-jul-dev',
+  lambdaInitiatorUrl: `${env.apiGateway.url}/calcular-redondeo`,
+  apiGatewayBaseUrl: env.apiGateway.url,
+  awsRegion: env.region,
+  s3ResultsBucket: env.s3.resultsBucket,
+  dynamoDBTable: env.dynamodb.jobsTable,
+  s3UploadsBucket: env.s3.uploadsBucket,
+  stepFunctionArn: env.stepFunction.arn,
   statusPollingInterval: 5000,
   maxRetries: 3,
   retryDelay: 2000
 };
+
+// Log del ambiente actual (útil para debugging)
+console.log(`🌍 Lambda Service configurado para ambiente: ${env.name} (${env.displayName})`);
+console.log(`📡 API Gateway: ${config.apiGatewayBaseUrl}`);
 
 class LambdaService {
   /**

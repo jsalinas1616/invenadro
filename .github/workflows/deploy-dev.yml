@@ -46,10 +46,13 @@ jobs:
           npx serverless deploy --stage ${{ env.STAGE }} --verbose
 
       - name: Build Frontend
+        env:
+          REACT_APP_STAGE: ${{ env.STAGE }}
         run: |
           cd FrontEnd-lambdas
           npm install
           npm run build
+          echo "✅ Frontend build completado para ambiente: $REACT_APP_STAGE"
 
       - name: Clean Frontend Stack (if corrupted)
         continue-on-error: true

@@ -1,12 +1,21 @@
 import { Amplify } from 'aws-amplify';
+// Importar configuración por ambiente
+import { getConfig } from './config/environments';
 
-// Configuración de AWS Amplify
+// Obtener configuración del ambiente actual
+const env = getConfig();
+
+// Log del ambiente para debugging
+console.log(`🔐 Cognito configurado para ambiente: ${env.name} (${env.displayName})`);
+console.log(`👤 User Pool: ${env.cognito.userPoolId}`);
+
+// Configuración de AWS Amplify - Multi-ambiente
 Amplify.configure({
   Auth: {
     Cognito: {
-      // Configuración del User Pool de Cognito - PROYECTO INVENADRO
-      userPoolId: 'mx-central-1_WIAYTqFq7',  // ✅ User Pool ID (invenadro-backend-jul-dev)
-      userPoolClientId: 'jo46f6pkduolu7hdb02geo0tj',  // ✅ App Client SIN secret
+      // Configuración del User Pool de Cognito desde ambiente
+      userPoolId: env.cognito.userPoolId,
+      userPoolClientId: env.cognito.clientId,
       
       // Opcional: Configuración adicional
       signUpVerificationMethod: 'code', // 'code' | 'link'
