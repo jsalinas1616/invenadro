@@ -28,7 +28,7 @@ const environments = {
       jobsTable: 'invenadro-backend-jul-dev-jobs'
     },
     stepFunction: {
-      arn: 'arn:aws:states:mx-central-1:975130647458:stateMachine:invenadro-backend-jul-dev'
+      arn: 'arn:aws:states:mx-central-1:975130647458:stateMachine:invenadro-backend-jul-dev-StateMachine'
     }
   },
 
