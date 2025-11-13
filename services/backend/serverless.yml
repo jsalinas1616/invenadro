@@ -6,6 +6,16 @@ plugins:
   - serverless-dotenv-plugin
   - serverless-iam-roles-per-function
 
+# Configuración personalizada por ambiente
+custom:
+  # 🔐 URLs permitidas para CORS por ambiente
+  # Las URLs de CloudFront se actualizan después del primer deployment
+  allowedOrigins:
+    jul-dev: 'https://d1n7zsgit8xch8.cloudfront.net,http://invenadro-frontend-jul-dev.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
+    jul-qa: 'https://CLOUDFRONT-URL-QA-PLACEHOLDER,http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
+    nadro-qa: 'https://CLOUDFRONT-URL-NADRO-QA-PLACEHOLDER,http://invenadro-frontend-nadro-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
+    nadro-prod: 'https://CLOUDFRONT-URL-NADRO-PROD-PLACEHOLDER,http://invenadro-frontend-nadro-prod.s3-website.mx-central-1.amazonaws.com'
+
 provider:
   name: aws
   runtime: nodejs22.x
@@ -33,6 +43,8 @@ provider:
     UPLOADS_BUCKET: ${self:service}-${self:provider.stage}-uploads
     RESULTS_BUCKET: ${self:service}-${self:provider.stage}-results
     STEP_FUNCTION_ARN: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
+    # 🔐 URLs permitidas para CORS (separadas por coma)
+    ALLOWED_ORIGINS: ${self:custom.allowedOrigins.${self:provider.stage}}
 
 # Funciones Lambda
 functions:

@@ -7,16 +7,19 @@ const s3 = new AWS.S3();
 // Configuración
 const RESULTS_BUCKET = 'factor-redondeo-lambda-results-dev';
 
-// 🔐 ORÍGENES PERMITIDOS PARA CORS
-const ALLOWED_ORIGINS = [
-    'http://factor-redondeo-v3-frontend-dev.s3-website-us-east-1.amazonaws.com',
-    'http://factor-redondeo-lambda-frontend.s3-website-us-east-1.amazonaws.com'
-];
+// 🔐 ORÍGENES PERMITIDOS PARA CORS - Desde variable de entorno por ambiente
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : ['http://localhost:3000']; // Fallback solo para desarrollo local
+
+console.log('CORS - Orígenes permitidos:', ALLOWED_ORIGINS);
 
 // Helper para obtener el origen correcto según el request
 const getCorsOrigin = (event) => {
     const origin = event.headers?.origin || event.headers?.Origin;
-    return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+    const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+    console.log(`CORS - Origin recibido: ${origin}, usando: ${allowedOrigin}`);
+    return allowedOrigin;
 };
 
 exports.handler = async (event) => {
