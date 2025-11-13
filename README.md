@@ -1,254 +1,357 @@
-# 🚀 Invenadro
+# Invenadro - Sistema de Optimización de Factor de Redondeo
 
-Sistema serverless completo: Backend (Lambdas + Step Functions) + Frontend (React + CloudFront).
+Sistema serverless en AWS para optimización de inventarios.
 
-## ⚡ Quick Start
+---
+
+## 🚀 Deployment Rápido
 
 ### Prerequisitos
+
 ```bash
-# Node.js 20+
+# 1. Node.js 22+
 node --version
 
-# Serverless Framework
+# 2. AWS CLI configurado
+aws --version
+
+# 3. Serverless Framework
 npm install -g serverless
 
-# AWS CLI configurado
-aws configure
+# 4. jq (para scripts automáticos)
+brew install jq  # macOS
 ```
 
-### Deploy Completo (Backend + Frontend)
+---
+
+## 📦 Deploy Completo (Backend + Frontend)
+
+### Opción 1: Automático con GitHub Actions (Recomendado)
 
 ```bash
-# 1. Instalar todas las dependencias
-npm run install:all
+# Push a la rama correspondiente
+git push origin dev       # → jul-dev
+git push origin qa        # → jul-qa
+git push origin nadro-qa  # → nadro-qa
+git push origin main      # → nadro-prod
 
-# 2. Configurar ambiente
-cp .env.template .env.dev
-# Edita .env.dev con tu AWS_ACCOUNT_ID
-
-# 3. Deploy TODO (backend + frontend)
-npm run deploy:all:dev
+# GitHub Actions se encarga de todo automáticamente
 ```
 
-### Deploy Individual
+---
+
+### Opción 2: Manual
+
+#### **Paso 1: Deploy Backend**
 
 ```bash
-# Solo backend
-npm run deploy:simplicidad:dev
+# Ir a carpeta backend
+cd services/backend
 
-# Solo frontend  
-npm run deploy:frontend:dev
+# Instalar dependencias
+npm install
+
+# Deploy
+npx serverless deploy --stage jul-dev --verbose
+
+# Ver información del deployment
+npx serverless info --stage jul-dev
 ```
 
-### 🎉 ¡Listo!
+#### **Paso 2: Actualizar Configuración del Frontend (Automático) 🤖**
 
-Outputs del deploy:
-- ✅ **Backend:** API Gateway URL, Cognito User Pool
-- ✅ **Frontend:** CloudFront URL (https://d123456789.cloudfront.net)
-
----
-
-## 🏗️ Arquitectura
-
-```
-Frontend (React) → CloudFront (CDN) → S3 (hosting)
-                        ↓
-            API Gateway + Cognito
-                        ↓
-              8 Lambda Functions
-                        ↓
-           Step Functions (Orquestación)
-                        ↓
-              S3 + DynamoDB
-```
-
-**Stack completo:**
-- **Frontend:** React app en S3 + CloudFront
-- **Backend:** 8 Lambdas + Step Functions
-- **API:** API Gateway con Cognito auth
-- **Storage:** S3 buckets + DynamoDB
-
----
-
-## 📁 Estructura
-
-```
-invenadro/
-├── services/
-│   ├── simplicidad/              # Backend
-│   │   ├── serverless.yml       # 8 Lambdas + Step Functions
-│   │   ├── functions/           # Código de Lambdas
-│   │   ├── resources/           # DynamoDB, S3, Cognito, IAM
-│   │   └── stepfunctions/       # State machine definition
-│   │
-│   └── frontend/                 # Frontend Deploy
-│       ├── serverless.yml       # S3 + CloudFront
-│       └── package.json
-│
-├── FrontEnd-lambdas/             # Código React
-│   ├── src/                     # Fuentes React
-│   ├── public/
-│   └── build/                   # Build output
-│
-└── .github/workflows/            # CI/CD
-    ├── deploy-dev.yml           # Backend + Frontend automático
-    ├── deploy-qa.yml
-    └── deploy-prod.yml
-```
-
----
-
-## 🌍 Ambientes
-
-| Ambiente | Rama | Deploy | Recursos |
-|----------|------|--------|----------|
-| **DEV** | `dev` | Automático | `invenadro-*-dev-*` |
-| **QA** | `qa` | Automático | `invenadro-*-qa-*` |
-| **PROD** | `main` | Manual | `invenadro-*-prod-*` |
-
-Cada ambiente tiene su propia infraestructura aislada:
-- Backend: `invenadro-simplicidad-{stage}-*`
-- Frontend: `invenadro-frontend-{stage}`
-
----
-
-## 🛠️ Comandos
-
-### Deploy
 ```bash
-# Deploy completo (backend + frontend)
-npm run deploy:all:dev
-npm run deploy:all:qa
-npm run deploy:all:prod
+# Volver a raíz
+cd ../..
 
-# Deploy solo backend
-npm run deploy:simplicidad:dev
+# Script automático que obtiene las URLs del backend
+./scripts/update-frontend-config.sh jul-dev
 
-# Deploy solo frontend
-npm run deploy:frontend:dev
-
-# Build frontend sin deploy
-npm run build:frontend
+# Ver los cambios
+git diff FrontEnd-lambdas/src/config/environments.js
 ```
 
-### Info
-```bash
-# Ver info backend
-npm run info:backend:dev
+#### **Paso 3: Build Frontend**
 
-# Ver info frontend  
-npm run info:frontend:dev
+```bash
+# Ir a carpeta frontend React
+cd FrontEnd-lambdas
+
+# Instalar dependencias
+npm install
+
+# Build con el ambiente correcto
+REACT_APP_STAGE=jul-dev npm run build
 ```
 
-### Logs
+#### **Paso 4: Deploy Frontend**
+
 ```bash
-npm run logs:initiator:dev
-npm run logs:processor:dev
+# Volver a raíz e ir a carpeta de deployment
+cd ../services/frontend
+
+# Instalar dependencias
+npm install
+
+# Deploy
+npx serverless deploy --stage jul-dev --verbose
+
+# Ver información del deployment
+npx serverless info --stage jul-dev
 ```
 
-### Remover
-```bash
-# Remover backend
-npm run remove:simplicidad:dev
+#### **Paso 5: Obtener URL del Frontend**
 
-# Remover frontend
-npm run remove:frontend:dev
+```bash
+# La URL de CloudFront aparece en el output
+# Ejemplo: https://d3qyx007nie7k5.cloudfront.net
 ```
 
 ---
 
-## 📊 CI/CD (GitHub Actions)
+## 🌍 Ambientes Disponibles
 
-### Setup:
-1. Crear OIDC role en AWS
-2. Agregar secret `AWS_ROLE_ARN` en GitHub
+| Ambiente | Stage | Branch | Cuenta AWS |
+|----------|-------|--------|------------|
+| **Desarrollo (Julio)** | `jul-dev` | `dev` | 975130647458 |
+| **QA (Julio)** | `jul-qa` | `qa` | 975130647458 |
+| **QA (Nadro)** | `nadro-qa` | `nadro-qa` | TBD |
+| **Producción (Nadro)** | `nadro-prod` | `main` | TBD |
 
-### Flujo automático:
-```
-Push a dev → Build React → Deploy Backend → Deploy Frontend → ✅
-Push a qa → Build React → Deploy Backend → Deploy Frontend → ✅
-Push a main → Aprobación → Deploy Backend → Deploy Frontend → ✅
+---
+
+## 🔄 Deploy de un Ambiente Nuevo
+
+### Ejemplo: Crear ambiente `jul-qa`
+
+```bash
+# 1. Deploy backend
+cd services/backend
+npx serverless deploy --stage jul-qa
+
+# 2. Actualizar config del frontend automáticamente
+cd ../..
+./scripts/update-frontend-config.sh jul-qa
+
+# 3. Commit cambios
+git add FrontEnd-lambdas/src/config/environments.js
+git commit -m "chore: Actualizar config jul-qa"
+
+# 4. Build frontend
+cd FrontEnd-lambdas
+REACT_APP_STAGE=jul-qa npm run build
+
+# 5. Deploy frontend
+cd ../services/frontend
+npx serverless deploy --stage jul-qa
+
+# ¡Listo! 🎉
 ```
 
 ---
 
-## 🌐 Frontend Details
+## 📊 Ver Info de Deployment
 
-### Stack:
-- **Hosting:** S3 bucket (private)
-- **CDN:** CloudFront distribution
-- **SSL:** Gratis con CloudFront
-- **Cache:** Assets con max-age 1 año
-- **SPA:** Routing con fallback a index.html
+```bash
+# Backend
+cd services/backend
+npx serverless info --stage jul-dev
 
-### URLs después del deploy:
+# Frontend
+cd services/frontend
+npx serverless info --stage jul-dev
 ```
-DEV:  https://d123abc.cloudfront.net
-QA:   https://d456def.cloudfront.net
-PROD: https://d789ghi.cloudfront.net
-```
-
-### Custom domain (opcional):
-Ver `services/frontend/serverless.yml` para configurar ACM certificate.
 
 ---
 
-## 🔐 Seguridad
+## 🗑️ Eliminar un Ambiente
 
-Backend:
-- ✅ Account IDs en `.env.*` (gitignored)
-- ✅ Cognito authentication
-- ✅ IAM least privilege
-- ✅ S3 buckets privados
+```bash
+# Frontend (primero)
+cd services/frontend
+npx serverless remove --stage jul-dev
 
-Frontend:
-- ✅ CloudFront HTTPS only
-- ✅ CORS configurado
-- ✅ S3 bucket privado (acceso vía CloudFront)
-- ✅ Cache busting para assets
+# Backend (después)
+cd ../backend
+npx serverless remove --stage jul-dev
+```
+
+---
+
+## 🛠️ Comandos Útiles
+
+### Backend
+
+```bash
+# Logs de una función específica
+npx serverless logs -f initiator --stage jul-dev --tail
+
+# Invocar función manualmente
+npx serverless invoke -f initiator --stage jul-dev --data '{"test":true}'
+
+# Ver métricas
+npx serverless metrics --stage jul-dev
+```
+
+### Frontend
+
+```bash
+# Invalidar caché de CloudFront
+aws cloudfront create-invalidation \
+  --distribution-id D3QYX007NIE7K5 \
+  --paths "/*"
+
+# Ver logs de CloudFront
+aws cloudfront get-distribution \
+  --id D3QYX007NIE7K5
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Error: "Stack does not exist"
+```bash
+# El stack no existe, hacer deployment inicial
+npx serverless deploy --stage jul-dev
+```
+
+### Error: "Bucket does not allow ACLs"
+```bash
+# Ya está solucionado en la última versión
+# Si ves este error, haz git pull
+```
+
+### Error: "User not authorized"
+```bash
+# Verificar credenciales AWS
+aws sts get-caller-identity
+
+# Verificar permisos (ver permisos/01-github-actions/README.md)
+```
+
+### Frontend no carga o tiene errores
+```bash
+# 1. Verificar que usaste REACT_APP_STAGE
+echo $REACT_APP_STAGE
+
+# 2. Verificar configuración en consola del navegador
+# Abre DevTools (F12) y busca:
+# "🌍 Ambiente detectado por REACT_APP_STAGE: jul-dev"
+
+# 3. Actualizar configuración
+./scripts/update-frontend-config.sh jul-dev
+```
+
+---
+
+## 📚 Documentación Adicional
+
+- **Multi-Ambiente**: [`MULTI_ENVIRONMENT.md`](./MULTI_ENVIRONMENT.md)
+- **Scripts Automáticos**: [`scripts/README.md`](./scripts/README.md)
+- **Permisos IAM**: [`permisos/01-github-actions/README.md`](./permisos/01-github-actions/README.md)
+- **Backend Config**: [`services/backend/serverless.yml`](./services/backend/serverless.yml)
+- **Frontend Config**: [`FrontEnd-lambdas/src/config/environments.js`](./FrontEnd-lambdas/src/config/environments.js)
+
+---
+
+## 🎯 Arquitectura
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    USUARIO FINAL                        │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│              CloudFront (CDN)                           │
+│              Frontend React (S3 Website)                │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│              API Gateway                                │
+│              (Cognito Auth)                             │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│         Lambda Functions (8 funciones)                  │
+│         - initiator                                     │
+│         - client-separator                              │
+│         - processor (motor principal)                   │
+│         - status-checker                                │
+│         - client-aggregator                             │
+│         - download-result                               │
+│         - excel-generator                               │
+│         - get-presigned-url                             │
+└────────┬─────────────┬──────────────┬───────────────────┘
+         │             │              │
+         ▼             ▼              ▼
+    ┌────────┐   ┌─────────┐   ┌──────────┐
+    │   S3   │   │ DynamoDB│   │Step      │
+    │Uploads │   │  Jobs   │   │Functions │
+    │Results │   │  Table  │   │          │
+    └────────┘   └─────────┘   └──────────┘
+```
+
+---
+
+## 🔐 Cognito (Autenticación)
+
+```bash
+# Crear usuario de prueba
+aws cognito-idp admin-create-user \
+  --user-pool-id mx-central-1_WIAYTqFq7 \
+  --username test@ejemplo.com \
+  --user-attributes Name=email,Value=test@ejemplo.com \
+  --temporary-password TempPass123!
+
+# Listar usuarios
+aws cognito-idp list-users \
+  --user-pool-id mx-central-1_WIAYTqFq7
+```
 
 ---
 
 ## 💰 Costos Estimados
 
-### Por ambiente (DEV/QA):
-- Backend (Lambdas + Step Functions): $2-5/mes
-- Frontend (S3 + CloudFront): $1-2/mes
-- DynamoDB: $0 (free tier)
-- **Total: ~$5-10/mes**
+| Servicio | Costo Mensual (estimado) |
+|----------|--------------------------|
+| Lambda (8 funciones) | ~$5-20 |
+| S3 (uploads + results) | ~$1-5 |
+| DynamoDB | ~$1-5 |
+| API Gateway | ~$3-10 |
+| CloudFront | ~$1-5 |
+| Step Functions | ~$0.50-2 |
+| Cognito | Gratis (< 50K usuarios) |
+| **Total** | **~$11-47/mes** |
 
-### PROD:
-Variable según tráfico. CloudFront free tier:
-- 1 TB salida/mes gratis
-- 10M requests HTTP/mes gratis
-
----
-
-## 📚 Docs
-
-- **`docs/DEPLOY.md`** - Guía completa de deployment
-- **`docs/ARCHITECTURE.md`** - Arquitectura detallada
-- **`PROXIMOS_PASOS.md`** - Siguiente fase
-- **`.env.template`** - Variables necesarias
+*Nota: Costos basados en uso moderado. Pueden variar según volumen.*
 
 ---
 
-## 🔧 Troubleshooting
+## 🤝 Soporte
 
-### Frontend no actualiza después del deploy:
+- **Issues**: [GitHub Issues](https://github.com/jsalinas1616/invenadro/issues)
+- **Documentación**: Ver carpeta `permisos/` y archivos `.md`
+
+---
+
+## 📝 License
+
+Propietario - Uso interno
+
+---
+
+**¿Listo para deployar?** 🚀
+
 ```bash
-# CloudFront cachea contenido, espera ~5 minutos
-# O fuerza invalidación:
-cd services/frontend
-serverless cloudfrontInvalidate --stage dev
+# Rápido y simple:
+cd services/backend && npx serverless deploy --stage jul-dev
+cd ../.. && ./scripts/update-frontend-config.sh jul-dev
+cd FrontEnd-lambdas && REACT_APP_STAGE=jul-dev npm run build
+cd ../services/frontend && npx serverless deploy --stage jul-dev
 ```
 
-### Error de CORS en frontend:
-Verifica que el API Gateway URL en React app coincide con el deployed.
-
----
-
-**🚀 Powered by Serverless Framework + GitHub Actions + CloudFront**
-
-Propietario: Julian Salinas
-# Test deploy
+**¡Y ya está funcionando!** 🎉
