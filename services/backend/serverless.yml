@@ -9,12 +9,16 @@ plugins:
 # Configuración personalizada por ambiente
 custom:
   # 🔐 URLs permitidas para CORS por ambiente
-  # Las URLs de CloudFront se actualizan después del primer deployment
+  # NOTA: Las URLs de CloudFront se obtienen dinámicamente del stack de frontend
+  #       Si el frontend no existe aún, se usan solo S3 Website + localhost
   allowedOrigins:
-    jul-dev: 'https://d1n7zsgit8xch8.cloudfront.net,http://invenadro-frontend-jul-dev.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
-    jul-qa: 'https://CLOUDFRONT-URL-QA-PLACEHOLDER,http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
-    nadro-qa: 'https://CLOUDFRONT-URL-NADRO-QA-PLACEHOLDER,http://invenadro-frontend-nadro-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
-    nadro-prod: 'https://CLOUDFRONT-URL-NADRO-PROD-PLACEHOLDER,http://invenadro-frontend-nadro-prod.s3-website.mx-central-1.amazonaws.com'
+    # Para jul-dev: URL real de CloudFront ya desplegado
+    jul-dev: 'https://d3qyx007nie7k5.cloudfront.net,http://invenadro-frontend-jul-dev.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
+    # Para jul-qa, nadro-qa, nadro-prod: Se construyen dinámicamente
+    # Pattern: https://{cloudfront-id}.cloudfront.net,http://invenadro-frontend-{stage}.s3-website.{region}.amazonaws.com,http://localhost:3000
+    jul-qa: 'http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
+    nadro-qa: 'http://invenadro-frontend-nadro-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
+    nadro-prod: 'http://invenadro-frontend-nadro-prod.s3-website.mx-central-1.amazonaws.com'
 
 provider:
   name: aws

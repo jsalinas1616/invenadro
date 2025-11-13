@@ -1,5 +1,129 @@
 # Scripts de Automatización - Invenadro
 
+## 📦 Scripts Disponibles
+
+1. **🤖 update-frontend-config.sh** - Actualiza config del frontend con valores del backend
+2. **🔄 sync-cloudfront-urls.sh** - Sincroniza URLs de CloudFront en el backend (NUEVO)
+
+---
+
+## 🔄 sync-cloudfront-urls.sh (NUEVO)
+
+Script automático que **obtiene la URL de CloudFront del frontend desplegado** y actualiza el `serverless.yml` del backend con la URL correcta para CORS.
+
+### 🎯 Problema que Resuelve
+
+**Antes**: Después de deployar el frontend, AWS CloudFront genera una URL aleatoria (ej: `d3qyx007nie7k5.cloudfront.net`). Tenías que:
+1. Ver en la consola de AWS cuál es
+2. Copiarla manualmente
+3. Actualizar `serverless.yml` del backend
+4. Re-deployar el backend
+
+**Ahora**: **Un solo comando** obtiene la URL de CloudFront del stack desplegado y actualiza el backend automáticamente. ✨
+
+### 🚀 Uso
+
+```bash
+# Sintaxis
+./scripts/sync-cloudfront-urls.sh <stage>
+
+# Ejemplos
+./scripts/sync-cloudfront-urls.sh jul-dev
+./scripts/sync-cloudfront-urls.sh jul-qa
+./scripts/sync-cloudfront-urls.sh nadro-prod
+```
+
+### 📋 Flujo Completo (Ambiente Nuevo)
+
+```bash
+# 1. Deploy backend (primera vez)
+cd services/backend
+npx serverless deploy --stage jul-qa
+
+# 2. Build y deploy frontend
+cd ../../FrontEnd-lambdas
+npm run build
+cd ../services/frontend
+npx serverless deploy --stage jul-qa
+# ☝️ CloudFront se crea con URL random: d123abc.cloudfront.net
+
+# 3. Sincronizar URL de CloudFront al backend 🤖
+cd ../..
+./scripts/sync-cloudfront-urls.sh jul-qa
+# ☝️ Actualiza serverless.yml con la URL real
+
+# 4. Re-deploy backend con URL correcta
+cd services/backend
+npx serverless deploy --stage jul-qa
+
+# 5. Commit cambios
+git add serverless.yml
+git commit -m "chore: Actualizar CloudFront URL para jul-qa"
+git push origin qa
+```
+
+### 📊 ¿Qué Actualiza?
+
+Actualiza la línea correspondiente al stage en `services/backend/serverless.yml`:
+
+**ANTES** (con placeholder):
+```yaml
+custom:
+  allowedOrigins:
+    jul-qa: 'http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
+```
+
+**DESPUÉS** (con CloudFront real):
+```yaml
+custom:
+  allowedOrigins:
+    jul-qa: 'https://d3qyx007nie7k5.cloudfront.net,http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
+```
+
+### 🔍 Output del Script
+
+```bash
+$ ./scripts/sync-cloudfront-urls.sh jul-qa
+
+ℹ️  Stage: jul-qa
+
+ℹ️  Verificando stack del frontend...
+✅ Stack encontrado: invenadro-frontend-jul-qa (Estado: UPDATE_COMPLETE)
+
+ℹ️  Obteniendo CloudFront URL...
+✅ CloudFront URL: https://d3qyx007nie7k5.cloudfront.net
+
+ℹ️  Orígenes permitidos:
+   https://d3qyx007nie7k5.cloudfront.net,http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000
+
+ℹ️  Actualizando services/backend/serverless.yml...
+✅ Línea de jul-qa actualizada
+
+ℹ️  Cambio realizado:
+    jul-qa: 'https://d3qyx007nie7k5.cloudfront.net,http://...'
+
+✅ ¡Configuración actualizada!
+
+ℹ️  Próximos pasos:
+   1. Revisar cambios: git diff services/backend/serverless.yml
+   2. Re-deploy backend:
+      cd services/backend
+      npx serverless deploy --stage jul-qa
+   3. Commit los cambios:
+      git add services/backend/serverless.yml
+      git commit -m "chore: Actualizar CloudFront URL para jul-qa"
+
+⚠️  Archivo backup guardado en: services/backend/serverless.yml.backup
+```
+
+### ⚠️ Prerequisitos
+
+1. **Frontend desplegado** en el stage que quieres sincronizar
+2. **AWS CLI configurado** con el perfil `default`
+3. El stack del frontend debe existir en CloudFormation
+
+---
+
 ## 🤖 update-frontend-config.sh
 
 Script automático que actualiza la configuración del frontend (`environments.js`) con los valores reales del backend deployado en AWS.
@@ -227,8 +351,9 @@ aws cloudformation describe-stacks \
 
 ```
 scripts/
-├── update-frontend-config.sh    # Script principal (bash)
-├── update-environments-js.js    # Script de actualización (Node.js)
+├── sync-cloudfront-urls.sh      # Sincroniza URLs de CloudFront (bash) ⭐ NUEVO
+├── update-frontend-config.sh    # Actualiza config del frontend (bash)
+├── update-environments-js.js    # Helper para actualizar environments.js (Node.js)
 └── README.md                     # Esta documentación
 ```
 
