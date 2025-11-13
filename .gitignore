@@ -64,8 +64,14 @@ deployment/*.txt
 # Variables de entorno
 .envrc
 .env
-.env.*
+.env.local
+.env.*.local
 !.env.template
+# Permitir archivos de configuración por ambiente (NO contienen secretos, solo URLs públicas)
+!.env.jul-dev
+!.env.jul-qa
+!.env.nadro-qa
+!.env.nadro-prod
 
 # Perfiles de cuentas AWS (pueden contener IDs sensibles)
 deployment/profiles/
