@@ -1,15 +1,15 @@
 // Importar Amplify para obtener el token JWT
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-// Configuración directa para AWS Lambda
+// Configuración directa para AWS Lambda - PROYECTO INVENADRO
 const config = {
-  lambdaInitiatorUrl: 'https://8zck1369x8.execute-api.us-east-1.amazonaws.com/dev/calcular-redondeo',
-  apiGatewayBaseUrl: 'https://8zck1369x8.execute-api.us-east-1.amazonaws.com/dev',
-  awsRegion: 'us-east-1',
-  s3ResultsBucket: 'factor-redondeo-lambda-results-dev',
-  dynamoDBTable: 'factor-redondeo-lambda-jobs-dev',
-  s3UploadsBucket: 'factor-redondeo-lambda-uploads-dev',
-  stepFunctionArn: 'arn:aws:states:us-east-1:975130647458:stateMachine:FactorRedondeo',
+  lambdaInitiatorUrl: 'https://c9nzcqgz16.execute-api.mx-central-1.amazonaws.com/jul-dev/calcular-redondeo',
+  apiGatewayBaseUrl: 'https://c9nzcqgz16.execute-api.mx-central-1.amazonaws.com/jul-dev',
+  awsRegion: 'mx-central-1',
+  s3ResultsBucket: 'invenadro-backend-jul-dev-results',
+  dynamoDBTable: 'invenadro-backend-jul-dev-jobs',
+  s3UploadsBucket: 'invenadro-backend-jul-dev-uploads',
+  stepFunctionArn: 'arn:aws:states:mx-central-1:975130647458:stateMachine:invenadro-backend-jul-dev',
   statusPollingInterval: 5000,
   maxRetries: 3,
   retryDelay: 2000

@@ -4,10 +4,9 @@ import { Amplify } from 'aws-amplify';
 Amplify.configure({
   Auth: {
     Cognito: {
-      // IMPORTANTE: Reemplaza estos valores con los de tu User Pool de Cognito
-      // Los obtendrás después de crear el User Pool en la consola de AWS
-      userPoolId: 'us-east-1_UQ9eT0Tgn',  // ✅ User Pool ID (recreado)
-      userPoolClientId: '47s3l4n3u40a9g48abp0jr3adq',  // ✅ App Client SIN secret
+      // Configuración del User Pool de Cognito - PROYECTO INVENADRO
+      userPoolId: 'mx-central-1_WIAYTqFq7',  // ✅ User Pool ID (invenadro-backend-jul-dev)
+      userPoolClientId: 'jo46f6pkduolu7hdb02geo0tj',  // ✅ App Client SIN secret
       
       // Opcional: Configuración adicional
       signUpVerificationMethod: 'code', // 'code' | 'link'
