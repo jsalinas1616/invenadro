@@ -1,0 +1,62 @@
+Resources:
+  # Clave KMS customer-managed para encriptar variables de entorno de Lambda
+  LambdaKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: 'KMS key for Lambda environment variables encryption'
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          # Permiso para la cuenta root (administrador)
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          
+          # Permiso para el servicio Lambda
+          - Sid: Allow Lambda service to use the key
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:ViaService': !Sub 'lambda.${AWS::Region}.amazonaws.com'
+          
+          # Permiso explícito para todos los roles de Lambda
+          - Sid: Allow Lambda roles to decrypt
+            Effect: Allow
+            Principal:
+              AWS:
+                - !GetAtt InitiatorIamRoleLambdaExecution.Arn
+                - !GetAtt ClientSeparatorIamRoleLambdaExecution.Arn
+                - !GetAtt ProcessorIamRoleLambdaExecution.Arn
+                - !GetAtt StatusCheckerIamRoleLambdaExecution.Arn
+                - !GetAtt ClientAggregatorIamRoleLambdaExecution.Arn
+                - !GetAtt DownloadResultIamRoleLambdaExecution.Arn
+                - !GetAtt ExcelGeneratorIamRoleLambdaExecution.Arn
+                - !GetAtt GetPresignedUrlIamRoleLambdaExecution.Arn
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+            Resource: '*'
+
+  # Alias para la clave (más fácil de identificar)
+  LambdaKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${self:service}-${self:provider.stage}-lambda'
+      TargetKeyId: !Ref LambdaKMSKey
+
+Outputs:
+  LambdaKMSKeyArn:
+    Description: 'ARN of the KMS key for Lambda'
+    Value: !GetAtt LambdaKMSKey.Arn
+    Export:
+      Name: !Sub '${self:service}-${self:provider.stage}-lambda-kms-key-arn'
+

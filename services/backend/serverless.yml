@@ -31,6 +31,11 @@ provider:
   logs:
     restApi: true
   
+  # ✅ Clave KMS para encriptar variables de entorno
+  # Usa nuestra clave customer-managed en lugar de la AWS-managed
+  # Esto permite que Step Functions invoque lambdas sin problemas de permisos
+  kmsKeyArn: !GetAtt LambdaKMSKey.Arn
+  
   # Tags globales
   tags:
     Project: invenadro
@@ -265,6 +270,7 @@ functions:
 
 # CloudFormation Resources
 resources:
+  - ${file(resources/kms.yml)}
   - ${file(resources/dynamodb.yml)}
   - ${file(resources/s3.yml)}
   - ${file(resources/cognito.yml)}
