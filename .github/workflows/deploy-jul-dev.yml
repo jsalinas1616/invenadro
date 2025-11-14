@@ -1,14 +1,14 @@
-name: Deploy to NADRO-QA
+name: Deploy to JUL-DEV
 
 on:
   push:
     branches:
-      - nadro-qa
+      - dev
   workflow_dispatch:
 
 env:
   AWS_REGION: mx-central-1
-  STAGE: nadro-qa
+  STAGE: jul-dev
 
 jobs:
   deploy:
@@ -23,22 +23,22 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Configure AWS Credentials (Cuenta 2 - nadro-qa)
+      - name: Configure AWS Credentials (Cuenta 1 - jul-dev)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_NADRO_QA }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_NADRO_QA }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install root dependencies
-        run: npm ci
+        run: npm install
 
       - name: Install service dependencies
         run: |
           cd services/backend
-          npm ci
+          npm install
           cd ../frontend
-          npm ci
+          npm install
 
       # ========================================
       # FRONTEND PRIMERO (para obtener CloudFront URL)
@@ -49,9 +49,35 @@ jobs:
           REACT_APP_STAGE: ${{ env.STAGE }}
         run: |
           cd FrontEnd-lambdas
-          npm ci
+          npm install
           npm run build
           echo "✅ Frontend build completado para ambiente: $REACT_APP_STAGE"
+
+      - name: Clean Frontend Stack (if corrupted)
+        continue-on-error: true
+        run: |
+          # Vaciar todos los buckets del frontend antes de eliminar
+          echo "Buscando buckets del frontend..."
+          BUCKETS=$(aws s3 ls | grep "invenadro-frontend-jul-" | awk '{print $3}' || true)
+          
+          for BUCKET in $BUCKETS; do
+            echo "Vaciando bucket: $BUCKET"
+            aws s3 rm s3://$BUCKET --recursive || true
+          done
+          
+          # Eliminar el stack directamente con CloudFormation
+          echo "Eliminando stack..."
+          aws cloudformation delete-stack \
+            --stack-name invenadro-frontend-${{ env.STAGE }} \
+            --region ${{ env.AWS_REGION }} || true
+          
+          # Esperar a que se complete la eliminación
+          echo "Esperando a que se complete la eliminación..."
+          aws cloudformation wait stack-delete-complete \
+            --stack-name invenadro-frontend-${{ env.STAGE }} \
+            --region ${{ env.AWS_REGION }} || true
+          
+          echo "✅ Stack cleanup completed or stack didn't exist"
 
       - name: Deploy Frontend
         run: |
@@ -99,4 +125,3 @@ jobs:
         run: |
           echo "❌ Deployment to ${{ env.STAGE }} failed!"
           echo "Check the logs above for details"
-

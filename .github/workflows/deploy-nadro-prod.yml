@@ -1,17 +1,26 @@
-name: Deploy to DEV
+name: Deploy to NADRO-PROD
 
 on:
   push:
     branches:
-      - dev
+      - main
   workflow_dispatch:
 
 env:
   AWS_REGION: mx-central-1
-  STAGE: jul-dev
+  STAGE: nadro-prod
 
 jobs:
+  approve:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Manual Approval Required
+        run: echo "Waiting for manual approval to deploy to PRODUCTION"
+
   deploy:
+    needs: approve
     runs-on: ubuntu-latest
     
     steps:
@@ -23,66 +32,59 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Configure AWS Credentials (Cuenta 1 - jul-dev)
+      - name: Configure AWS Credentials (Cuenta 3 - nadro-prod)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_NADRO_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_NADRO_PROD }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install root dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install service dependencies
         run: |
           cd services/backend
-          npm install
+          npm ci
           cd ../frontend
-          npm install
+          npm ci
 
-      - name: Deploy Backend
-        run: |
-          cd services/backend
-          npx serverless deploy --stage ${{ env.STAGE }} --verbose
-
+      # ========================================
+      # FRONTEND PRIMERO (para obtener CloudFront URL)
+      # ========================================
+      
       - name: Build Frontend
         env:
           REACT_APP_STAGE: ${{ env.STAGE }}
         run: |
           cd FrontEnd-lambdas
-          npm install
+          npm ci
           npm run build
           echo "✅ Frontend build completado para ambiente: $REACT_APP_STAGE"
-
-      - name: Clean Frontend Stack (if corrupted)
-        continue-on-error: true
-        run: |
-          # Vaciar todos los buckets del frontend antes de eliminar
-          echo "Buscando buckets del frontend..."
-          BUCKETS=$(aws s3 ls | grep "invenadro-frontend-jul-" | awk '{print $3}' || true)
-          
-          for BUCKET in $BUCKETS; do
-            echo "Vaciando bucket: $BUCKET"
-            aws s3 rm s3://$BUCKET --recursive || true
-          done
-          
-          # Eliminar el stack directamente con CloudFormation
-          echo "Eliminando stack..."
-          aws cloudformation delete-stack \
-            --stack-name invenadro-frontend-${{ env.STAGE }} \
-            --region ${{ env.AWS_REGION }} || true
-          
-          # Esperar a que se complete la eliminación
-          echo "Esperando a que se complete la eliminación..."
-          aws cloudformation wait stack-delete-complete \
-            --stack-name invenadro-frontend-${{ env.STAGE }} \
-            --region ${{ env.AWS_REGION }} || true
-          
-          echo "✅ Stack cleanup completed or stack didn't exist"
 
       - name: Deploy Frontend
         run: |
           cd services/frontend
+          npx serverless deploy --stage ${{ env.STAGE }} --verbose
+
+      # ========================================
+      # SINCRONIZAR URLs DE CLOUDFRONT AUTOMÁTICAMENTE
+      # ========================================
+      
+      - name: Sync CloudFront URLs to Backend
+        run: |
+          echo "🔄 Sincronizando CloudFront URL al backend..."
+          chmod +x ./scripts/sync-cloudfront-urls.sh
+          ./scripts/sync-cloudfront-urls.sh ${{ env.STAGE }}
+          echo "✅ CloudFront URL sincronizada"
+
+      # ========================================
+      # BACKEND DESPUÉS (con CloudFront URL correcta)
+      # ========================================
+      
+      - name: Deploy Backend
+        run: |
+          cd services/backend
           npx serverless deploy --stage ${{ env.STAGE }} --verbose
 
       - name: Get Backend Deployment Info

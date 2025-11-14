@@ -1,4 +1,4 @@
-name: Deploy to QA
+name: Deploy to JUL-QA
 
 on:
   push:
@@ -40,11 +40,10 @@ jobs:
           cd ../frontend
           npm install
 
-      - name: Deploy Backend
-        run: |
-          cd services/backend
-          npx serverless deploy --stage ${{ env.STAGE }} --verbose
-
+      # ========================================
+      # FRONTEND PRIMERO (para obtener CloudFront URL)
+      # ========================================
+      
       - name: Build Frontend
         env:
           REACT_APP_STAGE: ${{ env.STAGE }}
@@ -83,6 +82,26 @@ jobs:
       - name: Deploy Frontend
         run: |
           cd services/frontend
+          npx serverless deploy --stage ${{ env.STAGE }} --verbose
+
+      # ========================================
+      # SINCRONIZAR URLs DE CLOUDFRONT AUTOMÁTICAMENTE
+      # ========================================
+      
+      - name: Sync CloudFront URLs to Backend
+        run: |
+          echo "🔄 Sincronizando CloudFront URL al backend..."
+          chmod +x ./scripts/sync-cloudfront-urls.sh
+          ./scripts/sync-cloudfront-urls.sh ${{ env.STAGE }}
+          echo "✅ CloudFront URL sincronizada"
+
+      # ========================================
+      # BACKEND DESPUÉS (con CloudFront URL correcta)
+      # ========================================
+      
+      - name: Deploy Backend
+        run: |
+          cd services/backend
           npx serverless deploy --stage ${{ env.STAGE }} --verbose
 
       - name: Get Backend Deployment Info

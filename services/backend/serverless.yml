@@ -12,8 +12,8 @@ custom:
   # NOTA: Las URLs de CloudFront se obtienen dinámicamente del stack de frontend
   #       Si el frontend no existe aún, se usan solo S3 Website + localhost
   allowedOrigins:
-    # Para jul-dev: URL real de CloudFront ya desplegado
-    jul-dev: 'https://d3qyx007nie7k5.cloudfront.net,http://invenadro-frontend-jul-dev.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
+    # Para jul-dev: URL se sincroniza automáticamente con script
+    jul-dev: 'http://invenadro-frontend-jul-dev.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
     # Para jul-qa, nadro-qa, nadro-prod: Se construyen dinámicamente
     # Pattern: https://{cloudfront-id}.cloudfront.net,http://invenadro-frontend-{stage}.s3-website.{region}.amazonaws.com,http://localhost:3000
     jul-qa: 'http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
