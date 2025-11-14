@@ -16,7 +16,7 @@ States:
     Comment: "Analiza el archivo y determina si es single o multi-cliente"
     Resource: "arn:aws:states:::lambda:invoke"
     Parameters:
-      FunctionName: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:provider.stage}-client-separator
+      FunctionName: !GetAtt ClientSeparatorLambdaFunction.Arn
       Payload.$: "$"
     ResultPath: "$.separationResult"
     Next: DecidirFlujo
@@ -52,7 +52,7 @@ States:
     Comment: "Procesa archivo con un solo cliente"
     Resource: "arn:aws:states:::lambda:invoke"
     Parameters:
-      FunctionName: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:provider.stage}-processor
+      FunctionName: !GetAtt ProcessorLambdaFunction.Arn
       Payload:
         s3Bucket.$: "$.s3Bucket"
         s3Key.$: "$.s3Key"
@@ -81,7 +81,7 @@ States:
     Comment: "Verifica que el procesamiento de cliente único fue exitoso"
     Resource: "arn:aws:states:::lambda:invoke"
     Parameters:
-      FunctionName: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:provider.stage}-status-checker
+      FunctionName: !GetAtt StatusCheckerLambdaFunction.Arn
       Payload:
         processId.$: "$.processId"
         checkType: "SINGLE_CLIENT_VERIFICATION"
@@ -107,7 +107,7 @@ States:
     Comment: "Monitorea el progreso de los procesos paralelos"
     Resource: "arn:aws:states:::lambda:invoke"
     Parameters:
-      FunctionName: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:provider.stage}-status-checker
+      FunctionName: !GetAtt StatusCheckerLambdaFunction.Arn
       Payload:
         processId.$: "$.processId"
         checkType: "MULTI_CLIENT_MONITORING"
@@ -155,7 +155,7 @@ States:
     Comment: "Agrega todos los resultados de clientes múltiples"
     Resource: "arn:aws:states:::lambda:invoke"
     Parameters:
-      FunctionName: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:provider.stage}-client-aggregator
+      FunctionName: !GetAtt ClientAggregatorLambdaFunction.Arn
       Payload:
         processId.$: "$.processId"
         s3Bucket.$: "$.s3Bucket"
@@ -179,7 +179,7 @@ States:
     Comment: "Agrega resultados parciales cuando algunos procesos fallaron"
     Resource: "arn:aws:states:::lambda:invoke"
     Parameters:
-      FunctionName: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:provider.stage}-client-aggregator
+      FunctionName: !GetAtt ClientAggregatorLambdaFunction.Arn
       Payload:
         processId.$: "$.processId"
         s3Bucket.$: "$.s3Bucket"
@@ -194,7 +194,7 @@ States:
     Comment: "Genera el resultado final y lo prepara para descarga"
     Resource: "arn:aws:states:::lambda:invoke"
     Parameters:
-      FunctionName: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:provider.stage}-download-result
+      FunctionName: !GetAtt DownloadResultLambdaFunction.Arn
       Payload:
         processId.$: "$.processId"
         s3Bucket.$: "$.s3Bucket"
@@ -224,7 +224,7 @@ States:
     Comment: "Actualiza DynamoDB con estado FAILED cuando falla la separación"
     Resource: "arn:aws:states:::lambda:invoke"
     Parameters:
-      FunctionName: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:provider.stage}-status-checker
+      FunctionName: !GetAtt StatusCheckerLambdaFunction.Arn
       Payload:
         processId.$: "$.processId"
         status: "FAILED"
@@ -248,7 +248,7 @@ States:
     Comment: "Actualiza DynamoDB con estado FAILED cuando falla el procesamiento"
     Resource: "arn:aws:states:::lambda:invoke"
     Parameters:
-      FunctionName: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:provider.stage}-status-checker
+      FunctionName: !GetAtt StatusCheckerLambdaFunction.Arn
       Payload:
         processId.$: "$.processId"
         status: "FAILED"
