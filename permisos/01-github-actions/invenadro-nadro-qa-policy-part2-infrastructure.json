@@ -186,6 +186,38 @@
       ]
     },
     {
+      "Sid": "ManageKMSKeys",
+      "Effect": "Allow",
+      "Action": [
+        "kms:CreateKey",
+        "kms:CreateAlias",
+        "kms:DeleteAlias",
+        "kms:DescribeKey",
+        "kms:GetKeyPolicy",
+        "kms:PutKeyPolicy",
+        "kms:ScheduleKeyDeletion",
+        "kms:CancelKeyDeletion",
+        "kms:EnableKey",
+        "kms:DisableKey",
+        "kms:TagResource",
+        "kms:UntagResource",
+        "kms:ListResourceTags"
+      ],
+      "Resource": [
+        "arn:aws:kms:mx-central-1:975130647458:key/*",
+        "arn:aws:kms:mx-central-1:975130647458:alias/invenadro-backend-nadro-qa-*"
+      ]
+    },
+    {
+      "Sid": "ListKMSKeys",
+      "Effect": "Allow",
+      "Action": [
+        "kms:ListKeys",
+        "kms:ListAliases"
+      ],
+      "Resource": "*"
+    },
+    {
       "Sid": "GetCallerIdentity",
       "Effect": "Allow",
       "Action": [
