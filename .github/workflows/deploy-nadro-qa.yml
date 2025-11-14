@@ -54,9 +54,43 @@ jobs:
           echo "✅ Frontend build completado para ambiente: $REACT_APP_STAGE"
 
       - name: Deploy Frontend
+        id: deploy_frontend
+        continue-on-error: true
         run: |
           cd services/frontend
-          npx serverless deploy --stage ${{ env.STAGE }} --verbose
+          npx serverless deploy --stage ${{ env.STAGE }} --region ${{ env.AWS_REGION }} --verbose
+          
+      - name: Clean and Retry Frontend Deploy (only if failed)
+        if: steps.deploy_frontend.outcome == 'failure'
+        run: |
+          echo "⚠️ Deploy falló, limpiando stack corrupto..."
+          
+          # Vaciar todos los buckets del frontend
+          echo "Buscando buckets del frontend..."
+          BUCKETS=$(aws s3 ls | grep "invenadro-frontend-${{ env.STAGE }}-" | awk '{print $3}' || true)
+          
+          for BUCKET in $BUCKETS; do
+            echo "Vaciando bucket: $BUCKET"
+            aws s3 rm s3://$BUCKET --recursive || true
+          done
+          
+          # Eliminar el stack corrupto
+          echo "Eliminando stack corrupto..."
+          aws cloudformation delete-stack \
+            --stack-name invenadro-frontend-${{ env.STAGE }} \
+            --region ${{ env.AWS_REGION }} || true
+          
+          # Esperar a que se complete la eliminación
+          echo "Esperando eliminación completa..."
+          aws cloudformation wait stack-delete-complete \
+            --stack-name invenadro-frontend-${{ env.STAGE }} \
+            --region ${{ env.AWS_REGION }} || true
+          
+          echo "✅ Stack limpiado, reintentando deploy..."
+          
+          # Reintentar deploy desde cero
+          cd services/frontend
+          npx serverless deploy --stage ${{ env.STAGE }} --region ${{ env.AWS_REGION }} --verbose
 
       # ========================================
       # SINCRONIZAR URLs DE CLOUDFRONT AUTOMÁTICAMENTE
