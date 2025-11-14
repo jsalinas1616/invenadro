@@ -38,13 +38,6 @@ provider:
     Stage: ${self:provider.stage}
     ManagedBy: serverless
   
-  # ✅ Permisos IAM globales para todas las lambdas
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - kms:Decrypt
-      Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
-  
   # Variables de entorno globales para todas las Lambdas
   environment:
     STAGE: ${self:provider.stage}
@@ -67,6 +60,10 @@ functions:
     environment:
       PROCESSOR_STEP_FUNCTION_ARN: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
     iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
       - Effect: Allow
         Action:
           - states:StartExecution
@@ -100,6 +97,10 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+      - Effect: Allow
+        Action:
           - s3:GetObject
           - s3:PutObject
         Resource:
@@ -116,6 +117,10 @@ functions:
     timeout: 900
     memorySize: 3008
     iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
       - Effect: Allow
         Action:
           - s3:GetObject
@@ -135,6 +140,10 @@ functions:
     timeout: 60
     memorySize: 256
     iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
       - Effect: Allow
         Action:
           - dynamodb:GetItem
@@ -163,6 +172,10 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+      - Effect: Allow
+        Action:
           - s3:GetObject
           - s3:PutObject
         Resource:
@@ -179,6 +192,10 @@ functions:
     timeout: 300
     memorySize: 512
     iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
       - Effect: Allow
         Action:
           - s3:GetObject
@@ -204,6 +221,10 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+      - Effect: Allow
+        Action:
           - s3:GetObject
         Resource: !Sub "${ResultsBucket.Arn}/*"
       - Effect: Allow
@@ -225,6 +246,10 @@ functions:
     timeout: 60
     memorySize: 256
     iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
       - Effect: Allow
         Action:
           - s3:PutObject
