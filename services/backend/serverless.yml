@@ -31,11 +31,6 @@ provider:
   logs:
     restApi: true
   
-  # ✅ Clave KMS para encriptar variables de entorno
-  # Usa nuestra clave customer-managed en lugar de la AWS-managed
-  # Esto permite que Step Functions invoque lambdas sin problemas de permisos
-  kmsKeyArn: !GetAtt LambdaKMSKey.Arn
-  
   # Tags globales
   tags:
     Project: invenadro
@@ -65,10 +60,6 @@ functions:
     environment:
       PROCESSOR_STEP_FUNCTION_ARN: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
     iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
       - Effect: Allow
         Action:
           - states:StartExecution
@@ -102,10 +93,6 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
-      - Effect: Allow
-        Action:
           - s3:GetObject
           - s3:PutObject
         Resource:
@@ -122,10 +109,6 @@ functions:
     timeout: 900
     memorySize: 3008
     iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
       - Effect: Allow
         Action:
           - s3:GetObject
@@ -145,10 +128,6 @@ functions:
     timeout: 60
     memorySize: 256
     iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
       - Effect: Allow
         Action:
           - dynamodb:GetItem
@@ -177,10 +156,6 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
-      - Effect: Allow
-        Action:
           - s3:GetObject
           - s3:PutObject
         Resource:
@@ -197,10 +172,6 @@ functions:
     timeout: 300
     memorySize: 512
     iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
       - Effect: Allow
         Action:
           - s3:GetObject
@@ -226,10 +197,6 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
-      - Effect: Allow
-        Action:
           - s3:GetObject
         Resource: !Sub "${ResultsBucket.Arn}/*"
       - Effect: Allow
@@ -253,10 +220,6 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
-      - Effect: Allow
-        Action:
           - s3:PutObject
         Resource: !Sub "${UploadsBucket.Arn}/*"
     events:
@@ -270,7 +233,6 @@ functions:
 
 # CloudFormation Resources
 resources:
-  - ${file(resources/kms.yml)}
   - ${file(resources/dynamodb.yml)}
   - ${file(resources/s3.yml)}
   - ${file(resources/cognito.yml)}
