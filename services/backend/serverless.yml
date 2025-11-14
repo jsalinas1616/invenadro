@@ -38,6 +38,13 @@ provider:
     Stage: ${self:provider.stage}
     ManagedBy: serverless
   
+  # ✅ Permisos IAM globales para todas las lambdas
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - kms:Decrypt
+      Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+  
   # Variables de entorno globales para todas las Lambdas
   environment:
     STAGE: ${self:provider.stage}
