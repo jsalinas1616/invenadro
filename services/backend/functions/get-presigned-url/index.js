@@ -54,7 +54,11 @@ exports.handler = async (event) => {
             };
         }
 
-        const bucket = process.env.S3_UPLOADS_BUCKET || 'factor-redondeo-lambda-uploads-dev';
+        // ✅ VALIDAR VARIABLE DE ENTORNO
+        const bucket = process.env.UPLOADS_BUCKET;
+        if (!bucket) {
+            throw new Error('❌ UPLOADS_BUCKET no está configurado en variables de entorno');
+        }
         
         // 🔐 Incluir username en el key para trazabilidad
         const userPrefix = userInfo ? `${userInfo.username}/` : '';

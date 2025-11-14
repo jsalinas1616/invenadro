@@ -4,8 +4,11 @@ const XLSX = require('xlsx');
 // Configurar AWS SDK
 const s3 = new AWS.S3();
 
-// Configuración
-const RESULTS_BUCKET = 'factor-redondeo-lambda-results-dev';
+// ✅ VALIDAR VARIABLE DE ENTORNO
+const RESULTS_BUCKET = process.env.RESULTS_BUCKET;
+if (!RESULTS_BUCKET) {
+    throw new Error('❌ RESULTS_BUCKET no está configurado en variables de entorno');
+}
 
 // 🔐 ORÍGENES PERMITIDOS PARA CORS - Desde variable de entorno por ambiente
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS 

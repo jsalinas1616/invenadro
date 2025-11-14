@@ -11,6 +11,12 @@ exports.handler = async (event) => {
     try {
         console.log('🔀 CLIENT SEPARATOR - Evento recibido:', JSON.stringify(event, null, 2));
         
+        // ✅ VALIDAR VARIABLE DE ENTORNO
+        const JOBS_TABLE = process.env.JOBS_TABLE;
+        if (!JOBS_TABLE) {
+            throw new Error('❌ JOBS_TABLE no está configurado en variables de entorno');
+        }
+        
         const { s3Bucket, s3Key, customConfig, processId } = event;
         
         if (!s3Bucket || !s3Key) {
@@ -18,7 +24,7 @@ exports.handler = async (event) => {
         }
         
         // Actualizar estado en DynamoDB
-        await updateDynamoDBStatus(processId, 'SEPARATING_CLIENTS', 'Analizando archivo para detectar clientes múltiples...');
+        await updateDynamoDBStatus(processId, 'SEPARATING_CLIENTS', 'Analizando archivo para detectar clientes múltiples...', JOBS_TABLE);
         
         // Descargar archivo de S3
         console.log('📥 Descargando archivo de S3...');
@@ -38,7 +44,7 @@ exports.handler = async (event) => {
             // SINGLE CLIENTE - Procesar directamente
             console.log('🎯 SINGLE CLIENTE detectado - Procesando directamente');
             
-            await updateDynamoDBStatus(processId, 'PROCESSING_SINGLE', `Cliente único detectado: ${clientesInfo[0].cliente}`);
+            await updateDynamoDBStatus(processId, 'PROCESSING_SINGLE', `Cliente único detectado: ${clientesInfo[0].cliente}`, JOBS_TABLE);
             
             const resultado = await procesarClienteUnico(event, clientesInfo[0]);
             return resultado;
@@ -47,7 +53,7 @@ exports.handler = async (event) => {
             // MULTI CLIENTE - Separar y procesar cada uno
             console.log('🔄 MULTI CLIENTE detectado - Iniciando separación');
             
-            await updateDynamoDBStatus(processId, 'PROCESSING_MULTI', `Múltiples clientes detectados: ${clientesInfo.length}`);
+            await updateDynamoDBStatus(processId, 'PROCESSING_MULTI', `Múltiples clientes detectados: ${clientesInfo.length}`, JOBS_TABLE);
             
             const resultado = await procesarMultiplesClientes(event, clientesInfo, fileBuffer);
             return resultado;
@@ -61,7 +67,8 @@ exports.handler = async (event) => {
         
         // Actualizar estado de error en DynamoDB si tenemos processId
         if (event.processId) {
-            await updateDynamoDBStatus(event.processId, 'ERROR', `Error en separación: ${error.message}`);
+            const JOBS_TABLE_FALLBACK = process.env.JOBS_TABLE || 'invenadro-backend-jul-dev-jobs';
+            await updateDynamoDBStatus(event.processId, 'ERROR', `Error en separación: ${error.message}`, JOBS_TABLE_FALLBACK);
         }
         
         throw error;
@@ -206,10 +213,12 @@ async function procesarMultiplesClientes(event, clientesInfo, fileBuffer) {
         console.log(`📝 [${i + 1}/${clientesInfo.length}] Procesando cliente: ${clienteInfo.cliente}`);
         
         // Actualizar progreso en DynamoDB
+        const JOBS_TABLE_LOCAL = process.env.JOBS_TABLE || 'invenadro-backend-jul-dev-jobs';
         await updateDynamoDBStatus(
             processId, 
             'PROCESSING_MULTI', 
-            `Separando archivos: ${i + 1}/${clientesInfo.length} clientes procesados (${clienteInfo.cliente})`
+            `Separando archivos: ${i + 1}/${clientesInfo.length} clientes procesados (${clienteInfo.cliente})`,
+            JOBS_TABLE_LOCAL
         );
         
         // Leer datos del Excel SOLO para este cliente (streaming)
@@ -333,10 +342,10 @@ async function procesarMultiplesClientes(event, clientesInfo, fileBuffer) {
 /**
  * ACTUALIZAR ESTADO EN DYNAMODB
  */
-async function updateDynamoDBStatus(processId, status, details) {
+async function updateDynamoDBStatus(processId, status, details, jobsTable) {
     try {
         await dynamoDB.send(new UpdateItemCommand({
-            TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+            TableName: jobsTable,
             Key: { processId: { S: processId } },
             UpdateExpression: "SET #status = :status, #details = :details, lastUpdate = :time",
             ExpressionAttributeNames: { 

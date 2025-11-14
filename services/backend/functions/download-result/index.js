@@ -47,13 +47,23 @@ exports.handler = async (event) => {
         
         console.log('ProcessId extraído:', processId);
         
+        // ✅ VALIDAR VARIABLES DE ENTORNO
+        const JOBS_TABLE = process.env.JOBS_TABLE;
+        const RESULTS_BUCKET = process.env.RESULTS_BUCKET;
+        if (!JOBS_TABLE) {
+            throw new Error('❌ JOBS_TABLE no está configurado en variables de entorno');
+        }
+        if (!RESULTS_BUCKET) {
+            throw new Error('❌ RESULTS_BUCKET no está configurado en variables de entorno');
+        }
+        
         // customConfig puede venir del event o ser null para llamadas desde API Gateway
         const customConfig = event.customConfig || null;
         
         // Leer información del proceso desde DynamoDB (para obtener tiempos)
         console.log('Leyendo información del proceso desde DynamoDB...');
         const getItemResponse = await dynamoDB.send(new GetItemCommand({
-            TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+            TableName: JOBS_TABLE,
             Key: { processId: { S: processId } }
         }));
         
@@ -64,7 +74,7 @@ exports.handler = async (event) => {
         // Actualizar estado a DOWNLOADING
         console.log('Actualizando estado a DOWNLOADING en DynamoDB...');
         await dynamoDB.send(new UpdateItemCommand({
-            TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+            TableName: JOBS_TABLE,
             Key: { processId: { S: processId } },
             UpdateExpression: "SET #status = :status, downloadStartTime = :time",
             ExpressionAttributeNames: { "#status": "status" },
@@ -79,7 +89,7 @@ exports.handler = async (event) => {
         // Leer el resultado procesado desde S3 (generado por lambda-processor)
         console.log('Leyendo resultado procesado desde S3...');
         
-        const bucketName = process.env.RESULTS_BUCKET || 'factor-redondeo-lambda-results-dev';
+        const bucketName = RESULTS_BUCKET;
         const key = `resultados/${processId}/resultado.json`;
         
         let resultado;
@@ -125,7 +135,7 @@ exports.handler = async (event) => {
         // Actualizar estado final a COMPLETED
         console.log('Actualizando estado final a COMPLETED en DynamoDB...');
         await dynamoDB.send(new UpdateItemCommand({
-            TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+            TableName: JOBS_TABLE,
             Key: { processId: { S: processId } },
             UpdateExpression: "SET #status = :status, downloadCompletedTime = :time, resultLocation = :location",
             ExpressionAttributeNames: { "#status": "status" },
@@ -258,7 +268,7 @@ exports.handler = async (event) => {
         try {
             if (event.processId) {
                 await dynamoDB.send(new UpdateItemCommand({
-                    TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+                    TableName: process.env.JOBS_TABLE || 'invenadro-backend-jul-dev-jobs',
                     Key: { processId: { S: event.processId } },
                     UpdateExpression: "SET #status = :status, errorMessage = :error, errorTime = :time",
                     ExpressionAttributeNames: { "#status": "status" },

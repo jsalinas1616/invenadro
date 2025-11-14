@@ -9,6 +9,16 @@ exports.handler = async (event) => {
     try {
         console.log('Evento recibido en lambda-processor:', JSON.stringify(event, null, 2));
         
+        // ✅ VALIDAR VARIABLES DE ENTORNO
+        const JOBS_TABLE = process.env.JOBS_TABLE;
+        const RESULTS_BUCKET = process.env.RESULTS_BUCKET;
+        if (!JOBS_TABLE) {
+            throw new Error('❌ JOBS_TABLE no está configurado en variables de entorno');
+        }
+        if (!RESULTS_BUCKET) {
+            throw new Error('❌ RESULTS_BUCKET no está configurado en variables de entorno');
+        }
+        
         // Extraer datos del evento
         const { s3Bucket, s3Key, customConfig, processId } = event;
         
@@ -19,7 +29,7 @@ exports.handler = async (event) => {
         // Actualizar estado a PROCESSING
         console.log('Actualizando estado a PROCESSING en DynamoDB...');
         await dynamoDB.send(new UpdateItemCommand({
-            TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+            TableName: JOBS_TABLE,
             Key: { processId: { S: processId } },
             UpdateExpression: "SET #status = :status, processingStartTime = :time",
             ExpressionAttributeNames: { "#status": "status" },
@@ -62,7 +72,7 @@ exports.handler = async (event) => {
         
         // Guardar resultado completo en S3
         console.log('Guardando resultado en S3...');
-        const resultsBucket = process.env.RESULTS_BUCKET || 'factor-redondeo-lambda-results-dev';
+        const resultsBucket = RESULTS_BUCKET;
         const resultKey = `resultados/${processId}/resultado.json`;
         
         // Preparar datos completos para el frontend (estructura como en BackEnd)
@@ -105,7 +115,7 @@ exports.handler = async (event) => {
         // Actualizar estado a PROCESSED
         console.log('Actualizando estado a PROCESSED en DynamoDB...');
         await dynamoDB.send(new UpdateItemCommand({
-            TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+            TableName: JOBS_TABLE,
             Key: { processId: { S: processId } },
             UpdateExpression: "SET #status = :status, processingEndTime = :time",
             ExpressionAttributeNames: { "#status": "status" },
@@ -145,7 +155,7 @@ exports.handler = async (event) => {
         try {
             if (event.processId) {
                 await dynamoDB.send(new UpdateItemCommand({
-                    TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+                    TableName: process.env.JOBS_TABLE || 'invenadro-backend-jul-dev-jobs',
                     Key: { processId: { S: event.processId } },
                     UpdateExpression: "SET #status = :status, errorMessage = :error, errorTime = :time",
                     ExpressionAttributeNames: { "#status": "status" },

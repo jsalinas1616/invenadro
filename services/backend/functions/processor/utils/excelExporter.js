@@ -28,7 +28,9 @@ const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'us-east-1'
 });
 
-const S3_BUCKET = process.env.S3_BUCKET_NAME || 'factor-redondeo-exports';
+// ✅ Variable de entorno para S3 (si se necesita)
+// Nota: Esta utilidad no se usa actualmente en el flujo principal
+const S3_BUCKET = process.env.S3_BUCKET_NAME || process.env.RESULTS_BUCKET || 'invenadro-backend-exports';
 
 // Función auxiliar para determinar el directorio de export según el entorno
 const determinarDirectorioExport = () => {

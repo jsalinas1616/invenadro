@@ -6,6 +6,12 @@ exports.handler = async (event) => {
     try {
         console.log('Evento recibido en lambda-status-checker:', JSON.stringify(event, null, 2));
         
+        // ✅ VALIDAR VARIABLE DE ENTORNO
+        const JOBS_TABLE = process.env.JOBS_TABLE;
+        if (!JOBS_TABLE) {
+            throw new Error('❌ JOBS_TABLE no está configurado en variables de entorno');
+        }
+        
         // Extraer processId del path parameters (viene de API Gateway)
         let processId;
         if (event.pathParameters && event.pathParameters.processId) {
@@ -28,7 +34,7 @@ exports.handler = async (event) => {
         // Consultar estado actual en DynamoDB
         console.log('Consultando estado actual en DynamoDB...');
         const getResult = await dynamoDB.send(new GetItemCommand({
-            TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+            TableName: JOBS_TABLE,
             Key: { processId: { S: processId } }
         }));
         
@@ -72,7 +78,7 @@ exports.handler = async (event) => {
         try {
             if (event.processId) {
                 await dynamoDB.send(new UpdateItemCommand({
-                    TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+                    TableName: process.env.JOBS_TABLE || 'invenadro-backend-jul-dev-jobs',
                     Key: { processId: { S: event.processId } },
                     UpdateExpression: "SET #status = :status, errorMessage = :error, errorTime = :time",
                     ExpressionAttributeNames: { "#status": "status" },

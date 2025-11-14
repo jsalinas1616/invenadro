@@ -9,6 +9,16 @@ exports.handler = async (event) => {
     try {
         console.log('🔄 CLIENT AGGREGATOR - Evento recibido:', JSON.stringify(event, null, 2));
         
+        // ✅ VALIDAR VARIABLES DE ENTORNO
+        const JOBS_TABLE = process.env.JOBS_TABLE;
+        const RESULTS_BUCKET = process.env.RESULTS_BUCKET;
+        if (!JOBS_TABLE) {
+            throw new Error('❌ JOBS_TABLE no está configurado en variables de entorno');
+        }
+        if (!RESULTS_BUCKET) {
+            throw new Error('❌ RESULTS_BUCKET no está configurado en variables de entorno');
+        }
+        
         const { processId, s3Bucket } = event;
         
         if (!processId) {
@@ -16,7 +26,7 @@ exports.handler = async (event) => {
         }
         
         // Actualizar estado en DynamoDB
-        await updateDynamoDBStatus(processId, 'AGGREGATING', 'Iniciando agregación de resultados multi-cliente...');
+        await updateDynamoDBStatus(processId, 'AGGREGATING', 'Iniciando agregación de resultados multi-cliente...', JOBS_TABLE);
         
         // Obtener información de las ejecuciones
         console.log('📋 Obteniendo información de ejecuciones...');
@@ -29,7 +39,7 @@ exports.handler = async (event) => {
         
         // Recopilar resultados de cada cliente
         console.log('📥 Recopilando resultados de cada cliente...');
-        const resultadosClientes = await recopilarResultadosClientes(s3Bucket, executionsInfo);
+        const resultadosClientes = await recopilarResultadosClientes(s3Bucket, executionsInfo, RESULTS_BUCKET);
         
         // Generar reporte consolidado
         console.log('📊 Generando reporte consolidado...');
@@ -40,7 +50,7 @@ exports.handler = async (event) => {
         const archivoExcelConsolidado = await generarExcelConsolidado(resultadosClientes, executionsInfo);
         
         // 🔧 FIX: Guardar en el bucket de RESULTS, no en UPLOADS
-        const resultsBucket = process.env.RESULTS_BUCKET || 'factor-redondeo-lambda-results-dev';
+        const resultsBucket = RESULTS_BUCKET;
         
         // Subir reporte consolidado a S3
         const reporteKey = `resultados/${processId}/resultado.json`;
@@ -62,7 +72,7 @@ exports.handler = async (event) => {
         
         // Actualizar estado final en DynamoDB
         await updateDynamoDBStatus(processId, 'COMPLETED', 
-            `Agregación completada - ${executionsInfo.totalClientes} clientes procesados`);
+            `Agregación completada - ${executionsInfo.totalClientes} clientes procesados`, JOBS_TABLE);
         
         console.log('✅ Agregación completada exitosamente');
         
@@ -81,7 +91,8 @@ exports.handler = async (event) => {
         
         // Actualizar estado de error en DynamoDB
         if (event.processId) {
-            await updateDynamoDBStatus(event.processId, 'ERROR', `Error en agregación: ${error.message}`);
+            const JOBS_TABLE_FALLBACK = process.env.JOBS_TABLE || 'invenadro-backend-jul-dev-jobs';
+            await updateDynamoDBStatus(event.processId, 'ERROR', `Error en agregación: ${error.message}`, JOBS_TABLE_FALLBACK);
         }
         
         throw error;
@@ -115,11 +126,9 @@ async function getExecutionsInfo(bucket, processId) {
  * RECOPILAR RESULTADOS DE CADA CLIENTE - OPTIMIZADO
  * Solo extrae los datos necesarios, no todo el resultado completo
  */
-async function recopilarResultadosClientes(bucket, executionsInfo) {
+async function recopilarResultadosClientes(bucket, executionsInfo, resultsBucket) {
     const resultados = [];
-    
-    // 🔧 FIX: Los resultados están en el bucket de RESULTS, no en UPLOADS
-    const resultsBucket = process.env.RESULTS_BUCKET || 'factor-redondeo-lambda-results-dev';
+    const JOBS_TABLE = process.env.JOBS_TABLE || 'invenadro-backend-jul-dev-jobs';
     
     for (let i = 0; i < executionsInfo.executions.length; i++) {
         const execution = executionsInfo.executions[i];
@@ -131,7 +140,8 @@ async function recopilarResultadosClientes(bucket, executionsInfo) {
                 await updateDynamoDBStatus(
                     executionsInfo.processIdOriginal,
                     'AGGREGATING',
-                    `Consolidando resultados: ${i + 1}/${executionsInfo.executions.length} clientes procesados`
+                    `Consolidando resultados: ${i + 1}/${executionsInfo.executions.length} clientes procesados`,
+                    JOBS_TABLE
                 );
             }
             
@@ -345,10 +355,10 @@ function calcularFactorPromedio(clientesExitosos) {
 /**
  * ACTUALIZAR ESTADO EN DYNAMODB
  */
-async function updateDynamoDBStatus(processId, status, details) {
+async function updateDynamoDBStatus(processId, status, details, jobsTable) {
     try {
         await dynamoDB.send(new UpdateItemCommand({
-            TableName: process.env.JOBS_TABLE || 'factor-redondeo-lambda-jobs-dev',
+            TableName: jobsTable,
             Key: { processId: { S: processId } },
             UpdateExpression: "SET #status = :status, #details = :details, lastUpdate = :time",
             ExpressionAttributeNames: { 
