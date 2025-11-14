@@ -54,7 +54,7 @@ echo ""
 # Configuración
 AWS_REGION="mx-central-1"
 FRONTEND_STACK_NAME="invenadro-frontend-${STAGE}"
-BACKEND_SERVERLESS_YML="../services/backend/serverless.yml"
+BACKEND_SERVERLESS_YML="services/backend/serverless.yml"
 
 # Verificar que el stack del frontend existe
 print_info "Verificando stack del frontend..."
