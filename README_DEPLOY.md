@@ -523,6 +523,58 @@ aws configure list
 
 ---
 
+### Error: "KMSAccessDeniedException" o "Lambda was unable to decrypt the environment variables"
+
+**Síntoma**:
+```
+Error: Lambda.KMSAccessDeniedException
+Cause: User: ... is not authorized to perform: kms:Decrypt
+```
+
+**Problema**:
+- AWS Lambda encripta automáticamente las variables de entorno con KMS
+- La clave KMS AWS-managed tiene políticas restrictivas
+- Cuando Step Functions invoca Lambda, falla el descifrado de env vars
+
+**Solución (UNA VEZ por cuenta AWS)**:
+
+Ejecuta el script que actualiza la key policy de la clave KMS:
+
+```bash
+# Desde la raíz del proyecto
+# ⚠️ IMPORTANTE: Debes ejecutarlo con un usuario que tenga permisos admin
+# (kms:PutKeyPolicy en la clave KMS)
+./scripts/fix-kms-key-policy.sh
+```
+
+**Si no tienes permisos**:
+- Ejecuta el script con un usuario admin de AWS
+- O pide a tu equipo de infraestructura que ejecute el script
+- El script es seguro: solo actualiza permisos, no modifica datos
+
+**Qué hace el script**:
+1. ✅ Lee la clave KMS AWS-managed existente
+2. ✅ Crea una policy actualizada con permisos para los 8 roles Lambda
+3. ✅ Aplica la policy a la clave
+4. ✅ Permite que Step Functions invoque Lambdas sin errores KMS
+
+**Cuándo ejecutarlo**:
+- ✅ **Primera vez** que deployas en una cuenta AWS nueva
+- ✅ Si ves el error `KMSAccessDeniedException` en Step Functions
+- ✅ Solo necesitas ejecutarlo **UNA VEZ por cuenta AWS**
+
+**Nota**: 
+- Para `jul-dev` y `jul-qa` (misma cuenta): Solo ejecutar 1 vez
+- Para `nadro-qa` y `nadro-prod` (cuentas diferentes): Ejecutar en cada cuenta
+
+**Verificar que funcionó**:
+```bash
+# Probar subiendo un Excel desde el frontend
+# Si el Step Function completa sin error → ✅ Funcionó
+```
+
+---
+
 ### Error: "Stack does not exist"
 
 **Primera vez deployando**:
