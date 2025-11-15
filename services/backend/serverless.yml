@@ -31,11 +31,6 @@ provider:
   logs:
     restApi: true
   
-  # ✅ Clave KMS customer-managed para Lambda env vars
-  # Se crea automáticamente con permisos correctos
-  # Funciona con Step Functions sin problemas de permisos
-  kmsKeyArn: !GetAtt LambdaKMSKey.Arn
-  
   # Tags globales
   tags:
     Project: invenadro
@@ -238,7 +233,6 @@ functions:
 
 # CloudFormation Resources
 resources:
-  - ${file(resources/kms.yml)}
   - ${file(resources/dynamodb.yml)}
   - ${file(resources/s3.yml)}
   - ${file(resources/cognito.yml)}
