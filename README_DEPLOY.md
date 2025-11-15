@@ -531,24 +531,38 @@ Error: Lambda.KMSAccessDeniedException
 Cause: User: ... is not authorized to perform: kms:Decrypt
 ```
 
-**Solución**:
-✅ **Ya está resuelto automáticamente**
+**Problema**:
+- AWS Lambda encripta automáticamente las variables de entorno con KMS
+- La clave KMS AWS-managed tiene políticas restrictivas
+- Cuando Step Functions invoca Lambda, falla el descifrado de env vars
 
-El proyecto crea una **clave KMS customer-managed** con las políticas correctas:
-- Definida en: `services/backend/resources/kms.yml`
-- Se crea automáticamente con el deploy
-- Permite que Lambda y Step Functions descifren env vars
-- No requiere configuración manual
+**Solución (⚠️ EJECUTAR UNA SOLA VEZ CON USUARIO ADMIN)**:
 
-**Si aún ves este error**:
-1. Verifica que el deploy completó exitosamente
-2. Verifica que `resources/kms.yml` está incluido en `serverless.yml`
-3. Verifica logs de CloudFormation:
-   ```bash
-   aws cloudformation describe-stack-events \
-     --stack-name invenadro-backend-jul-dev \
-     --region mx-central-1
-   ```
+```bash
+# Desde la raíz del proyecto
+# ⚠️ REQUIERE usuario con permisos admin (kms:PutKeyPolicy)
+AWS_PROFILE=tu-perfil-admin ./scripts/fix-kms-key-policy.sh
+```
+
+**¿Cuándo ejecutarlo?**:
+- ✅ **UNA VEZ** al deployar por primera vez en una cuenta AWS
+- ✅ Si ves el error `KMSAccessDeniedException` en Step Functions
+- ❌ **NO** es necesario ejecutarlo en cada deploy (solo la primera vez)
+
+**¿Por qué requiere admin?**:
+- El script modifica la key policy de la clave KMS AWS-managed
+- Solo usuarios con `kms:PutKeyPolicy` pueden modificar key policies
+- Después de ejecutarlo una vez, GitHub Actions puede deployar sin problemas
+
+**Nota**: 
+- Para `jul-dev` y `jul-qa` (misma cuenta): Ejecutar 1 vez
+- Para `nadro-qa` y `nadro-prod` (cuentas diferentes): Ejecutar en cada cuenta
+
+**Verificar que funcionó**:
+```bash
+# Subir un Excel desde el frontend
+# Si el Step Function completa sin error → ✅ Funcionó
+```
 
 ---
 
