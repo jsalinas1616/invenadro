@@ -25,6 +25,49 @@ exports.handler = async (event) => {
         
         console.log('ProcessId extraído:', processId);
         
+        // 🔥 NUEVO: Si viene un status en el payload, ACTUALIZAR el estado en DynamoDB
+        // Esto se usa cuando el Step Function detecta un error y quiere notificar al frontend
+        if (event.status && (event.status === 'FAILED' || event.status === 'COMPLETED' || event.status === 'ERROR')) {
+            console.log(`🔄 Actualizando estado a: ${event.status}`);
+            
+            const updateExpression = event.status === 'FAILED' 
+                ? "SET #status = :status, errorMessage = :error, errorTime = :time, message = :message"
+                : "SET #status = :status, endTime = :time, message = :message";
+            
+            const expressionValues = {
+                ":status": { S: event.status },
+                ":time": { S: new Date().toISOString() },
+                ":message": { S: event.message || `Proceso en estado ${event.status}` }
+            };
+            
+            if (event.status === 'FAILED') {
+                expressionValues[":error"] = { 
+                    S: event.errorDetails?.cause || event.errorDetails?.error || event.message || 'Error desconocido' 
+                };
+            }
+            
+            await dynamoDB.send(new UpdateItemCommand({
+                TableName: JOBS_TABLE,
+                Key: { processId: { S: processId } },
+                UpdateExpression: updateExpression,
+                ExpressionAttributeNames: { "#status": "status" },
+                ExpressionAttributeValues: expressionValues
+            }));
+            
+            console.log(`✅ Estado actualizado a ${event.status} en DynamoDB`);
+            
+            // Retornar inmediatamente después de actualizar
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    processId: processId,
+                    status: event.status,
+                    message: event.message,
+                    updated: true
+                })
+            };
+        }
+        
         // Verificar si es monitoreo multi-cliente
         if (event.checkType === 'MULTI_CLIENT_MONITORING' && event.executions) {
             console.log('🔄 Modo MULTI_CLIENT_MONITORING detectado');
