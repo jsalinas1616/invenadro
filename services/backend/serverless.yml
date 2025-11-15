@@ -20,6 +20,21 @@ custom:
     nadro-qa: 'http://invenadro-frontend-nadro-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
     nadro-prod: 'http://invenadro-frontend-nadro-prod.s3-website.mx-central-1.amazonaws.com'
 
+package:
+  individually: false
+  patterns:
+    - '!.git/**'
+    - '!.github/**'
+    - '!.vscode/**'
+    - '!*.md'
+    - '!.env*'
+    - 'node_modules/**'
+    - 'functions/**'
+    - 'optimization/**'
+    - 'rules/**'
+    - 'utils/**'
+    - 'data/**'
+
 provider:
   name: aws
   runtime: nodejs22.x
