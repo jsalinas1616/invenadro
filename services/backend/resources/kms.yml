@@ -15,6 +15,24 @@ Resources:
             Action: 'kms:*'
             Resource: '*'
           
+          # Permitir a usuarios/roles IAM usar la clave (si tienen los permisos IAM)
+          # Esto permite que GitHub Actions (usuario invenadro) pueda deployar Lambdas
+          - Sid: Allow IAM principals to use the key
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action:
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+              - 'kms:CreateGrant'
+              - 'kms:DescribeKey'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:CallerAccount': !Sub '${AWS::AccountId}'
+          
           # Permiso amplio para el servicio Lambda
           # Esto permite que Lambda descifre env vars cuando inicia
           # También funciona cuando Step Functions invoca Lambda
