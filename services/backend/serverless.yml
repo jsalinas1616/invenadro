@@ -31,6 +31,9 @@ provider:
   logs:
     restApi: true
   
+  # 🔐 Clave KMS customer-managed para encriptar variables de entorno
+  kmsKeyArn: !GetAtt LambdaKMSKey.Arn
+  
   # Tags globales
   tags:
     Project: invenadro
@@ -240,6 +243,7 @@ resources:
   - ${file(resources/iam.yml)}
   - ${file(resources/step-functions.yml)}
   - ${file(resources/api-gateway-role.yml)}
+  - ${file(resources/kms.yml)}
   - Outputs:
       ApiGatewayUrl:
         Description: API Gateway URL
