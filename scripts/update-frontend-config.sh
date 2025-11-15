@@ -77,11 +77,18 @@ echo "   Stack: $STACK_NAME"
 echo "   Región: $REGION"
 echo ""
 
+# Detectar si estamos en CI/CD (GitHub Actions)
+AWS_PROFILE_ARG=""
+if [ -z "$CI" ]; then
+    # Local: usar profile
+    AWS_PROFILE_ARG="--profile ${AWS_PROFILE:-default}"
+fi
+
 # Verificar que el stack existe
 if ! aws cloudformation describe-stacks \
     --stack-name "$STACK_NAME" \
     --region "$REGION" \
-    --profile default \
+    $AWS_PROFILE_ARG \
     > /dev/null 2>&1; then
     log_error "El stack $STACK_NAME no existe en AWS"
     log_warning "Primero debes deployar el backend:"
@@ -98,7 +105,7 @@ log_info "Obteniendo outputs del CloudFormation..."
 OUTPUTS=$(aws cloudformation describe-stacks \
     --stack-name "$STACK_NAME" \
     --region "$REGION" \
-    --profile default \
+    $AWS_PROFILE_ARG \
     --query 'Stacks[0].Outputs' \
     --output json)
 
