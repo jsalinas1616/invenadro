@@ -204,8 +204,8 @@
         "kms:ListResourceTags"
       ],
       "Resource": [
-        "arn:aws:kms:mx-central-1:975130647458:key/*",
-        "arn:aws:kms:mx-central-1:975130647458:alias/invenadro-backend-nadro-qa-*"
+        "arn:aws:kms:mx-central-1:CUENTA_NADRO_QA:key/*",
+        "arn:aws:kms:mx-central-1:CUENTA_NADRO_QA:alias/invenadro-backend-nadro-qa-*"
       ]
     },
     {
