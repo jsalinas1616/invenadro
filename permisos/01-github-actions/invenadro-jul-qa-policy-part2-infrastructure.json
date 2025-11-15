@@ -197,6 +197,11 @@
       "Sid": "ManageKMSKeys",
       "Effect": "Allow",
       "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:CreateGrant",
         "kms:CreateAlias",
         "kms:DeleteAlias",
         "kms:DescribeKey",
