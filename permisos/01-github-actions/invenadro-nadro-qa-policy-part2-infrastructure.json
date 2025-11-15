@@ -186,10 +186,17 @@
       ]
     },
     {
+      "Sid": "CreateKMSKeys",
+      "Effect": "Allow",
+      "Action": [
+        "kms:CreateKey"
+      ],
+      "Resource": "*"
+    },
+    {
       "Sid": "ManageKMSKeys",
       "Effect": "Allow",
       "Action": [
-        "kms:CreateKey",
         "kms:CreateAlias",
         "kms:DeleteAlias",
         "kms:DescribeKey",
