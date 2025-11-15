@@ -12,12 +12,12 @@ const environments = {
     account: '975130647458',
     region: 'mx-central-1',
     apiGateway: {
-      url: 'https://c9nzcqgz16.execute-api.mx-central-1.amazonaws.com/jul-dev',
+      url: 'https://n528zjrguk.execute-api.mx-central-1.amazonaws.com/jul-dev',
       region: 'mx-central-1'
     },
     cognito: {
-      userPoolId: 'mx-central-1_WIAYTqFq7',
-      clientId: 'jo46f6pkduolu7hdb02geo0tj',
+      userPoolId: 'mx-central-1_NU4X1W1PK',
+      clientId: '20fuohg3hm1f1u4f67mnge5l7s',
       region: 'mx-central-1'
     },
     s3: {

@@ -112,6 +112,31 @@ jobs:
           cd services/backend
           npx serverless deploy --stage ${{ env.STAGE }} --verbose
 
+      # ========================================
+      # ACTUALIZAR FRONTEND CON OUTPUTS DEL BACKEND
+      # ========================================
+      
+      - name: Update Frontend Config with Backend Outputs
+        run: |
+          echo "🔄 Actualizando config del frontend con outputs del backend..."
+          chmod +x ./scripts/update-frontend-config.sh
+          ./scripts/update-frontend-config.sh ${{ env.STAGE }}
+          echo "✅ Frontend config actualizado con Cognito IDs y API Gateway URL"
+
+      - name: Rebuild Frontend with Updated Config
+        env:
+          REACT_APP_STAGE: ${{ env.STAGE }}
+        run: |
+          echo "🔨 Rebuilding frontend con configuración actualizada..."
+          cd FrontEnd-lambdas
+          npm run build
+
+      - name: Redeploy Frontend with Updated Config
+        run: |
+          echo "🚀 Redeployando frontend con config correcta..."
+          cd services/frontend
+          npx serverless deploy --stage ${{ env.STAGE }} --region ${{ env.AWS_REGION }} --verbose
+
       - name: Get Backend Deployment Info
         run: |
           cd services/backend
