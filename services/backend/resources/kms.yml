@@ -16,6 +16,8 @@ Resources:
             Resource: '*'
           
           # Permiso amplio para el servicio Lambda
+          # Esto permite que Lambda descifre env vars cuando inicia
+          # También funciona cuando Step Functions invoca Lambda
           - Sid: Allow Lambda service to use the key
             Effect: Allow
             Principal:
@@ -27,26 +29,10 @@ Resources:
               - 'kms:GenerateDataKey*'
               - 'kms:CreateGrant'
             Resource: '*'
-          
-          # Permiso para Step Functions invocar Lambda
-          - Sid: Allow Step Functions to invoke Lambda with this key
-            Effect: Allow
-            Principal:
-              Service: states.amazonaws.com
-            Action:
-              - 'kms:Decrypt'
-              - 'kms:DescribeKey'
-            Resource: '*'
-          
-          # Permiso para todos los roles Lambda de este stack
-          - Sid: Allow Lambda execution roles
-            Effect: Allow
-            Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${self:service}-${self:provider.stage}-*'
-            Action:
-              - 'kms:Decrypt'
-              - 'kms:DescribeKey'
-            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:ViaService': !Sub 'lambda.${AWS::Region}.amazonaws.com'
+                'kms:CallerAccount': !Sub '${AWS::AccountId}'
 
   # Alias para la clave (más fácil de identificar)
   LambdaKMSKeyAlias:
