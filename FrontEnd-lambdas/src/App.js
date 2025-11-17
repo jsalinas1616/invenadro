@@ -94,39 +94,56 @@ const AdvancedClientTable = ({ result, processId, onViewDetails }) => {
     
     try {
       // Marcar cliente como descargando
-      console.log('🟡 Marcando cliente como descargando:', clienteId);
+      console.log('Marcando cliente como descargando:', clienteId);
       setDownloadingClients(prev => {
         const newSet = new Set(prev).add(clienteId);
-        console.log('🟡 Estado downloadingClients actualizado:', newSet);
+        console.log('Estado downloadingClients actualizado:', newSet);
         return newSet;
       });
       
       // Mostrar toast de inicio
-      console.log('🟡 Mostrando toast de inicio');
+      console.log('Mostrando toast de inicio');
       addToast(`Generando Excel para cliente ${cliente.cliente}...`, 'success');
       
-      console.log('🔄 Descargando Excel para cliente:', cliente.cliente);
+      console.log('Descargando Excel para cliente:', cliente.cliente);
       
       // Llamar al servicio para descargar Excel del cliente específico
       const base64Data = await lambdaService.downloadClientExcel(processId, cliente.clienteId);
       
-      console.log(`📦 Base64 recibido, tamaño: ${base64Data.length} chars`);
-      
-      // Convertir Base64 a ArrayBuffer (método robusto para archivos grandes)
-      const binaryString = atob(base64Data);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      // VALIDAR que recibimos Base64 válido
+      if (!base64Data || base64Data.length === 0) {
+        throw new Error('No se recibió contenido del servidor');
       }
       
-      console.log(`✅ ArrayBuffer creado, tamaño: ${bytes.length} bytes`);
+      console.log(`Base64 recibido, tamaño: ${base64Data.length} chars`);
+      
+      // VALIDAR formato Base64 (debe ser solo caracteres válidos)
+      if (!/^[A-Za-z0-9+/=]+$/.test(base64Data)) {
+        console.error('ERROR: Contenido recibido NO es Base64 válido:', base64Data.substring(0, 100));
+        throw new Error('El servidor no devolvió un archivo válido');
+      }
+      
+      // Convertir Base64 a ArrayBuffer (método robusto para archivos grandes)
+      let binaryString, bytes;
+      try {
+        binaryString = atob(base64Data);
+        bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+      } catch (decodeError) {
+        console.error('ERROR: Error decodificando Base64:', decodeError);
+        throw new Error('Error al procesar el archivo descargado');
+      }
+      
+      console.log(`ArrayBuffer creado, tamaño: ${bytes.length} bytes`);
       
       // Crear Blob desde ArrayBuffer
       const blob = new Blob([bytes], { 
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
       });
       
-      console.log(`✅ Blob creado, tamaño: ${blob.size} bytes`);
+      console.log(`Blob creado, tamaño: ${blob.size} bytes`);
       
       // Crear Object URL desde Blob (más eficiente que data URL)
       const url = window.URL.createObjectURL(blob);
@@ -147,16 +164,16 @@ const AdvancedClientTable = ({ result, processId, onViewDetails }) => {
         window.URL.revokeObjectURL(url); // Liberar memoria
       }, 100);
       
-      console.log('✅ Intento de descarga ejecutado para cliente:', cliente.cliente);
+      console.log('Intento de descarga ejecutado para cliente:', cliente.cliente);
       
       // Mostrar toast de éxito
-      addToast(`✅ Excel generado para cliente ${cliente.cliente}`, 'success');
+      addToast(`Excel generado para cliente ${cliente.cliente}`, 'success');
       
     } catch (error) {
-      console.error('❌ Error descargando Excel del cliente:', error);
+      console.error('ERROR: Error descargando Excel del cliente:', error);
       
       // Mostrar toast de error
-      addToast(`❌ Error al generar Excel para cliente ${cliente.cliente}`, 'danger');
+      addToast(`Error al generar Excel para cliente ${cliente.cliente}`, 'danger');
       
       alert(`Error al descargar Excel del cliente ${cliente.cliente}: ${error.message}`);
     } finally {

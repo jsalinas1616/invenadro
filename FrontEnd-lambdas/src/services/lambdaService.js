@@ -228,29 +228,61 @@ class LambdaService {
       const response = await fetch(downloadUrl, {
         method: 'GET',
         headers: await this.getAuthHeaders({
-          'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        }) // 🔐 Headers con JWT + Accept header
+          'Accept': 'text/plain'
+        })
       });
       
+      console.log(`Response status: ${response.status} ${response.statusText}`);
+      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Error al generar Excel: ${response.status} - ${errorText}`);
+        let errorText;
+        try {
+          errorText = await response.text();
+          console.error('ERROR: Error response body:', errorText);
+        } catch (e) {
+          errorText = 'No se pudo leer el mensaje de error';
+        }
+        throw new Error(`Error del servidor (${response.status}): ${errorText}`);
       }
       
-      // Verificar que la respuesta es un Excel
+      // Verificar Content-Type
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('spreadsheetml')) {
-        console.warn('Respuesta no es un archivo Excel, content-type:', contentType);
+      console.log(`Content-Type recibido: ${contentType}`);
+      
+      // Obtener el contenido (puede ser JSON o texto)
+      const responseText = await response.text();
+      
+      console.log('Response recibido, primeros 200 chars:', responseText.substring(0, 200));
+      
+      // DETECTAR si es JSON o Base64 directo
+      let base64Text;
+      try {
+        const jsonResponse = JSON.parse(responseText);
+        console.log('Response es JSON, keys:', Object.keys(jsonResponse));
+        base64Text = jsonResponse.body || jsonResponse.excel || jsonResponse.data || responseText;
+      } catch (e) {
+        console.log('Response NO es JSON, es texto directo');
+        base64Text = responseText;
       }
       
-      // Obtener el texto Base64 directamente
-      const base64Text = await response.text();
+      // VALIDAR que recibimos algo
+      if (!base64Text || base64Text.trim().length === 0) {
+        throw new Error('El servidor devolvió una respuesta vacía');
+      }
       
-      console.log('✅ Excel Base64 obtenido, tamaño:', base64Text.length);
+      console.log(`Excel Base64 final, tamaño: ${base64Text.length} chars`);
+      console.log('Primeros 50 caracteres:', base64Text.substring(0, 50));
+      
+      // VALIDAR primeros caracteres (Excel siempre empieza con "PK" en Base64 = "UEs")
+      if (!base64Text.startsWith('UEs')) {
+        console.warn('WARNING: El archivo NO parece ser un Excel válido (no empieza con "UEs")');
+        console.warn('Contenido completo (primeros 500):', base64Text.substring(0, 500));
+        throw new Error('El servidor no devolvió un archivo Excel válido');
+      }
+      
       return base64Text;
     } catch (error) {
-      console.error('Error descargando Excel del cliente:', error);
+      console.error('ERROR: Error descargando Excel del cliente:', error);
       throw error;
     }
   }

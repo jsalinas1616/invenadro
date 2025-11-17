@@ -4,13 +4,13 @@ const XLSX = require('xlsx');
 // Configurar AWS SDK
 const s3 = new AWS.S3();
 
-// ✅ VALIDAR VARIABLE DE ENTORNO
+// VALIDAR VARIABLE DE ENTORNO
 const RESULTS_BUCKET = process.env.RESULTS_BUCKET;
 if (!RESULTS_BUCKET) {
-    throw new Error('❌ RESULTS_BUCKET no está configurado en variables de entorno');
+    throw new Error('ERROR: RESULTS_BUCKET no está configurado en variables de entorno');
 }
 
-// 🔐 ORÍGENES PERMITIDOS PARA CORS - Desde variable de entorno por ambiente
+// ORÍGENES PERMITIDOS PARA CORS - Desde variable de entorno por ambiente
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
     : ['http://localhost:3000']; // Fallback solo para desarrollo local
@@ -26,11 +26,11 @@ const getCorsOrigin = (event) => {
 };
 
 exports.handler = async (event) => {
-    console.log('🚀 Iniciando generación de Excel por cliente');
+    console.log('Iniciando generación de Excel por cliente');
     console.log('Event:', JSON.stringify(event, null, 2));
 
     try {
-        // 🔐 EXTRAER INFORMACIÓN DEL USUARIO AUTENTICADO
+        // EXTRAER INFORMACIÓN DEL USUARIO AUTENTICADO
         let userInfo = null;
         if (event.requestContext?.authorizer?.claims) {
             const claims = event.requestContext.authorizer.claims;
@@ -38,7 +38,7 @@ exports.handler = async (event) => {
                 email: claims.email || claims['cognito:username'],
                 username: claims['cognito:username']
             };
-            console.log('👤 Usuario descargando Excel:', userInfo.email);
+            console.log('Usuario descargando Excel:', userInfo.email);
         }
         
         // Extraer parámetros del evento
@@ -59,19 +59,19 @@ exports.handler = async (event) => {
             };
         }
 
-        console.log(`📋 Generando Excel para proceso: ${processId}, cliente: ${clienteId}`);
+        console.log(`Generando Excel para proceso: ${processId}, cliente: ${clienteId}`);
 
         // 1. Obtener datos del resultado desde S3
         let resultadoData = await obtenerResultadoDesdeS3(processId);
         
-        // 🔍 DETECTAR SI ES MULTI-CLIENTE
+        // DETECTAR SI ES MULTI-CLIENTE
         const isMultiClient = resultadoData?.tipoProcesso === 'MULTI_CLIENT_AGGREGATED' || 
                              resultadoData?.resumenPorCliente;
         
         let datosCliente;
         
         if (isMultiClient) {
-            console.log('✅ Detectado proceso MULTI-CLIENTE, buscando resultado individual del cliente...');
+            console.log('Detectado proceso MULTI-CLIENTE, buscando resultado individual del cliente...');
             
             // Buscar el resultado individual del cliente en resultados/{processId}-cliente-X/resultado.json
             const clienteResultado = await buscarResultadoClienteIndividual(processId, clienteId);
@@ -84,7 +84,7 @@ exports.handler = async (event) => {
             resultadoData = clienteResultado; // Usar el resultado individual
             
         } else {
-            console.log('✅ Detectado proceso SINGLE-CLIENTE');
+            console.log('Detectado proceso SINGLE-CLIENTE');
             
             if (!resultadoData || !resultadoData.datos) {
                 throw new Error('No se encontraron datos del proceso');
@@ -98,28 +98,34 @@ exports.handler = async (event) => {
             }
         }
 
-        console.log(`✅ Encontrados ${datosCliente.length} registros para el cliente ${clienteId}`);
+        console.log(`Encontrados ${datosCliente.length} registros para el cliente ${clienteId}`);
 
         // 3. Generar Excel específico del cliente
         const excelBuffer = generarExcelCliente(datosCliente, clienteId, resultadoData);
+        
+        console.log(`Excel buffer generado, tamaño: ${excelBuffer.length} bytes`);
+        
+        // Convertir a Base64
+        const base64String = excelBuffer.toString('base64');
+        console.log(`Base64 generado, tamaño: ${base64String.length} chars`);
+        console.log(`Primeros 50 caracteres: ${base64String.substring(0, 50)}...`);
+        console.log(`Ultimos 20 caracteres: ...${base64String.substring(base64String.length - 20)}`);
 
-        // 4. Retornar el Excel como Base64 en texto plano (NO usar isBase64Encoded)
-        // El frontend espera Base64 como texto, no binario
+        // 4. Retornar el Excel como Base64 en texto plano
+        // IMPORTANTE: Content-Type DEBE ser text/plain para que API Gateway NO transforme el body
         return {
             statusCode: 200,
             headers: {
-                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition': `attachment; filename="cliente_${clienteId}_${processId}.xlsx"`,
+                'Content-Type': 'text/plain',
                 'Access-Control-Allow-Origin': getCorsOrigin(event),
                 'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
                 'Access-Control-Allow-Methods': 'GET,OPTIONS'
             },
-            body: excelBuffer.toString('base64')
-            // ⚠️ NO usar isBase64Encoded: true porque el frontend espera el Base64 como texto
+            body: base64String
         };
 
     } catch (error) {
-        console.error('❌ Error generando Excel por cliente:', error);
+        console.error('ERROR: Error generando Excel por cliente:', error);
         
         return {
             statusCode: 500,
@@ -144,7 +150,7 @@ exports.handler = async (event) => {
  */
 async function obtenerResultadoDesdeS3(processId) {
     try {
-        console.log(`📥 Descargando resultado desde S3: resultados/${processId}/resultado.json`);
+        console.log(`Descargando resultado desde S3: resultados/${processId}/resultado.json`);
         
         const params = {
             Bucket: RESULTS_BUCKET,
@@ -154,11 +160,11 @@ async function obtenerResultadoDesdeS3(processId) {
         const response = await s3.getObject(params).promise();
         const resultadoData = JSON.parse(response.Body.toString());
         
-        console.log(`✅ Resultado descargado: ${resultadoData.datos?.length || 0} registros totales`);
+        console.log(`Resultado descargado: ${resultadoData.datos?.length || 0} registros totales`);
         return resultadoData;
         
     } catch (error) {
-        console.error('❌ Error descargando resultado desde S3:', error);
+        console.error('ERROR: Error descargando resultado desde S3:', error);
         throw new Error(`No se pudo obtener el resultado del proceso ${processId}`);
     }
 }
@@ -169,7 +175,7 @@ async function obtenerResultadoDesdeS3(processId) {
 async function buscarResultadoClienteIndividual(processId, clienteId) {
     try {
         // Primero, listar todos los subdirectorios para encontrar el cliente
-        console.log(`🔍 Buscando resultado individual para cliente ${clienteId} en proceso ${processId}`);
+        console.log(`Buscando resultado individual para cliente ${clienteId} en proceso ${processId}`);
         
         const listParams = {
             Bucket: RESULTS_BUCKET,
@@ -185,7 +191,7 @@ async function buscarResultadoClienteIndividual(processId, clienteId) {
         if (listResponse.CommonPrefixes) {
             for (const prefix of listResponse.CommonPrefixes) {
                 const folderName = prefix.Prefix;
-                console.log(`📁 Revisando carpeta: ${folderName}`);
+                console.log(`Revisando carpeta: ${folderName}`);
                 
                 // Intentar leer el resultado de esta carpeta
                 try {
@@ -201,12 +207,12 @@ async function buscarResultadoClienteIndividual(processId, clienteId) {
                     if (testData.datos && testData.datos.length > 0) {
                         const primerCliente = testData.datos[0].Cliente || testData.datos[0].cliente;
                         if (String(primerCliente) === String(clienteId)) {
-                            console.log(`✅ Encontrado resultado del cliente ${clienteId} en ${folderName}`);
+                            console.log(`Encontrado resultado del cliente ${clienteId} en ${folderName}`);
                             return testData;
                         }
                     }
                 } catch (err) {
-                    console.log(`⚠️ No se pudo leer ${folderName}: ${err.message}`);
+                    console.log(`WARNING: No se pudo leer ${folderName}: ${err.message}`);
                 }
             }
         }
@@ -214,7 +220,7 @@ async function buscarResultadoClienteIndividual(processId, clienteId) {
         throw new Error(`No se encontró resultado individual para el cliente ${clienteId}`);
         
     } catch (error) {
-        console.error('❌ Error buscando resultado individual del cliente:', error);
+        console.error('ERROR: Error buscando resultado individual del cliente:', error);
         throw error;
     }
 }
@@ -223,7 +229,7 @@ async function buscarResultadoClienteIndividual(processId, clienteId) {
  * Filtrar datos específicos de un cliente
  */
 function filtrarDatosDeCliente(datos, clienteId) {
-    console.log(`🔍 Filtrando datos para cliente: ${clienteId}`);
+    console.log(`Filtrando datos para cliente: ${clienteId}`);
     
     // Convertir clienteId a número para comparación
     const clienteIdNum = parseInt(clienteId);
@@ -233,7 +239,7 @@ function filtrarDatosDeCliente(datos, clienteId) {
         return itemClienteId === clienteIdNum || itemClienteId === clienteId;
     });
     
-    console.log(`✅ Filtrados ${datosCliente.length} registros para cliente ${clienteId}`);
+    console.log(`Filtrados ${datosCliente.length} registros para cliente ${clienteId}`);
     return datosCliente;
 }
 
@@ -241,7 +247,7 @@ function filtrarDatosDeCliente(datos, clienteId) {
  * Generar archivo Excel específico para un cliente
  */
 function generarExcelCliente(datosCliente, clienteId, resultadoCompleto) {
-    console.log(`📊 Generando Excel para cliente ${clienteId} con ${datosCliente.length} registros`);
+    console.log(`Generando Excel para cliente ${clienteId} con ${datosCliente.length} registros`);
     
     try {
         // Crear un nuevo workbook
@@ -270,11 +276,11 @@ function generarExcelCliente(datosCliente, clienteId, resultadoCompleto) {
             compression: true 
         });
         
-        console.log(`✅ Excel generado exitosamente para cliente ${clienteId}`);
+        console.log(`Excel generado exitosamente para cliente ${clienteId}`);
         return excelBuffer;
         
     } catch (error) {
-        console.error('❌ Error generando Excel:', error);
+        console.error('ERROR: Error generando Excel:', error);
         throw new Error(`Error generando Excel para cliente ${clienteId}: ${error.message}`);
     }
 }
