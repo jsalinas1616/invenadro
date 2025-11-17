@@ -103,7 +103,8 @@ exports.handler = async (event) => {
         // 3. Generar Excel específico del cliente
         const excelBuffer = generarExcelCliente(datosCliente, clienteId, resultadoData);
 
-        // 4. Retornar el Excel como respuesta binaria
+        // 4. Retornar el Excel como Base64 en texto plano (NO usar isBase64Encoded)
+        // El frontend espera Base64 como texto, no binario
         return {
             statusCode: 200,
             headers: {
@@ -113,8 +114,8 @@ exports.handler = async (event) => {
                 'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
                 'Access-Control-Allow-Methods': 'GET,OPTIONS'
             },
-            body: excelBuffer.toString('base64'),
-            isBase64Encoded: true
+            body: excelBuffer.toString('base64')
+            // ⚠️ NO usar isBase64Encoded: true porque el frontend espera el Base64 como texto
         };
 
     } catch (error) {
