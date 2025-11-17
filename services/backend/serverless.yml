@@ -197,6 +197,7 @@ functions:
           - s3:GetObject
           - s3:PutObject
         Resource:
+          - !Sub "${UploadsBucket.Arn}/*"
           - !Sub "${ResultsBucket.Arn}/*"
       - Effect: Allow
         Action:
