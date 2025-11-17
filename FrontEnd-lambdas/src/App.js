@@ -110,37 +110,42 @@ const AdvancedClientTable = ({ result, processId, onViewDetails }) => {
       // Llamar al servicio para descargar Excel del cliente específico
       const base64Data = await lambdaService.downloadClientExcel(processId, cliente.clienteId);
       
-      // Método más directo: usar data URL directamente
+      console.log(`📦 Base64 recibido, tamaño: ${base64Data.length} chars`);
+      
+      // Convertir Base64 a ArrayBuffer (método robusto para archivos grandes)
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      console.log(`✅ ArrayBuffer creado, tamaño: ${bytes.length} bytes`);
+      
+      // Crear Blob desde ArrayBuffer
+      const blob = new Blob([bytes], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      
+      console.log(`✅ Blob creado, tamaño: ${blob.size} bytes`);
+      
+      // Crear Object URL desde Blob (más eficiente que data URL)
+      const url = window.URL.createObjectURL(blob);
       const fileName = `Cliente_${cliente.clienteId}_${processId}.xlsx`;
-      const dataUrl = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${base64Data}`;
       
       // Crear elemento de descarga
       const link = document.createElement('a');
-      link.href = dataUrl;
+      link.href = url;
       link.download = fileName;
-      link.target = '_blank';
       
       // Forzar la descarga
       document.body.appendChild(link);
-      
-      try {
-        link.click();
-      } catch (e) {
-        console.warn('Método click() falló, intentando dispatchEvent');
-        const event = new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true
-        });
-        link.dispatchEvent(event);
-      }
+      link.click();
       
       // Limpiar después
       setTimeout(() => {
-        if (document.body.contains(link)) {
-          document.body.removeChild(link);
-        }
-      }, 1000);
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url); // Liberar memoria
+      }, 100);
       
       console.log('✅ Intento de descarga ejecutado para cliente:', cliente.cliente);
       
