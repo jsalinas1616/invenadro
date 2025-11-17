@@ -219,8 +219,8 @@ class LambdaService {
     try {
       console.log(`Descargando Excel para cliente ${clienteId} del proceso ${processId}`);
       
-      // Construir la URL del endpoint lambda-excel-generator
-      const downloadUrl = `https://8zck1369x8.execute-api.us-east-1.amazonaws.com/dev/excel/${processId}/${clienteId}`;
+      // Construir la URL del endpoint lambda-excel-generator usando la URL base dinámica
+      const downloadUrl = `${this.baseURL}/excel/${processId}/${clienteId}`;
       
       console.log(`Llamando a endpoint: ${downloadUrl}`);
       
