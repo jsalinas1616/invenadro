@@ -15,7 +15,10 @@
     "@aws-sdk/client-sfn": "^3.637.0",
     "@aws-sdk/lib-dynamodb": "^3.637.0",
     "xlsx": "^0.18.5",
-    "exceljs": "^4.4.0"
+    "exceljs": "^4.4.0",
+    "bignumber.js": "^9.1.2",
+    "axios": "^1.6.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "serverless": "^3.38.0",
