@@ -174,6 +174,10 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+      - Effect: Allow
+        Action:
           - s3:GetObject
           - s3:PutObject
         Resource:
@@ -220,11 +224,16 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+      - Effect: Allow
+        Action:
           - s3:GetObject
         Resource: !Sub "${ResultsBucket.Arn}/*"
       - Effect: Allow
         Action:
           - dynamodb:GetItem
+          - dynamodb:UpdateItem
         Resource: !GetAtt JobsTable.Arn
     events:
       - http:
