@@ -65,8 +65,10 @@ provider:
     UPLOADS_BUCKET: ${self:service}-${self:provider.stage}-uploads
     RESULTS_BUCKET: ${self:service}-${self:provider.stage}-results
     STEP_FUNCTION_ARN: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
-    # 🔐 URLs permitidas para CORS (separadas por coma)
+    # URLs permitidas para CORS (separadas por coma)
     ALLOWED_ORIGINS: ${self:custom.allowedOrigins.${self:provider.stage}}
+    # Databricks se carga dinámicamente desde AWS Parameter Store
+    # Ver: functions/processor/utils/parameterStore.js
 
 # Funciones Lambda
 functions:
@@ -129,6 +131,10 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - kms:Decrypt
+        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+      - Effect: Allow
+        Action:
           - s3:GetObject
           - s3:PutObject
         Resource:
@@ -139,6 +145,10 @@ functions:
           - dynamodb:UpdateItem
           - dynamodb:GetItem
         Resource: !GetAtt JobsTable.Arn
+      - Effect: Allow
+        Action:
+          - ssm:GetParameters
+        Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/invenadro/databricks/*'
 
   statusChecker:
     name: ${self:service}-${self:provider.stage}-status-checker

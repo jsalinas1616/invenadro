@@ -1,6 +1,7 @@
 const { DynamoDBClient, UpdateItemCommand } = require('@aws-sdk/client-dynamodb');
 const { S3Client, GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { procesarExcelConConfiguracion } = require('./invenadroCalc_modular');
+const { initializeDatabricks } = require('./utils/parameterStore');
 
 const dynamoDB = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-east-1' });
 const s3 = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
@@ -8,6 +9,16 @@ const s3 = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
 exports.handler = async (event) => {
     try {
         console.log('Evento recibido en lambda-processor:', JSON.stringify(event, null, 2));
+        
+        // INICIALIZAR DATABRICKS desde Parameter Store
+        console.log('[INIT] Inicializando credenciales de Databricks...');
+        try {
+            await initializeDatabricks();
+            console.log('[INIT] Databricks inicializado correctamente');
+        } catch (error) {
+            console.error('[INIT] Error inicializando Databricks:', error.message);
+            console.warn('[INIT] Continuando sin Databricks (ventas en 0)');
+        }
         
         // ✅ VALIDAR VARIABLES DE ENTORNO
         const JOBS_TABLE = process.env.JOBS_TABLE;
