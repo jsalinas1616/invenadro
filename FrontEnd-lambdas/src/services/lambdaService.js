@@ -25,8 +25,12 @@ console.log(`🌍 Lambda Service configurado para ambiente: ${env.name} (${env.d
 console.log(`📡 API Gateway: ${config.apiGatewayBaseUrl}`);
 
 class LambdaService {
+  constructor() {
+    this.baseURL = config.apiGatewayBaseUrl;
+  }
+
   /**
-   * 🔐 Obtener headers con autenticación JWT
+   * Obtener headers con autenticación JWT
    * Esta función obtiene el token de Cognito y lo agrega a los headers
    */
   async getAuthHeaders(additionalHeaders = {}) {
