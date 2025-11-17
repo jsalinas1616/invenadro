@@ -9,11 +9,18 @@ const axios = require('axios');
 
 // Variables de configuración globales
 let workspaceUrl, accessToken, warehouseId, orgId, enabled;
+let configValidated = false; // Flag para validar solo una vez
 
 /**
  * Valida que todas las variables de entorno necesarias estén configuradas
+ * LAZY INITIALIZATION: Se llama la primera vez que se usa, no al importar
  */
 const validateConfig = () => {
+  // Si ya se validó, no hacerlo de nuevo
+  if (configValidated) {
+    return;
+  }
+  
   workspaceUrl = process.env.DATABRICKS_WORKSPACE_URL;
   accessToken = process.env.DATABRICKS_ACCESS_TOKEN;
   warehouseId = process.env.DATABRICKS_WAREHOUSE_ID;
@@ -38,6 +45,8 @@ const validateConfig = () => {
     enabled = true;
     console.log('Servicio de Databricks configurado correctamente');
   }
+  
+  configValidated = true;
 };
 
 /**
@@ -47,6 +56,9 @@ const validateConfig = () => {
  * @returns {Promise<Object>} Resultado de la query
  */
 const executeQuery = async (query, options = {}) => {
+    // Validar configuración la primera vez que se usa (lazy initialization)
+    validateConfig();
+    
     if (!enabled) {
       throw new Error('Servicio de Databricks no está configurado');
     }
@@ -337,8 +349,8 @@ const getControlados = async (filters = {}) => {
   }
 };
 
-// Inicializar configuración al cargar el módulo
-validateConfig();
+// NO inicializar aquí - se usa lazy initialization en executeQuery()
+// validateConfig() se llama la primera vez que se ejecuta executeQuery()
 
 // Exportar funciones
 module.exports = {
