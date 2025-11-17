@@ -110,6 +110,8 @@ functions:
     handler: functions/client-separator/index.handler
     timeout: 900
     memorySize: 1024
+    environment:
+      PROCESSOR_STEP_FUNCTION_ARN: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -122,6 +124,10 @@ functions:
         Action:
           - dynamodb:UpdateItem
         Resource: !GetAtt JobsTable.Arn
+      - Effect: Allow
+        Action:
+          - states:StartExecution
+        Resource: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
 
   processor:
     name: ${self:service}-${self:provider.stage}-processor

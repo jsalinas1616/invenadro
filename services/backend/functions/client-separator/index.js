@@ -273,8 +273,11 @@ async function procesarMultiplesClientes(event, clientesInfo, fileBuffer) {
         console.log(`  ✅ Archivo subido: ${clienteKey}`);
         
         // Crear ejecución individual
-        const stepFunctionArn = process.env.PROCESSOR_STEP_FUNCTION_ARN || 
-            'arn:aws:states:us-east-1:975130647458:stateMachine:FactorRedondeo';
+        const stepFunctionArn = process.env.PROCESSOR_STEP_FUNCTION_ARN;
+        
+        if (!stepFunctionArn) {
+            throw new Error('❌ PROCESSOR_STEP_FUNCTION_ARN no está configurado');
+        }
         
         const executionInput = {
             s3Bucket: s3Bucket,
