@@ -87,21 +87,61 @@ const formFields = {
 };
 
 const CustomAuthenticator = ({ children }) => {
+  console.log('🚀 [CustomAuthenticator] Componente montado');
+  
   // Hook para ocultar automáticamente la pantalla de verificación
   useEffect(() => {
+    console.log('🔍 [useEffect-hideVerify] Iniciando búsqueda de pantalla de verificación...');
+    
     const hideVerifyScreen = () => {
-      // Buscar cualquier elemento que contenga "Verificar contacto"
+      // Buscar el authenticator y su estado
+      const authenticator = document.querySelector('[data-amplify-authenticator]');
+      const isAuthenticated = authenticator?.getAttribute('data-amplify-authenticated');
+      console.log(`📊 [hideVerify] Authenticator estado: ${isAuthenticated ? 'AUTENTICADO' : 'NO AUTENTICADO'}`);
+      
+      // Buscar formulario de verifyUser específicamente
+      const verifyForm = document.querySelector('form[data-amplify-authenticator-verifyuser]');
+      if (verifyForm) {
+        console.log('🚨 [hideVerify] ¡Formulario de verificación ENCONTRADO!');
+        verifyForm.style.display = 'none';
+        verifyForm.style.visibility = 'hidden';
+        verifyForm.style.opacity = '0';
+        verifyForm.style.height = '0';
+        verifyForm.style.position = 'absolute';
+        verifyForm.style.left = '-9999px';
+        console.log('✅ [hideVerify] Formulario de verificación OCULTADO con CSS agresivo');
+      }
+      
+      // Buscar cualquier elemento que contenga textos relacionados con verificación
+      const verifyTexts = ['Verificar contacto', 'información de contacto verificada', 'recuperación de la cuenta'];
       const verifyElements = document.querySelectorAll('[data-amplify-authenticator] *');
+      let foundCount = 0;
+      
       verifyElements.forEach(el => {
-        if (el.textContent && el.textContent.includes('Verificar contacto')) {
-          // Ocultar el contenedor padre
-          let parent = el.closest('[data-amplify-router-content]');
-          if (parent) {
-            parent.style.display = 'none';
-            console.log('Pantalla de verificación ocultada automáticamente');
+        if (el.textContent) {
+          const hasVerifyText = verifyTexts.some(text => el.textContent.includes(text));
+          if (hasVerifyText) {
+            foundCount++;
+            let parent = el.closest('[data-amplify-router-content]');
+            if (parent) {
+              parent.style.display = 'none';
+              console.log(`🚫 [hideVerify] Elemento ${foundCount} con texto de verificación ocultado`);
+            }
           }
         }
       });
+      
+      // También buscar y hacer click automático en "Omitir"
+      const skipButton = document.querySelector('button[type="button"]');
+      if (skipButton && skipButton.textContent && skipButton.textContent.includes('Omitir')) {
+        console.log('🔘 [hideVerify] Botón "Omitir" encontrado, haciendo click automático...');
+        skipButton.click();
+        foundCount++;
+      }
+      
+      if (foundCount === 0) {
+        console.log('✅ [hideVerify] No se encontró pantalla de verificación en el DOM');
+      }
     };
 
     // Ejecutar inmediatamente y luego observar cambios
@@ -109,24 +149,42 @@ const CustomAuthenticator = ({ children }) => {
     const interval = setInterval(hideVerifyScreen, 100);
 
     // Limpiar intervalo después de 5 segundos
-    setTimeout(() => clearInterval(interval), 5000);
+    setTimeout(() => {
+      clearInterval(interval);
+      console.log('⏱️ [hideVerify] Intervalo detenido después de 5 segundos');
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
   // Hook para insertar Header/Footer SOLO en pantalla de login
   useEffect(() => {
+    console.log('🎨 [useEffect-insertHeader] Iniciando inserción de Header/Footer...');
+    
     const insertCustomHeader = () => {
       // Solo insertar si NO está autenticado
       const authenticator = document.querySelector('[data-amplify-authenticator]:not([data-amplify-authenticated])');
-      if (!authenticator) return;
+      if (!authenticator) {
+        console.log('⚠️ [insertHeader] Authenticator no encontrado o ya autenticado');
+        return;
+      }
+      
+      console.log('✅ [insertHeader] Authenticator NO autenticado encontrado');
 
       // Buscar si ya existe el header personalizado
-      if (document.querySelector('.auth-header')) return;
+      if (document.querySelector('.auth-header')) {
+        console.log('ℹ️ [insertHeader] Header ya existe, saltando...');
+        return;
+      }
 
       // Buscar el formulario de login
       const form = authenticator.querySelector('[data-amplify-form]');
-      if (!form) return;
+      if (!form) {
+        console.log('⚠️ [insertHeader] Formulario no encontrado');
+        return;
+      }
+      
+      console.log('📝 [insertHeader] Formulario encontrado, insertando header y footer...');
 
       // Crear e insertar header
       const headerDiv = document.createElement('div');
@@ -151,12 +209,17 @@ const CustomAuthenticator = ({ children }) => {
         </div>
       `;
       form.appendChild(footerDiv);
+      
+      console.log('✅ [insertHeader] Header y Footer insertados correctamente');
     };
 
     // Ejecutar varias veces para asegurar que se inserte
     insertCustomHeader();
     const interval = setInterval(insertCustomHeader, 200);
-    setTimeout(() => clearInterval(interval), 3000);
+    setTimeout(() => {
+      clearInterval(interval);
+      console.log('⏱️ [insertHeader] Intervalo detenido después de 3 segundos');
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);
