@@ -131,6 +131,14 @@ const CustomAuthenticator = ({ children }) => {
       components={components}
       variation="modal"
       socialProviders={[]}
+      loginMechanisms={['email']}
+      // Omitir pantalla de verificación de contacto
+      services={{
+        async handleVerifyUserAttribute() {
+          // Omitir verificación - ir directo a la app
+          return;
+        }
+      }}
     >
       {({ signOut, user }) => {
         return (

@@ -53,3 +53,5 @@ Resources:
       WriteAttributes:
         - email
         - name
+      # Omitir pantalla de verificación de contacto después del login
+      EnableTokenRevocation: true
