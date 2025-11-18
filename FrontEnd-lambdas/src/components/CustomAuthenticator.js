@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Authenticator, translations } from '@aws-amplify/ui-react';
 import { I18n } from 'aws-amplify/utils';
-import { fetchAuthSession } from 'aws-amplify/auth';
 import '../styles/CustomAuth.css';
 
 // Configurar traducciones al español
@@ -88,14 +87,10 @@ const formFields = {
 };
 
 const CustomAuthenticator = ({ children }) => {
-  console.log('🚀 [CustomAuthenticator] Componente montado');
-  
-  // NOTA: El workaround para ocultar la pantalla de verificación fue ELIMINADO
-  // Ahora el flujo funciona correctamente:
-  // 1. Usuario hace login (primera vez)
-  // 2. Cognito muestra pantalla "Verificar contacto" si email no verificado
-  // 3. Usuario hace click en "Verificar" → Recibe código por email → Lo ingresa
-  // 4. email_verified: true → Logins futuros NO muestran la pantalla
+  // ✅ SOLUCIÓN DEFINITIVA aplicada en backend (cognito.yml)
+  // - AutoVerifiedAttributes removido
+  // - La pantalla "Verificar contacto" YA NO APARECE
+  // - No se necesita workaround JavaScript
 
   // Hook para insertar Header/Footer SOLO en pantalla de login
   useEffect(() => {
@@ -133,44 +128,6 @@ const CustomAuthenticator = ({ children }) => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, []);
-
-  // Hook para AUTO-SKIPEAR la pantalla de "Verificar contacto"
-  useEffect(() => {
-    console.log('[AUTH] Iniciando monitor para auto-skipear verificación...');
-    
-    const interval = setInterval(async () => {
-      // Buscar si está en la pantalla de "Verificar contacto"
-      const verifyScreen = document.querySelector('[data-amplify-authenticator-verifyuser]');
-      
-      if (verifyScreen) {
-        console.log('[AUTH] ⚠️ Pantalla "Verificar contacto" detectada - AUTO-SKIPEANDO...');
-        
-        // Buscar el botón "Omitir" y hacer click automáticamente
-        const skipButton = Array.from(document.querySelectorAll('button')).find(
-          btn => btn.textContent.includes('Omitir') || btn.textContent.includes('Skip')
-        );
-        
-        if (skipButton) {
-          console.log('[AUTH] ✅ Click en "Omitir" automático');
-          skipButton.click();
-        } else {
-          console.log('[AUTH] Botón "Omitir" no encontrado, verificando sesión...');
-          // Si no hay botón "Omitir", intentar verificar la sesión directamente
-          try {
-            const session = await fetchAuthSession({ forceRefresh: true });
-            if (session.tokens) {
-              console.log('[AUTH] ✅ Sesión válida detectada, forzando recarga...');
-              window.location.reload();
-            }
-          } catch (error) {
-            console.error('[AUTH] ❌ Error verificando sesión:', error);
-          }
-        }
-      }
-    }, 300); // Verificar cada 300ms
-
-    return () => clearInterval(interval);
   }, []);
 
   return (
