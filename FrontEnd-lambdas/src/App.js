@@ -1091,7 +1091,7 @@ function App() {
                   height="70"
                   className="me-3"
                 />
-                <span className="fw-bold">Sistema de Optimización de Factores de Redondeo - Inicio de Sesión</span>
+                {/* <span className="fw-bold">Sistema de Optimización de Factores de Redondeo - Inicio de Sesión</span> */}
               </Navbar.Brand>
               
               {/* Usuario y Logout */}

@@ -1,6 +1,6 @@
 {
-  "short_name": "Factor Redondeo",
-  "name": "Sistema de Optimización de Factores de Redondeo",
+  "short_name": "Invenadro",
+  "name": "invenadro",
   "description": "Sistema profesional para optimización de inventario con algoritmo de factor de redondeo dinámico",
   "icons": [
     {

@@ -760,7 +760,7 @@ function App() {
               <Card className="shadow-sm">
                 <Card.Body className="text-center py-5">
                   <FaChartLine className="text-muted mb-3" size="3em" />
-                  <h5>¡Bienvenido al Sistema de Optimización!</h5>
+                  <h5>¡Bienvenido a Invenadro!</h5>
                   <p className="text-muted">
                     Selecciona un archivo Excel y configura los parámetros para comenzar.
                   </p>

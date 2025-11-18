@@ -191,8 +191,8 @@ const CustomAuthenticator = ({ children }) => {
       headerDiv.className = 'auth-header';
       headerDiv.innerHTML = `
         <img src="/logo-invenadro.png" alt="Invenadro Logo" class="auth-logo"/>
-        <h2 class="auth-title">Sistema de Optimización</h2>
-        <p class="auth-subtitle">Panel de control</p>
+        <h2 class="auth-title">Invenadro</h2>
+        <p class="auth-subtitle">Control de acceso</p>
       `;
       form.prepend(headerDiv);
 

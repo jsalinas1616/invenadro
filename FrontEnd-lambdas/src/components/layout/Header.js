@@ -14,7 +14,7 @@ import { Navbar, Container } from 'react-bootstrap';
  * @returns {JSX.Element} Header component
  */
 const Header = ({ 
-  title = "Sistema de Optimización de Factores de Redondeo - Inicio de Sesión",
+  title = "Invenadro",
   version = "v 1.0 - Lambda"
 }) => {
   return (
