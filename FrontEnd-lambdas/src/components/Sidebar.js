@@ -4,6 +4,7 @@ import { FaHospital, FaStore, FaChevronRight, FaChevronDown, FaCalculator, FaTh 
 import './Sidebar.css';
 
 const Sidebar = ({ activeModule, onModuleChange, visible }) => {
+  const [independientesExpanded, setIndependientesExpanded] = useState(false); // Colapsado por default
   const [farmatodoExpanded, setFarmatodoExpanded] = useState(true); // Expandido por default
 
   return (
@@ -15,28 +16,37 @@ const Sidebar = ({ activeModule, onModuleChange, visible }) => {
         </div>
       </div>
 
-      {/* Farmacias Independientes */}
+      {/* Farmacias Independientes (Colapsable) */}
       <div className="sidebar-section">
-        <div className="sidebar-section-title">
-          <FaHospital className="me-2" />
-          FARMACIAS INDEPENDIENTES
+        <div 
+          className="sidebar-section-title clickable"
+          onClick={() => setIndependientesExpanded(!independientesExpanded)}
+        >
+          <div className="d-flex align-items-center">
+            <FaHospital className="me-2" />
+            FARMACIAS INDEPENDIENTES
+          </div>
+          {independientesExpanded ? <FaChevronDown /> : <FaChevronRight />}
         </div>
-        <Nav className="flex-column sidebar-nav">
-          <Nav.Link 
-            className={activeModule === 'ind-spp' ? 'active' : ''}
-            onClick={() => onModuleChange('ind-spp')}
-          >
-            <FaCalculator className="me-2" />
-            SPP
-          </Nav.Link>
-          <Nav.Link 
-            className={activeModule === 'ind-ipp' ? 'active' : ''}
-            onClick={() => onModuleChange('ind-ipp')}
-          >
-            <FaCalculator className="me-2" />
-            IPP
-          </Nav.Link>
-        </Nav>
+        
+        {independientesExpanded && (
+          <Nav className="flex-column sidebar-nav">
+            <Nav.Link 
+              className={activeModule === 'ind-spp' ? 'active' : ''}
+              onClick={() => onModuleChange('ind-spp')}
+            >
+              <FaCalculator className="me-2" />
+              SPP
+            </Nav.Link>
+            <Nav.Link 
+              className={activeModule === 'ind-ipp' ? 'active' : ''}
+              onClick={() => onModuleChange('ind-ipp')}
+            >
+              <FaCalculator className="me-2" />
+              IPP
+            </Nav.Link>
+          </Nav>
+        )}
       </div>
 
       {/* Farmatodo (Expandible) */}
