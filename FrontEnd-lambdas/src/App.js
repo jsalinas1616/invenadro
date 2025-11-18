@@ -1081,34 +1081,58 @@ function App() {
     <CustomAuthenticator>
       {({ signOut, user }) => (
         <div className="min-vh-100 app-background">
-          {/* Header */}
-          <Navbar variant="dark" className="navbar-primary shadow-sm">
+          {/* Header Moderno */}
+          <Navbar className="navbar-modern shadow-lg">
             <Container fluid>
-              <Navbar.Brand className="d-flex align-items-center">
-                <img 
-                  src="/logo-invenadro.png" 
-                  alt="Invenadro Logo" 
-                  height="70"
-                  className="me-3"
-                />
-                {/* <span className="fw-bold">Sistema de Optimización de Factores de Redondeo - Inicio de Sesión</span> */}
+              {/* Logo y Título */}
+              <Navbar.Brand className="navbar-brand-modern">
+                <div className="d-flex align-items-center gap-3">
+                  <div className="logo-container">
+                    <img 
+                      src="/logo-invenadro.png" 
+                      alt="Invenadro Logo" 
+                      height="45"
+                      className="logo-img"
+                    />
+                  </div>
+                  <div className="brand-text">
+                    <h4 className="mb-0 fw-bold text-white">Invenadro</h4>
+                    <small className="text-white-50">Sistema de Optimización</small>
+                  </div>
+                </div>
               </Navbar.Brand>
               
+              {/* Separador */}
+              <div className="navbar-separator"></div>
+              
               {/* Usuario y Logout */}
-              <div className="d-flex align-items-center gap-3">
-                {/* <span className="badge badge-corporate">v 1.0 - Lambda</span> */}
-                <div className="d-flex align-items-center gap-2 text-white">
-                  <FaUser />
-                  <span>{user?.signInDetails?.loginId || user?.username || 'Usuario'}</span>
+              <div className="d-flex align-items-center gap-4">
+                {/* Badge de versión */}
+                <span className="badge-modern">
+                  <span className="badge-icon">⚡</span>
+                  v2.0
+                </span>
+                
+                {/* Info del usuario */}
+                <div className="user-info">
+                  <div className="user-avatar">
+                    <FaUser />
+                  </div>
+                  <div className="user-details">
+                    <div className="user-name">
+                      {user?.signInDetails?.loginId || user?.username || 'Usuario'}
+                    </div>
+                    <div className="user-role">Administrador</div>
+                  </div>
                 </div>
+                
+                {/* Botón Logout moderno */}
                 <Button 
-                  variant="outline-light" 
-                  size="sm" 
+                  className="btn-logout-modern"
                   onClick={signOut}
-                  className="d-flex align-items-center gap-2"
                 >
-                  <FaSignOutAlt />
-                  Cerrar Sesión
+                  <FaSignOutAlt className="me-2" />
+                  Salir
                 </Button>
               </div>
             </Container>

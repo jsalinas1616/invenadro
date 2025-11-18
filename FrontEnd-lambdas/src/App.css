@@ -47,7 +47,209 @@
   --medium-green: #6b8f32;
 }
 
-/* Override Bootstrap navbar */
+/* ========================================
+   NAVBAR MODERNO CON GLASSMORPHISM
+   ======================================== */
+
+.navbar-modern {
+  background: linear-gradient(135deg, #4a6b1d 0%, #648a26 50%, #7ba32e 100%) !important;
+  border: none !important;
+  padding: 1rem 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto glassmorphism sutil */
+.navbar-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+/* Logo container con hover effect */
+.logo-container {
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.05) rotate(2deg);
+}
+
+.logo-img {
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+}
+
+/* Texto de marca */
+.brand-text h4 {
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.brand-text small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Separador vertical elegante */
+.navbar-separator {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255,255,255,0.3) 20%,
+    rgba(255,255,255,0.3) 80%,
+    transparent
+  );
+  margin: 0 2rem;
+}
+
+/* Badge moderno */
+.badge-modern {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.badge-modern:hover {
+  background: rgba(255,255,255,0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.badge-icon {
+  font-size: 1rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Info del usuario */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+.user-info:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.25);
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffffff20, #ffffff10);
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-name {
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.user-role {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Botón Logout moderno */
+.btn-logout-modern {
+  background: rgba(255,255,255,0.15) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3) !important;
+  color: white !important;
+  padding: 0.6rem 1.5rem !important;
+  border-radius: 25px !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.btn-logout-modern:hover {
+  background: rgba(255,255,255,0.25) !important;
+  border-color: rgba(255,255,255,0.4) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-logout-modern:active {
+  transform: translateY(0);
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .navbar-separator {
+    display: none;
+  }
+  
+  .brand-text {
+    display: none;
+  }
+  
+  .user-details {
+    display: none;
+  }
+  
+  .badge-modern {
+    display: none;
+  }
+  
+  .navbar-modern {
+    padding: 0.75rem 0 !important;
+  }
+  
+  .user-info {
+    padding: 0.5rem;
+  }
+}
+
+/* Override Bootstrap navbar (mantener para compatibilidad) */
 .navbar-primary {
   background-color: var(--primary-green) !important;
 }

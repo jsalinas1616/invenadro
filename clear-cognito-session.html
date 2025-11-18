@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpiar Sesión</title>
+</head>
+<body>
+    <h1>Limpiando sesión de Cognito...</h1>
+    <script>
+        // Borrar TODO de localStorage
+        localStorage.clear();
+        
+        // Borrar TODO de sessionStorage
+        sessionStorage.clear();
+        
+        // Borrar todas las cookies
+        document.cookie.split(";").forEach(function(c) { 
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        });
+        
+        alert("Sesión limpiada. Ahora cierra esta pestaña y abre la app en un nuevo tab.");
+    </script>
+</body>
+</html>
