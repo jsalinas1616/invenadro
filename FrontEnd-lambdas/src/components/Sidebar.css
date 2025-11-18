@@ -21,7 +21,21 @@
 }
 
 .sidebar-header {
-  padding: 1.5rem 1.25rem 0.5rem;
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-header-icon {
+  color: #648a26;
+  font-size: 1.1rem;
+}
+
+.sidebar-header-title {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
 }
 
 .sidebar-section {

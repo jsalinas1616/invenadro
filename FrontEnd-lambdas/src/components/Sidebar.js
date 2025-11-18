@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Nav } from 'react-bootstrap';
-import { FaHospital, FaStore, FaChevronRight, FaChevronDown, FaCalculator } from 'react-icons/fa';
+import { FaHospital, FaStore, FaChevronRight, FaChevronDown, FaCalculator, FaTh } from 'react-icons/fa';
 import './Sidebar.css';
 
 const Sidebar = ({ activeModule, onModuleChange, visible }) => {
@@ -9,7 +9,10 @@ const Sidebar = ({ activeModule, onModuleChange, visible }) => {
   return (
     <div className={`sidebar ${visible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
       <div className="sidebar-header">
-        <h6 className="text-muted mb-3">MÓDULOS</h6>
+        <div className="d-flex align-items-center gap-2">
+          <FaTh className="sidebar-header-icon" />
+          <h6 className="mb-0 sidebar-header-title">MÓDULOS</h6>
+        </div>
       </div>
 
       {/* Farmacias Independientes */}

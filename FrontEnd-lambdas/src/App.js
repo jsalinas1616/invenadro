@@ -1121,18 +1121,18 @@ function App() {
               
               {/* Logo y Título */}
               <Navbar.Brand className="navbar-brand-modern">
-                <div className="d-flex align-items-center gap-3">
-                  <div className="logo-container">
+                <div className="d-flex align-items-center gap-2">
+                  <div className="logo-container-compact">
                     <img 
                       src="/logo-invenadro.png" 
                       alt="Invenadro Logo" 
-                      height="45"
+                      height="35"
                       className="logo-img"
                     />
                   </div>
                   <div className="brand-text">
-                    <h4 className="mb-0 fw-bold text-white">Invenadro</h4>
-                    <small className="text-white-50">Sistema de Optimización</small>
+                    <h5 className="mb-0 fw-bold text-white">Invenadro</h5>
+                    <small className="text-white-50 d-block" style={{ fontSize: '0.7rem', marginTop: '-2px' }}>Sistema de Optimización</small>
                   </div>
                 </div>
               </Navbar.Brand>
@@ -1142,12 +1142,6 @@ function App() {
               
               {/* Usuario y Logout */}
               <div className="d-flex align-items-center gap-4">
-                {/* Badge de versión */}
-                <span className="badge-modern">
-                  <span className="badge-icon">⚡</span>
-                  v2.0
-                </span>
-                
                 {/* Info del usuario */}
                 <div className="user-info">
                   <div className="user-avatar">
