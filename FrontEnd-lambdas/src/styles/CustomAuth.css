@@ -156,19 +156,9 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
   display: none !important;
 }
 
-/* OCULTAR PANTALLA DE VERIFICAR CONTACTO COMPLETAMENTE */
-/* NOTA: Solo ocultamos la pantalla específica de verificación de email */
-/* NO ocultamos pantallas de cambio de contraseña ni otros flujos */
-[data-amplify-authenticator] form[data-amplify-authenticator-verifyuser],
-[data-amplify-authenticator] [data-amplify-router="verifyUser"] {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  position: absolute !important;
-  left: -9999px !important;
-}
+/* NOTA: CSS para ocultar pantalla de verificación fue ELIMINADO */
+/* Ahora el flujo de verificación funciona correctamente */
+/* Los usuarios verán la pantalla de verificación SOLO la primera vez si su email no está verificado */
 
 /* Ocultar headings duplicados */
 [data-amplify-authenticator] [data-amplify-heading],

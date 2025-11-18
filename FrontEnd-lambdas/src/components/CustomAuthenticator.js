@@ -89,110 +89,30 @@ const formFields = {
 const CustomAuthenticator = ({ children }) => {
   console.log('🚀 [CustomAuthenticator] Componente montado');
   
-  // Hook para ocultar automáticamente la pantalla de verificación
-  useEffect(() => {
-    console.log('🔍 [useEffect-hideVerify] Iniciando búsqueda de pantalla de verificación...');
-    
-    const hideVerifyScreen = () => {
-      // Buscar el authenticator y su estado
-      const authenticator = document.querySelector('[data-amplify-authenticator]');
-      const isAuthenticated = authenticator?.getAttribute('data-amplify-authenticated');
-      console.log(`📊 [hideVerify] Authenticator estado: ${isAuthenticated ? 'AUTENTICADO' : 'NO AUTENTICADO'}`);
-      
-      // Buscar formulario de verifyUser específicamente
-      const verifyForm = document.querySelector('form[data-amplify-authenticator-verifyuser]');
-      if (verifyForm) {
-        console.log('🚨 [hideVerify] ¡Formulario de verificación ENCONTRADO!');
-        verifyForm.style.display = 'none';
-        verifyForm.style.visibility = 'hidden';
-        verifyForm.style.opacity = '0';
-        verifyForm.style.height = '0';
-        verifyForm.style.position = 'absolute';
-        verifyForm.style.left = '-9999px';
-        console.log('✅ [hideVerify] Formulario de verificación OCULTADO con CSS agresivo');
-      }
-      
-      // Buscar cualquier elemento que contenga textos relacionados con verificación
-      const verifyTexts = ['Verificar contacto', 'información de contacto verificada', 'recuperación de la cuenta'];
-      const verifyElements = document.querySelectorAll('[data-amplify-authenticator] *');
-      let foundCount = 0;
-      
-      verifyElements.forEach(el => {
-        if (el.textContent) {
-          const hasVerifyText = verifyTexts.some(text => el.textContent.includes(text));
-          if (hasVerifyText) {
-            foundCount++;
-            let parent = el.closest('[data-amplify-router-content]');
-            if (parent) {
-              parent.style.display = 'none';
-              console.log(`🚫 [hideVerify] Elemento ${foundCount} con texto de verificación ocultado`);
-            }
-          }
-        }
-      });
-      
-      // También buscar y hacer click automático en "Omitir"
-      const skipButton = document.querySelector('button[type="button"]');
-      if (skipButton && skipButton.textContent && skipButton.textContent.includes('Omitir')) {
-        console.log('🔘 [hideVerify] Botón "Omitir" encontrado, haciendo click automático...');
-        skipButton.click();
-        foundCount++;
-      }
-      
-      if (foundCount === 0) {
-        console.log('✅ [hideVerify] No se encontró pantalla de verificación en el DOM');
-      }
-    };
-
-    // Ejecutar inmediatamente y luego observar cambios
-    hideVerifyScreen();
-    const interval = setInterval(hideVerifyScreen, 100);
-
-    // Limpiar intervalo después de 5 segundos
-    setTimeout(() => {
-      clearInterval(interval);
-      console.log('⏱️ [hideVerify] Intervalo detenido después de 5 segundos');
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
+  // NOTA: El workaround para ocultar la pantalla de verificación fue ELIMINADO
+  // Ahora el flujo funciona correctamente:
+  // 1. Usuario hace login (primera vez)
+  // 2. Cognito muestra pantalla "Verificar contacto" si email no verificado
+  // 3. Usuario hace click en "Verificar" → Recibe código por email → Lo ingresa
+  // 4. email_verified: true → Logins futuros NO muestran la pantalla
 
   // Hook para insertar Header/Footer SOLO en pantalla de login
   useEffect(() => {
-    console.log('🎨 [useEffect-insertHeader] Iniciando inserción de Header/Footer...');
-    
-    const insertCustomHeader = () => {
-      // Solo insertar si NO está autenticado
+    // Ejecutar después de que Amplify UI renderice (un solo timeout)
+    const timer = setTimeout(() => {
       const authenticator = document.querySelector('[data-amplify-authenticator]:not([data-amplify-authenticated])');
-      if (!authenticator) {
-        console.log('⚠️ [insertHeader] Authenticator no encontrado o ya autenticado');
-        return;
-      }
-      
-      console.log('✅ [insertHeader] Authenticator NO autenticado encontrado');
+      if (!authenticator || document.querySelector('.auth-header')) return;
 
-      // Buscar si ya existe el header personalizado
-      if (document.querySelector('.auth-header')) {
-        console.log('ℹ️ [insertHeader] Header ya existe, saltando...');
-        return;
-      }
-
-      // Buscar el formulario de login
       const form = authenticator.querySelector('[data-amplify-form]');
-      if (!form) {
-        console.log('⚠️ [insertHeader] Formulario no encontrado');
-        return;
-      }
-      
-      console.log('📝 [insertHeader] Formulario encontrado, insertando header y footer...');
+      if (!form) return;
 
       // Crear e insertar header
       const headerDiv = document.createElement('div');
       headerDiv.className = 'auth-header';
       headerDiv.innerHTML = `
         <img src="/logo-invenadro.png" alt="Invenadro Logo" class="auth-logo"/>
-        <h2 class="auth-title">Invenadro</h2>
-        <p class="auth-subtitle">Control de acceso</p>
+        <h2 class="auth-title">Sistema de Optimización</h2>
+        <p class="auth-subtitle">Panel de control</p>
       `;
       form.prepend(headerDiv);
 
@@ -209,19 +129,9 @@ const CustomAuthenticator = ({ children }) => {
         </div>
       `;
       form.appendChild(footerDiv);
-      
-      console.log('✅ [insertHeader] Header y Footer insertados correctamente');
-    };
+    }, 500);
 
-    // Ejecutar varias veces para asegurar que se inserte
-    insertCustomHeader();
-    const interval = setInterval(insertCustomHeader, 200);
-    setTimeout(() => {
-      clearInterval(interval);
-      console.log('⏱️ [insertHeader] Intervalo detenido después de 3 segundos');
-    }, 3000);
-
-    return () => clearInterval(interval);
+    return () => clearTimeout(timer);
   }, []);
 
   return (

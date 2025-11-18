@@ -3,8 +3,12 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: ${self:service}-${self:provider.stage}-users
-      # Sin verificación automática - NO queremos pantalla de "Verificar contacto"
-      AutoVerifiedAttributes: []
+      # Verificación de email habilitada - Los usuarios verifican su email UNA VEZ
+      # - Al registrarse: reciben código de verificación por email
+      # - Al login con email no verificado: ven pantalla "Verificar contacto" (solo primera vez)
+      # - Después de verificar: email_verified=true, no vuelven a ver la pantalla
+      AutoVerifiedAttributes:
+        - email
       UsernameAttributes:
         - email
       Schema:
