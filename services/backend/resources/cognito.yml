@@ -30,7 +30,7 @@ Resources:
         - SOFTWARE_TOKEN_MFA
       AccountRecoverySetting:
         RecoveryMechanisms:
-          - Name: verified_email
+          - Name: admin_only
             Priority: 1
       # UserPoolTags removidos - Serverless Framework los agrega automáticamente desde provider.tags
 
