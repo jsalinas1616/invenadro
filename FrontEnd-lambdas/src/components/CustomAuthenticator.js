@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Authenticator, translations } from '@aws-amplify/ui-react';
 import { I18n } from 'aws-amplify/utils';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import '../styles/CustomAuth.css';
 
 // Configurar traducciones al español
@@ -132,6 +133,44 @@ const CustomAuthenticator = ({ children }) => {
     }, 500);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // Hook para AUTO-SKIPEAR la pantalla de "Verificar contacto"
+  useEffect(() => {
+    console.log('[AUTH] Iniciando monitor para auto-skipear verificación...');
+    
+    const interval = setInterval(async () => {
+      // Buscar si está en la pantalla de "Verificar contacto"
+      const verifyScreen = document.querySelector('[data-amplify-authenticator-verifyuser]');
+      
+      if (verifyScreen) {
+        console.log('[AUTH] ⚠️ Pantalla "Verificar contacto" detectada - AUTO-SKIPEANDO...');
+        
+        // Buscar el botón "Omitir" y hacer click automáticamente
+        const skipButton = Array.from(document.querySelectorAll('button')).find(
+          btn => btn.textContent.includes('Omitir') || btn.textContent.includes('Skip')
+        );
+        
+        if (skipButton) {
+          console.log('[AUTH] ✅ Click en "Omitir" automático');
+          skipButton.click();
+        } else {
+          console.log('[AUTH] Botón "Omitir" no encontrado, verificando sesión...');
+          // Si no hay botón "Omitir", intentar verificar la sesión directamente
+          try {
+            const session = await fetchAuthSession({ forceRefresh: true });
+            if (session.tokens) {
+              console.log('[AUTH] ✅ Sesión válida detectada, forzando recarga...');
+              window.location.reload();
+            }
+          } catch (error) {
+            console.error('[AUTH] ❌ Error verificando sesión:', error);
+          }
+        }
+      }
+    }, 300); // Verificar cada 300ms
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
