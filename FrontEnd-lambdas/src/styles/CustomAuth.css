@@ -34,19 +34,32 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
 
 [data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-form],
 [data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-router] {
-  max-width: 420px !important;
+  max-width: 500px !important;
   width: 90% !important;
   margin: 0 auto !important;
   background: #ffffff !important;
   border: 1px solid #e5e5e5 !important;
-  border-radius: 16px !important;
-  padding: 3rem 2.5rem !important;
+  border-radius: 20px !important;
+  padding: 3rem 3rem !important;
   box-shadow: 
     0 4px 6px rgba(0, 0, 0, 0.05),
     0 10px 20px rgba(0, 0, 0, 0.08) !important;
   position: relative !important;
   z-index: 10 !important;
   animation: cardSlideIn 0.4s ease-out;
+}
+
+/* Remover padding del contenedor interno */
+[data-amplify-authenticator] [data-amplify-router-content] {
+  padding: 0 !important;
+}
+
+/* Fieldset sin padding ni background */
+[data-amplify-authenticator] fieldset {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
 }
 
 @keyframes cardSlideIn {
@@ -66,27 +79,28 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
 
 .auth-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+  padding: 1rem 0;
 }
 
 .auth-logo {
-  height: 70px;
+  height: 65px;
   width: auto;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   opacity: 0.95;
 }
 
 .auth-title {
   color: #2d3748;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 700;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
   letter-spacing: -0.5px;
 }
 
 .auth-subtitle {
   color: #718096;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 400;
   margin: 0;
 }
@@ -150,7 +164,7 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
 [data-amplify-authenticator] [data-amplify-field],
 [data-amplify-authenticator] [data-amplify-fieldset] {
   display: block !important;
-  margin-bottom: 1.25rem !important;
+  margin-bottom: 1.75rem !important;
   position: relative !important;
 }
 
@@ -173,13 +187,13 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
 [data-amplify-authenticator] input {
   display: block !important;
   width: 100% !important;
-  height: 48px !important;
-  padding: 0.75rem 1rem !important;
-  font-size: 0.95rem !important;
+  height: 52px !important;
+  padding: 0.875rem 1.125rem !important;
+  font-size: 1rem !important;
   color: #2d3748 !important;
   background: #f7fafc !important;
   border: 1.5px solid #e2e8f0 !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
   transition: all 0.2s ease !important;
   box-sizing: border-box !important;
 }
@@ -260,20 +274,20 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
   visibility: visible !important;
   opacity: 1 !important;
   width: 100% !important;
-  height: 48px !important;
-  min-height: 48px !important;
-  max-height: 48px !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  max-height: 50px !important;
   padding: 0 2rem !important;
-  margin-top: 1.5rem !important;
-  margin-bottom: 0.5rem !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
   
-  font-size: 0.95rem !important;
+  font-size: 1rem !important;
   font-weight: 600 !important;
   color: #ffffff !important;
   
   background: #648a26 !important;
   border: none !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
   box-shadow: 0 2px 4px rgba(100, 138, 38, 0.2) !important;
   
   cursor: pointer !important;
@@ -367,19 +381,34 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
 @media (max-width: 576px) {
   [data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-form],
   [data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-router] {
-    padding: 2rem 1.5rem !important;
+    padding: 2.5rem 2rem !important;
+    max-width: 95% !important;
+  }
+
+  .auth-header {
+    margin-bottom: 2rem;
+    padding: 0.5rem 0;
   }
 
   .auth-logo {
-    height: 60px;
+    height: 55px;
   }
 
   .auth-title {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
   }
 
   .auth-subtitle {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  [data-amplify-authenticator] input {
+    height: 50px !important;
+    font-size: 0.95rem !important;
+  }
+
+  [data-amplify-authenticator] button[type="submit"] {
+    height: 48px !important;
   }
 }
 
