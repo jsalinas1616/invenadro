@@ -147,6 +147,26 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
   display: none !important;
 }
 
+/* OCULTAR PANTALLA DE VERIFICAR CONTACTO COMPLETAMENTE */
+[data-amplify-authenticator] [data-amplify-router-content]:has([data-amplify-form*="verify"]),
+[data-amplify-authenticator] form[data-amplify-authenticator-verifyuser],
+[data-amplify-authenticator] [data-amplify-container]:has(button:contains("Verificar")),
+[data-amplify-router="authenticated"] [data-amplify-container] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* Si el título dice "Verificar contacto", ocultar todo el formulario */
+[data-amplify-authenticator]:has(*:contains("Verificar contacto")) form,
+[data-amplify-authenticator]:has(*:contains("Verificar")) [data-amplify-router-content] {
+  display: none !important;
+}
+
 /* Ocultar headings duplicados */
 [data-amplify-authenticator] [data-amplify-heading],
 [data-amplify-authenticator] h1,

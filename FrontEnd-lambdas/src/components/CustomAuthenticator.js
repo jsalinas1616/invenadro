@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Authenticator, translations } from '@aws-amplify/ui-react';
 import { I18n } from 'aws-amplify/utils';
 import '../styles/CustomAuth.css';
@@ -125,6 +125,33 @@ const components = {
 };
 
 const CustomAuthenticator = ({ children }) => {
+  // Hook para ocultar automáticamente la pantalla de verificación
+  useEffect(() => {
+    const hideVerifyScreen = () => {
+      // Buscar cualquier elemento que contenga "Verificar contacto"
+      const verifyElements = document.querySelectorAll('[data-amplify-authenticator] *');
+      verifyElements.forEach(el => {
+        if (el.textContent && el.textContent.includes('Verificar contacto')) {
+          // Ocultar el contenedor padre
+          let parent = el.closest('[data-amplify-router-content]');
+          if (parent) {
+            parent.style.display = 'none';
+            console.log('🚫 Pantalla de verificación ocultada automáticamente');
+          }
+        }
+      });
+    };
+
+    // Ejecutar inmediatamente y luego observar cambios
+    hideVerifyScreen();
+    const interval = setInterval(hideVerifyScreen, 100);
+
+    // Limpiar intervalo después de 5 segundos
+    setTimeout(() => clearInterval(interval), 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Authenticator
       formFields={formFields}
@@ -132,13 +159,6 @@ const CustomAuthenticator = ({ children }) => {
       variation="modal"
       socialProviders={[]}
       loginMechanisms={['email']}
-      // Omitir pantalla de verificación de contacto
-      services={{
-        async handleVerifyUserAttribute() {
-          // Omitir verificación - ir directo a la app
-          return;
-        }
-      }}
     >
       {({ signOut, user }) => {
         return (
