@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Authenticator, translations } from '@aws-amplify/ui-react';
 import { I18n } from 'aws-amplify/utils';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import '../styles/CustomAuth.css';
 
 // Configurar traducciones al español
@@ -87,11 +88,6 @@ const formFields = {
 };
 
 const CustomAuthenticator = ({ children }) => {
-  // ✅ SOLUCIÓN DEFINITIVA aplicada en backend (cognito.yml)
-  // - AutoVerifiedAttributes removido
-  // - La pantalla "Verificar contacto" YA NO APARECE
-  // - No se necesita workaround JavaScript
-
   // Hook para insertar Header/Footer SOLO en pantalla de login
   useEffect(() => {
     // Ejecutar después de que Amplify UI renderice (un solo timeout)
@@ -128,6 +124,42 @@ const CustomAuthenticator = ({ children }) => {
     }, 500);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // Hook para AUTO-SKIPEAR la pantalla de "Verificar contacto"
+  // NOTA: Aunque eliminamos AutoVerifiedAttributes, este fallback protege
+  // contra usuarios creados con config vieja o bugs de Cognito/Amplify
+  useEffect(() => {
+    console.log('[AUTH] Monitor auto-skip activo...');
+    
+    const interval = setInterval(async () => {
+      const verifyScreen = document.querySelector('[data-amplify-authenticator-verifyuser]');
+      
+      if (verifyScreen) {
+        console.log('[AUTH] Pantalla "Verificar contacto" detectada - AUTO-SKIPEANDO...');
+        
+        const skipButton = Array.from(document.querySelectorAll('button')).find(
+          btn => btn.textContent.includes('Omitir') || btn.textContent.includes('Skip')
+        );
+        
+        if (skipButton) {
+          console.log('[AUTH] Click en "Omitir" automatico');
+          skipButton.click();
+        } else {
+          try {
+            const session = await fetchAuthSession({ forceRefresh: true });
+            if (session.tokens) {
+              console.log('[AUTH] Sesion valida, forzando recarga...');
+              window.location.reload();
+            }
+          } catch (error) {
+            console.error('[AUTH] Error verificando sesion:', error);
+          }
+        }
+      }
+    }, 300);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
