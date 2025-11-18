@@ -7,6 +7,7 @@
    FONDO CLARO Y PROFESIONAL
    ======================================== */
 
+/* Wrapper del login - solo visible cuando NO está autenticado */
 [data-amplify-authenticator]:not([data-amplify-authenticated]) {
   position: fixed !important;
   top: 0 !important;
@@ -21,6 +22,14 @@
   
   /* Fondo claro con tono verde menta suave */
   background: linear-gradient(135deg, #f0f7e9 0%, #e8f5e0 50%, #f5faf0 100%) !important;
+}
+
+/* IMPORTANTE: Ocultar completamente el wrapper cuando está autenticado */
+[data-amplify-authenticator][data-amplify-authenticated] {
+  display: none !important;
+  position: static !important;
+  z-index: 0 !important;
+  background: transparent !important;
 }
 
 body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
@@ -148,10 +157,10 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
 }
 
 /* OCULTAR PANTALLA DE VERIFICAR CONTACTO COMPLETAMENTE */
-[data-amplify-authenticator] [data-amplify-router-content]:has([data-amplify-form*="verify"]),
+/* NOTA: Solo ocultamos la pantalla específica de verificación de email */
+/* NO ocultamos pantallas de cambio de contraseña ni otros flujos */
 [data-amplify-authenticator] form[data-amplify-authenticator-verifyuser],
-[data-amplify-authenticator] [data-amplify-container]:has(button:contains("Verificar")),
-[data-amplify-router="authenticated"] [data-amplify-container] {
+[data-amplify-authenticator] [data-amplify-router="verifyUser"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -159,12 +168,6 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
   overflow: hidden !important;
   position: absolute !important;
   left: -9999px !important;
-}
-
-/* Si el título dice "Verificar contacto", ocultar todo el formulario */
-[data-amplify-authenticator]:has(*:contains("Verificar contacto")) form,
-[data-amplify-authenticator]:has(*:contains("Verificar")) [data-amplify-router-content] {
-  display: none !important;
 }
 
 /* Ocultar headings duplicados */

@@ -24,38 +24,6 @@ I18n.putVocabularies({
   },
 });
 
-// Componente de Header minimalista y moderno
-const AuthHeader = () => {
-  return (
-    <div className="auth-header">
-      <img 
-        src="/logo-invenadro.png" 
-        alt="Invenadro Logo" 
-        className="auth-logo"
-      />
-      <h2 className="auth-title">Sistema de Optimización</h2>
-      <p className="auth-subtitle">Panel de control</p>
-    </div>
-  );
-};
-
-// Componente de Footer minimalista
-const AuthFooter = () => {
-  return (
-    <div className="auth-footer">
-      <div className="d-flex align-items-center justify-content-center gap-2 mt-4">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{color: '#a0aec0'}}>
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <p className="text-muted small mb-0">
-          Autenticación segura con AWS Cognito
-        </p>
-      </div>
-    </div>
-  );
-};
-
 // Textos personalizados en español
 const formFields = {
   signIn: {
@@ -118,12 +86,6 @@ const formFields = {
   },
 };
 
-// Personalización de componentes
-const components = {
-  Header: AuthHeader,
-  Footer: AuthFooter,
-};
-
 const CustomAuthenticator = ({ children }) => {
   // Hook para ocultar automáticamente la pantalla de verificación
   useEffect(() => {
@@ -136,7 +98,7 @@ const CustomAuthenticator = ({ children }) => {
           let parent = el.closest('[data-amplify-router-content]');
           if (parent) {
             parent.style.display = 'none';
-            console.log('🚫 Pantalla de verificación ocultada automáticamente');
+            console.log('Pantalla de verificación ocultada automáticamente');
           }
         }
       });
@@ -152,12 +114,56 @@ const CustomAuthenticator = ({ children }) => {
     return () => clearInterval(interval);
   }, []);
 
+  // Hook para insertar Header/Footer SOLO en pantalla de login
+  useEffect(() => {
+    const insertCustomHeader = () => {
+      // Solo insertar si NO está autenticado
+      const authenticator = document.querySelector('[data-amplify-authenticator]:not([data-amplify-authenticated])');
+      if (!authenticator) return;
+
+      // Buscar si ya existe el header personalizado
+      if (document.querySelector('.auth-header')) return;
+
+      // Buscar el formulario de login
+      const form = authenticator.querySelector('[data-amplify-form]');
+      if (!form) return;
+
+      // Crear e insertar header
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'auth-header';
+      headerDiv.innerHTML = `
+        <img src="/logo-invenadro.png" alt="Invenadro Logo" class="auth-logo"/>
+        <h2 class="auth-title">Sistema de Optimización</h2>
+        <p class="auth-subtitle">Panel de control</p>
+      `;
+      form.prepend(headerDiv);
+
+      // Crear e insertar footer
+      const footerDiv = document.createElement('div');
+      footerDiv.className = 'auth-footer';
+      footerDiv.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center gap-2 mt-4">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #a0aec0">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <p class="text-muted small mb-0">Autenticación segura con AWS Cognito</p>
+        </div>
+      `;
+      form.appendChild(footerDiv);
+    };
+
+    // Ejecutar varias veces para asegurar que se inserte
+    insertCustomHeader();
+    const interval = setInterval(insertCustomHeader, 200);
+    setTimeout(() => clearInterval(interval), 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Authenticator
       formFields={formFields}
-      components={components}
-      variation="modal"
-      socialProviders={[]}
       loginMechanisms={['email']}
     >
       {({ signOut, user }) => {
