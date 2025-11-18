@@ -3,11 +3,11 @@ import { Nav } from 'react-bootstrap';
 import { FaHospital, FaStore, FaChevronRight, FaChevronDown, FaCalculator } from 'react-icons/fa';
 import './Sidebar.css';
 
-const Sidebar = ({ activeModule, onModuleChange }) => {
+const Sidebar = ({ activeModule, onModuleChange, visible }) => {
   const [farmatodoExpanded, setFarmatodoExpanded] = useState(true); // Expandido por default
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${visible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
       <div className="sidebar-header">
         <h6 className="text-muted mb-3">MÓDULOS</h6>
       </div>

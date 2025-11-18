@@ -42,7 +42,9 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaSignOutAlt,
-  FaUser
+  FaUser,
+  FaBars,
+  FaTimes
 } from 'react-icons/fa';
 import { useDropzone } from 'react-dropzone';
 import * as XLSX from 'xlsx';
@@ -680,6 +682,9 @@ function App() {
 
   // Estado para el módulo activo en el Sidebar
   const [activeModule, setActiveModule] = useState('farmatodo-spp'); // default: Farmatodo SPP
+  
+  // Estado para mostrar/ocultar Sidebar
+  const [sidebarVisible, setSidebarVisible] = useState(true);
 
   // Función para cambiar de módulo
   const handleModuleChange = (module) => {
@@ -691,6 +696,11 @@ function App() {
     setError(null);
     setProcessId(null);
     setStatus('idle');
+  };
+
+  // Función para toggle del sidebar
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
   };
 
   // Debug: Log cuando cambia la configuración
@@ -1100,6 +1110,15 @@ function App() {
           {/* Header Moderno */}
           <Navbar className="navbar-modern shadow-lg">
             <Container fluid>
+              {/* Botón Toggle Sidebar */}
+              <Button 
+                className="btn-toggle-sidebar me-3"
+                onClick={toggleSidebar}
+                title={sidebarVisible ? "Ocultar menú" : "Mostrar menú"}
+              >
+                {sidebarVisible ? <FaTimes /> : <FaBars />}
+              </Button>
+              
               {/* Logo y Título */}
               <Navbar.Brand className="navbar-brand-modern">
                 <div className="d-flex align-items-center gap-3">
@@ -1159,11 +1178,20 @@ function App() {
             {/* Sidebar */}
             <Sidebar 
               activeModule={activeModule} 
-              onModuleChange={handleModuleChange} 
+              onModuleChange={handleModuleChange}
+              visible={sidebarVisible}
             />
             
             {/* Main Content */}
-            <div className="main-content" style={{ marginLeft: '280px', width: 'calc(100% - 280px)', minHeight: 'calc(100vh - 76px)' }}>
+            <div 
+              className="main-content" 
+              style={{ 
+                marginLeft: sidebarVisible ? '280px' : '0', 
+                width: sidebarVisible ? 'calc(100% - 280px)' : '100%', 
+                minHeight: 'calc(100vh - 76px)',
+                transition: 'all 0.3s ease'
+              }}
+            >
               {/* Contenido según módulo seleccionado */}
               {activeModule === 'farmatodo-spp' && (
                 <>

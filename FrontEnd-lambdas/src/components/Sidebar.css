@@ -8,7 +8,16 @@
   top: 76px; /* Altura del navbar moderno */
   overflow-y: auto;
   box-shadow: 2px 0 8px rgba(0,0,0,0.05);
-  z-index: 100;
+  z-index: 99; /* Debajo del navbar (que tiene z-index: 1000) */
+  transition: transform 0.3s ease;
+}
+
+.sidebar-visible {
+  transform: translateX(0);
+}
+
+.sidebar-hidden {
+  transform: translateX(-100%);
 }
 
 .sidebar-header {
