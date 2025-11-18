@@ -35,8 +35,8 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
 [data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-form],
 [data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-router] {
   max-width: 500px !important;
+  min-width: 400px !important;
   width: 90% !important;
-  margin: 0 auto !important;
   background: #ffffff !important;
   border: 1px solid #e5e5e5 !important;
   border-radius: 20px !important;
@@ -44,9 +44,14 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
   box-shadow: 
     0 4px 6px rgba(0, 0, 0, 0.05),
     0 10px 20px rgba(0, 0, 0, 0.08) !important;
-  position: relative !important;
   z-index: 10 !important;
   animation: cardSlideIn 0.4s ease-out;
+  
+  /* Centrado perfecto con min-width */
+  position: relative !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  margin: 0 !important;
 }
 
 /* Remover padding del contenedor interno */
@@ -382,7 +387,9 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
   [data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-form],
   [data-amplify-authenticator]:not([data-amplify-authenticated]) [data-amplify-router] {
     padding: 2.5rem 2rem !important;
+    min-width: 320px !important;
     max-width: 95% !important;
+    width: 95% !important;
   }
 
   .auth-header {
