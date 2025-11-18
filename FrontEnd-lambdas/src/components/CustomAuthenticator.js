@@ -24,7 +24,7 @@ I18n.putVocabularies({
   },
 });
 
-// Componente de Header personalizado para el login
+// Componente de Header minimalista y moderno
 const AuthHeader = () => {
   return (
     <div className="auth-header">
@@ -34,20 +34,22 @@ const AuthHeader = () => {
         className="auth-logo"
       />
       <h2 className="auth-title">Sistema de Optimización</h2>
-      <p className="auth-subtitle">Factores de Redondeo - Inicio de Sesión</p>
+      <p className="auth-subtitle">Panel de control</p>
     </div>
   );
 };
 
-// Componente de Footer personalizado
+// Componente de Footer minimalista
 const AuthFooter = () => {
   return (
     <div className="auth-footer">
-      <div className="auth-divider"></div>
-      <div className="d-flex align-items-center justify-content-center gap-2 mt-3">
-        <span className="auth-lock-icon">🔒</span>
+      <div className="d-flex align-items-center justify-content-center gap-2 mt-4">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{color: '#a0aec0'}}>
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
         <p className="text-muted small mb-0">
-          Autenticación segura
+          Autenticación segura con AWS Cognito
         </p>
       </div>
     </div>
@@ -131,25 +133,8 @@ const CustomAuthenticator = ({ children }) => {
       socialProviders={[]}
     >
       {({ signOut, user }) => {
-        // Cuando el usuario está autenticado, renderizar la app SIN el wrapper del login
         return (
           <>
-            {/* Wrapper de login bonito SOLO cuando NO hay usuario */}
-            <style>{`
-              [data-amplify-authenticator]:not([data-amplify-authenticated]) {
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                height: 100vh !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                z-index: 9999 !important;
-                overflow: auto !important;
-                background: linear-gradient(135deg, #648a26 0%, #4a6b1d 50%, #8ab346 100%) !important;
-              }
-            `}</style>
             {children({ signOut, user })}
           </>
         );
