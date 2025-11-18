@@ -3,8 +3,8 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: ${self:service}-${self:provider.stage}-users
-      AutoVerifiedAttributes:
-        - email
+      # Sin verificación automática - NO queremos pantalla de "Verificar contacto"
+      AutoVerifiedAttributes: []
       UsernameAttributes:
         - email
       Schema:
