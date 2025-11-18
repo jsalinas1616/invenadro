@@ -49,6 +49,7 @@ import * as XLSX from 'xlsx';
 import lambdaService from './services/lambdaService';
 import ConvergenceModal from './components/ConvergenceModal';
 import CustomAuthenticator from './components/CustomAuthenticator';
+import Sidebar from './components/Sidebar';
 
 // Registrar componentes de Chart.js
 ChartJS.register(
@@ -677,6 +678,21 @@ function App() {
   // Estado para mostrar/ocultar configuración
   const [showConfigPanel, setShowConfigPanel] = useState(true);
 
+  // Estado para el módulo activo en el Sidebar
+  const [activeModule, setActiveModule] = useState('farmatodo-spp'); // default: Farmatodo SPP
+
+  // Función para cambiar de módulo
+  const handleModuleChange = (module) => {
+    console.log('Módulo seleccionado:', module);
+    setActiveModule(module);
+    // Resetear estados cuando se cambia de módulo
+    setFile(null);
+    setResult(null);
+    setError(null);
+    setProcessId(null);
+    setStatus('idle');
+  };
+
   // Debug: Log cuando cambia la configuración
   useEffect(() => {
     console.log('Estado config actualizado:', config);
@@ -1138,6 +1154,19 @@ function App() {
             </Container>
           </Navbar>
 
+          {/* Layout con Sidebar y Main Content */}
+          <div className="d-flex">
+            {/* Sidebar */}
+            <Sidebar 
+              activeModule={activeModule} 
+              onModuleChange={handleModuleChange} 
+            />
+            
+            {/* Main Content */}
+            <div className="main-content" style={{ marginLeft: '280px', width: 'calc(100% - 280px)', minHeight: 'calc(100vh - 76px)' }}>
+              {/* Contenido según módulo seleccionado */}
+              {activeModule === 'farmatodo-spp' && (
+                <>
       <Container fluid className="py-4">
         {/* Botón para mostrar/ocultar panel de configuración */}
         <Row className="mb-3">
@@ -1643,6 +1672,30 @@ function App() {
         result={result}
         config={config}
       />
+                </>
+              )}
+
+              {/* Placeholder para Farmacias Independientes - SPP */}
+              {activeModule === 'ind-spp' && (
+                <Container fluid className="py-4">
+                  <Alert variant="info">
+                    <h4>Farmacias Independientes - SPP</h4>
+                    <p>Módulo en desarrollo. Próximamente podrás calcular el factor de redondeo para farmacias independientes con SPP.</p>
+                  </Alert>
+                </Container>
+              )}
+
+              {/* Placeholder para Farmacias Independientes - IPP */}
+              {activeModule === 'ind-ipp' && (
+                <Container fluid className="py-4">
+                  <Alert variant="info">
+                    <h4>Farmacias Independientes - IPP</h4>
+                    <p>Módulo en desarrollo. Próximamente podrás calcular el factor de redondeo para farmacias independientes con IPP.</p>
+                  </Alert>
+                </Container>
+              )}
+            </div>
+          </div>
     </div>
       )}
     </CustomAuthenticator>

@@ -247,11 +247,26 @@
   .user-info {
     padding: 0.5rem;
   }
+  
+  /* Main content sin margen en móviles */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
 }
 
 /* Override Bootstrap navbar (mantener para compatibilidad) */
 .navbar-primary {
   background-color: var(--primary-green) !important;
+}
+
+/* ========================================
+   MAIN CONTENT
+   ======================================== */
+
+.main-content {
+  transition: all 0.3s ease;
+  background: #f5f7fa;
 }
 
 /* Cards con bordes redondeados y sombras profesionales */

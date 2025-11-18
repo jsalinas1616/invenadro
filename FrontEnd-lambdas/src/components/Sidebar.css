@@ -1,0 +1,101 @@
+.sidebar {
+  width: 280px;
+  height: calc(100vh - 76px); /* Altura menos el navbar moderno */
+  background: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  position: fixed;
+  left: 0;
+  top: 76px; /* Altura del navbar moderno */
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 1.5rem 1.25rem 0.5rem;
+}
+
+.sidebar-section {
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-section-title {
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #2c3e50;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-section-title.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-section-title.clickable:hover {
+  background: #e9ecef;
+}
+
+.sidebar-nav .nav-link {
+  color: #4a5568;
+  padding: 0.75rem 1.25rem 0.75rem 2.5rem;
+  font-size: 0.9rem;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav .nav-link:hover {
+  background: #f0f7e8;
+  color: #648a26;
+  border-left-color: #648a26;
+}
+
+.sidebar-nav .nav-link.active {
+  background: #648a26;
+  color: white;
+  border-left-color: #4a6b1a;
+  font-weight: 500;
+}
+
+.sidebar-nav .nav-link svg {
+  opacity: 0.7;
+}
+
+.sidebar-nav .nav-link.active svg {
+  opacity: 1;
+}
+
+/* Scrollbar personalizado */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    top: 0;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+}
+
