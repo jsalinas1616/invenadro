@@ -99,14 +99,14 @@ const CustomAuthenticator = ({ children }) => {
       if (!form) return;
 
       // Crear e insertar header
-      const headerDiv = document.createElement('div');
-      headerDiv.className = 'auth-header';
-      headerDiv.innerHTML = `
-        <img src="/logo-invenadro.png" alt="Invenadro Logo" class="auth-logo"/>
-        <h2 class="auth-title">Sistema de Optimización Invenadro</h2>
-        <p class="auth-subtitle">Panel de control</p>
-      `;
-      form.prepend(headerDiv);
+              const headerDiv = document.createElement('div');
+              headerDiv.className = 'auth-header';
+              headerDiv.innerHTML = `
+                <img src="/logo-invenadro-512.png" alt="Invenadro Logo" class="auth-logo"/>
+                <h2 class="auth-title">Sistema de Optimización Invenadro</h2>
+                <p class="auth-subtitle">Panel de control</p>
+              `;
+              form.prepend(headerDiv);
 
       // Crear e insertar footer
       const footerDiv = document.createElement('div');

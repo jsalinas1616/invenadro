@@ -1121,13 +1121,13 @@ function App() {
               
               {/* Logo y Título */}
               <Navbar.Brand className="navbar-brand-modern">
-                <div className="d-flex align-items-center gap-2">
-                  <div className="logo-container-compact">
+                <div className="d-flex align-items-center gap-3">
+                  <div className="logo-container-hd">
                     <img 
-                      src="/logo-invenadro.png" 
+                      src="/logo-invenadro-512.png" 
                       alt="Invenadro Logo" 
-                      height="35"
-                      className="logo-img"
+                      height="50"
+                      className="logo-img-hd"
                     />
                   </div>
                   <div className="brand-text">

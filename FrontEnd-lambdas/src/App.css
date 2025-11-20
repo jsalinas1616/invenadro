@@ -90,6 +90,43 @@
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
 }
 
+/* Logo HD - Alta Resolución con UX/UI optimizado */
+.logo-container-hd {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-container-hd:hover {
+  transform: translateY(-2px) scale(1.02);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.logo-img-hd {
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.3));
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+  transition: all 0.3s ease;
+}
+
+.logo-container-hd:hover .logo-img-hd {
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  transform: scale(1.05);
+}
+
 /* Texto de marca */
 .brand-text h4 {
   font-size: 1.5rem;
@@ -279,6 +316,16 @@
   
   .user-info {
     padding: 0.5rem;
+  }
+  
+  /* Logo HD responsive en móviles */
+  .logo-container-hd {
+    padding: 0.35rem;
+    border-radius: 8px;
+  }
+  
+  .logo-img-hd {
+    height: 40px !important;
   }
   
   /* Main content sin margen en móviles */

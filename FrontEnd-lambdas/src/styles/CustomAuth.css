@@ -98,10 +98,23 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
 }
 
 .auth-logo {
-  height: 65px;
+  height: 70px;
   width: auto;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   opacity: 0.95;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1));
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  transition: all 0.3s ease;
+}
+
+.auth-logo:hover {
+  transform: scale(1.05);
+  opacity: 1;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
 }
 
 .auth-title {
@@ -411,7 +424,7 @@ body:has([data-amplify-authenticator]:not([data-amplify-authenticated])) {
   }
 
   .auth-logo {
-    height: 55px;
+    height: 60px;
   }
 
   .auth-title {
