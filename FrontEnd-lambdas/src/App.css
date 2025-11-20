@@ -332,6 +332,7 @@
   .main-content {
     margin-left: 0 !important;
     width: 100% !important;
+    padding: 1.25rem !important;
   }
 }
 
@@ -351,6 +352,15 @@
 .main-content {
   transition: all 0.3s ease;
   background: #f5f7fa;
+  padding: 2rem;
+  min-height: calc(100vh - 76px);
+}
+
+/* Espaciado interno del contenido */
+.main-content .container-fluid {
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 /* Cards con bordes redondeados y sombras profesionales */
@@ -363,6 +373,19 @@
 .card-header {
   border-radius: 12px 12px 0 0 !important;
   border-bottom: 1px solid #e9ecef !important;
+  padding: 1rem 1.25rem !important;
+  background: linear-gradient(to bottom, #fafbfc, #ffffff) !important;
+}
+
+.card-header h6,
+.card-header h5 {
+  margin-bottom: 0 !important;
+  font-weight: 600 !important;
+  color: #2c3e50 !important;
+}
+
+.card-body {
+  padding: 1.5rem 1.25rem !important;
 }
 
 /* Botones personalizados */

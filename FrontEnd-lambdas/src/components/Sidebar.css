@@ -21,37 +21,46 @@
 }
 
 .sidebar-header {
-  padding: 1.5rem 1.25rem 1rem;
+  padding: 1.25rem 1.25rem 0.85rem;
   border-bottom: 2px solid #e9ecef;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(to bottom, #fafbfc, #ffffff);
 }
 
 .sidebar-header-icon {
   color: #648a26;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  opacity: 0.9;
 }
 
 .sidebar-header-title {
   color: #2c3e50;
   font-weight: 700;
-  font-size: 0.9rem;
-  letter-spacing: 0.5px;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  margin-left: 0.5rem;
 }
 
 .sidebar-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.sidebar-section:first-of-type {
+  margin-top: 0;
 }
 
 .sidebar-section-title {
-  padding: 0.75rem 1.25rem;
+  padding: 0.9rem 1.25rem;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #2c3e50;
-  background: #f8f9fa;
+  background: linear-gradient(to right, #f8f9fa, #fafbfc);
   border-bottom: 1px solid #e9ecef;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  letter-spacing: 0.3px;
+  margin: 0;
 }
 
 .sidebar-section-title.clickable {
@@ -60,15 +69,27 @@
 }
 
 .sidebar-section-title.clickable:hover {
-  background: #e9ecef;
+  background: linear-gradient(to right, #e9ecef, #f1f3f5);
+}
+
+.sidebar-section-title svg {
+  font-size: 0.95rem;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.sidebar-section-title.clickable:hover svg {
+  opacity: 1;
+  transform: scale(1.05);
 }
 
 .sidebar-nav .nav-link {
   color: #4a5568;
-  padding: 0.75rem 1.25rem 0.75rem 2.5rem;
-  font-size: 0.9rem;
+  padding: 0.7rem 1.25rem 0.7rem 2.75rem;
+  font-size: 0.875rem;
   border-left: 3px solid transparent;
   transition: all 0.2s ease;
+  margin: 0;
 }
 
 .sidebar-nav .nav-link:hover {
@@ -86,6 +107,8 @@
 
 .sidebar-nav .nav-link svg {
   opacity: 0.7;
+  margin-right: 0.65rem;
+  font-size: 0.9rem;
 }
 
 .sidebar-nav .nav-link.active svg {
