@@ -1,6 +1,6 @@
 # Configuración Multi-Ambiente - Invenadro
 
-## 🌍 Ambientes Disponibles
+## Ambientes Disponibles
 
 Este proyecto soporta **4 ambientes**:
 
@@ -13,7 +13,7 @@ Este proyecto soporta **4 ambientes**:
 
 ---
 
-## 🏗️ Arquitectura Multi-Ambiente
+## ️ Arquitectura Multi-Ambiente
 
 ### Backend
 El backend usa **Serverless Framework** con stages:
@@ -25,33 +25,33 @@ El backend usa **Serverless Framework** con stages:
 El frontend usa **configuración dinámica** por ambiente:
 - Archivo central: `FrontEnd-lambdas/src/config/environments.js`
 - Detección automática del ambiente en 3 formas:
-  1. **Build-time**: Variable `REACT_APP_STAGE` (recomendado)
-  2. **Runtime**: Análisis del hostname/URL
-  3. **Fallback**: `jul-dev` por defecto
+ 1. **Build-time**: Variable `REACT_APP_STAGE` (recomendado)
+ 2. **Runtime**: Análisis del hostname/URL
+ 3. **Fallback**: `jul-dev` por defecto
 
 ---
 
-## 📝 Configuración de Ambientes
+## Configuración de Ambientes
 
 ### Archivo: `FrontEnd-lambdas/src/config/environments.js`
 
 ```javascript
 const environments = {
-  'jul-dev': {
-    apiGateway: { url: 'https://xxx.execute-api.mx-central-1.amazonaws.com/jul-dev' },
-    cognito: { 
-      userPoolId: 'mx-central-1_XXXXX',
-      clientId: 'xxxxx'
-    },
-    s3: {
-      resultsBucket: 'invenadro-backend-jul-dev-results',
-      uploadsBucket: 'invenadro-backend-jul-dev-uploads'
-    },
-    // ...
-  },
-  'jul-qa': { /* ... */ },
-  'nadro-qa': { /* ... */ },
-  'nadro-prod': { /* ... */ }
+ 'jul-dev': {
+ apiGateway: { url: 'https://xxx.execute-api.mx-central-1.amazonaws.com/jul-dev' },
+ cognito: { 
+ userPoolId: 'mx-central-1_XXXXX',
+ clientId: 'xxxxx'
+ },
+ s3: {
+ resultsBucket: 'invenadro-backend-jul-dev-results',
+ uploadsBucket: 'invenadro-backend-jul-dev-uploads'
+ },
+ // ...
+ },
+ 'jul-qa': { /* ... */ },
+ 'nadro-qa': { /* ... */ },
+ 'nadro-prod': { /* ... */ }
 }
 ```
 
@@ -60,19 +60,19 @@ const environments = {
 El sistema detecta el ambiente en este orden:
 
 1. **Variable de entorno** (build-time):
-   ```bash
-   REACT_APP_STAGE=jul-qa npm run build
-   ```
+ ```bash
+ REACT_APP_STAGE=jul-qa npm run build
+ ```
 
 2. **Hostname** (runtime):
-   - `xxx.cloudfront.net` → detecta por path/subdomain
-   - `localhost` → siempre `jul-dev`
+ - `xxx.cloudfront.net` → detecta por path/subdomain
+ - `localhost` → siempre `jul-dev`
 
 3. **Fallback**: Si no detecta nada, usa `jul-dev`
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 ### Opción 1: GitHub Actions (Recomendado)
 
@@ -118,7 +118,7 @@ npx serverless deploy --stage $STAGE
 
 ---
 
-## 🔐 Credenciales AWS
+## Credenciales AWS
 
 ### GitHub Secrets por Ambiente
 
@@ -141,14 +141,14 @@ aws iam create-user --user-name github-actions-jul-dev
 
 # 2. Aplicar políticas (2 por ambiente)
 aws iam put-user-policy \
-  --user-name github-actions-jul-dev \
-  --policy-name InvenadroJulDevCompute \
-  --policy-document file://permisos/01-github-actions/invenadro-jul-dev-policy-part1-compute.json
+ --user-name github-actions-jul-dev \
+ --policy-name InvenadroJulDevCompute \
+ --policy-document file://permisos/01-github-actions/invenadro-jul-dev-policy-part1-compute.json
 
 aws iam put-user-policy \
-  --user-name github-actions-jul-dev \
-  --policy-name InvenadroJulDevInfra \
-  --policy-document file://permisos/01-github-actions/invenadro-jul-dev-policy-part2-infrastructure.json
+ --user-name github-actions-jul-dev \
+ --policy-name InvenadroJulDevInfra \
+ --policy-document file://permisos/01-github-actions/invenadro-jul-dev-policy-part2-infrastructure.json
 
 # 3. Crear Access Keys
 aws iam create-access-key --user-name github-actions-jul-dev
@@ -158,75 +158,75 @@ Ver documentación completa en: `permisos/01-github-actions/README.md`
 
 ---
 
-## 🔄 Flujo de Trabajo
+## Flujo de Trabajo
 
 ### Desarrollo (jul-dev)
 ```
 Desarrollador → git push origin dev
-              ↓
-         GitHub Actions
-              ↓
-    Backend Deploy (jul-dev)
-              ↓
-    Frontend Build (REACT_APP_STAGE=jul-dev)
-              ↓
-    Frontend Deploy (jul-dev)
-              ↓
-    CloudFront Distribution
-              ↓
-         URL Pública
+ ↓
+ GitHub Actions
+ ↓
+ Backend Deploy (jul-dev)
+ ↓
+ Frontend Build (REACT_APP_STAGE=jul-dev)
+ ↓
+ Frontend Deploy (jul-dev)
+ ↓
+ CloudFront Distribution
+ ↓
+ URL Pública
 ```
 
 ### QA (jul-qa)
 ```
 QA Team → git push origin qa
-        ↓
-   GitHub Actions
-        ↓
-  Backend Deploy (jul-qa)
-        ↓
-  Frontend Build (REACT_APP_STAGE=jul-qa)
-        ↓
-  Frontend Deploy (jul-qa)
-        ↓
-  CloudFront Distribution
-        ↓
-     URL Pública
+ ↓
+ GitHub Actions
+ ↓
+ Backend Deploy (jul-qa)
+ ↓
+ Frontend Build (REACT_APP_STAGE=jul-qa)
+ ↓
+ Frontend Deploy (jul-qa)
+ ↓
+ CloudFront Distribution
+ ↓
+ URL Pública
 ```
 
 ---
 
-## 📊 Recursos por Ambiente
+## Recursos por Ambiente
 
 Cada ambiente crea su propio conjunto de recursos AWS:
 
 ### Backend Resources
 - **Lambda Functions**: `invenadro-backend-{STAGE}-*`
-  - initiator
-  - client-separator
-  - processor
-  - status-checker
-  - client-aggregator
-  - download-result
-  - excel-generator
-  - get-presigned-url
+ - initiator
+ - client-separator
+ - processor
+ - status-checker
+ - client-aggregator
+ - download-result
+ - excel-generator
+ - get-presigned-url
 
 - **S3 Buckets**:
-  - `invenadro-backend-{STAGE}-uploads`
-  - `invenadro-backend-{STAGE}-results`
-  - `invenadro-backend-{STAGE}-s3-logs`
+ - `invenadro-backend-{STAGE}-uploads`
+ - `invenadro-backend-{STAGE}-results`
+ - `invenadro-backend-{STAGE}-s3-logs`
 
 - **DynamoDB Tables**:
-  - `invenadro-backend-{STAGE}-jobs`
+ - `invenadro-backend-{STAGE}-jobs`
 
 - **Step Functions**:
-  - `invenadro-backend-{STAGE}`
+ - `invenadro-backend-{STAGE}`
 
 - **API Gateway**:
-  - `invenadro-backend-{STAGE}`
+ - `invenadro-backend-{STAGE}`
 
 - **Cognito User Pool**:
-  - `invenadro-backend-{STAGE}-users`
+ - `invenadro-backend-{STAGE}-users`
 
 ### Frontend Resources
 - **S3 Bucket**: `invenadro-frontend-{STAGE}`
@@ -235,18 +235,18 @@ Cada ambiente crea su propio conjunto de recursos AWS:
 
 ---
 
-## 🐛 Debugging
+## Debugging
 
 ### Ver configuración detectada
 
 Abre la consola del navegador (F12) y verás logs como:
 
 ```
-🌍 Ambiente detectado por REACT_APP_STAGE: jul-dev
-🌍 Lambda Service configurado para ambiente: jul-dev (Desarrollo (Julio))
-📡 API Gateway: https://c9nzcqgz16.execute-api.mx-central-1.amazonaws.com/jul-dev
-🔐 Cognito configurado para ambiente: jul-dev (Desarrollo (Julio))
-👤 User Pool: mx-central-1_WIAYTqFq7
+ Ambiente detectado por REACT_APP_STAGE: jul-dev
+ Lambda Service configurado para ambiente: jul-dev (Desarrollo (Julio))
+ API Gateway: https://c9nzcqgz16.execute-api.mx-central-1.amazonaws.com/jul-dev
+ Cognito configurado para ambiente: jul-dev (Desarrollo (Julio))
+ User Pool: mx-central-1_WIAYTqFq7
 ```
 
 ### Verificar ambiente en runtime
@@ -273,7 +273,7 @@ npx serverless info --stage jul-dev
 
 ---
 
-## ⚠️ Notas Importantes
+## ️ Notas Importantes
 
 ### 1. Placeholders en Configuración
 
@@ -322,7 +322,7 @@ npx serverless deploy --stage jul-dev
 
 ---
 
-## 📚 Referencias
+## Referencias
 
 - **Permisos IAM**: `permisos/01-github-actions/README.md`
 - **Backend Config**: `services/backend/serverless.yml`
@@ -331,7 +331,7 @@ npx serverless deploy --stage jul-dev
 
 ---
 
-## ✅ Checklist para Nuevo Ambiente
+## Checklist para Nuevo Ambiente
 
 - [ ] Crear branch en Git (ej: `nadro-qa`)
 - [ ] Crear usuario IAM con permisos

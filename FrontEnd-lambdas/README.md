@@ -1,12 +1,12 @@
-# 🚀 FrontEnd para Sistema de Factor de Redondeo con AWS Lambda
+# FrontEnd para Sistema de Factor de Redondeo con AWS Lambda
 
-## 📋 Descripción
+## Descripción
 
 Este es el frontend adaptado para trabajar con el sistema de **AWS Lambda + Step Functions** para el cálculo de factor de redondeo. Es una versión moderna y asíncrona que reemplaza el sistema anterior basado en App Runner.
 
-## 🏗️ Arquitectura
+## ️ Arquitectura
 
-### **📦 TODOS LOS ARCHIVOS - Upload directo a S3:**
+### ** TODOS LOS ARCHIVOS - Upload directo a S3:**
 ```
 FrontEnd → lambda-get-presigned-url → FrontEnd sube a S3 → lambda-initiator → Step Function
 ```
@@ -21,22 +21,22 @@ FrontEnd → lambda-get-presigned-url → FrontEnd sube a S3 → lambda-initiato
 7. **Usuario ve progreso en tiempo real** → Estados: RUNNING → PROCESSING → COMPLETED
 8. **Resultado disponible** → Usuario puede descargar Excel consolidado
 
-### **✅ Ventajas del upload directo a S3:**
+### ** Ventajas del upload directo a S3:**
 - **Sin límites de tamaño** - Archivos de cualquier tamaño
 - **Más rápido** - Upload directo sin conversión Base64
 - **Más simple** - Un solo flujo, menos código
 - **Más confiable** - Menos puntos de falla
 
-## 🚀 Características
+## Características
 
-### **✅ Ventajas del Nuevo Sistema:**
+### ** Ventajas del Nuevo Sistema:**
 - **Asíncrono**: Usuario no espera, proceso continúa en segundo plano
 - **Escalable**: Múltiples archivos se pueden procesar simultáneamente
 - **Resiliente**: Reintentos automáticos y manejo de errores
 - **Rastreable**: Cada proceso tiene ID único y estado visible
 - **Sin timeouts**: Procesamiento de archivos grandes sin límites
 
-### **🔄 Estados del Proceso:**
+### ** Estados del Proceso:**
 - `RUNNING` → Proceso iniciado
 - `PROCESSING` → Procesando Excel
 - `PROCESSED` → Excel procesado
@@ -46,7 +46,7 @@ FrontEnd → lambda-get-presigned-url → FrontEnd sube a S3 → lambda-initiato
 - `COMPLETED` → Proceso completado
 - `FAILED` → Error en el proceso
 
-## 🛠️ Configuración Requerida
+## ️ Configuración Requerida
 
 ### **1. Credenciales AWS:**
 ```bash
@@ -70,17 +70,17 @@ REACT_APP_DYNAMODB_TABLE=factor-redondeo-lambda-jobs-dev
 ### **3. Configuración en `src/config.js`:**
 ```javascript
 const config = {
-  lambdaInitiatorUrl: 'https://tu-api-gateway-url.amazonaws.com/prod/initiate',
-  awsRegion: 'us-east-1',
-  s3ResultsBucket: 'factor-redondeo-lambda-results-dev',
-  dynamoDBTable: 'factor-redondeo-lambda-jobs-dev',
-  s3UploadsBucket: 'factor-redondeo-files',
-  stepFunctionArn: 'arn:aws:states:us-east-1:...',
-  statusPollingInterval: 5000
+ lambdaInitiatorUrl: 'https://tu-api-gateway-url.amazonaws.com/prod/initiate',
+ awsRegion: 'us-east-1',
+ s3ResultsBucket: 'factor-redondeo-lambda-results-dev',
+ dynamoDBTable: 'factor-redondeo-lambda-jobs-dev',
+ s3UploadsBucket: 'factor-redondeo-files',
+ stepFunctionArn: 'arn:aws:states:us-east-1:...',
+ statusPollingInterval: 5000
 };
 ```
 
-## 📦 Instalación y Ejecución
+## Instalación y Ejecución
 
 ### **1. Instalar dependencias:**
 ```bash
@@ -97,13 +97,13 @@ npm start
 npm run build
 ```
 
-## 🔧 Dependencias Principales
+## Dependencias Principales
 
 - **React 18**: Framework principal
 - **AWS SDK v2**: Para interactuar con servicios AWS
 - **CSS Modules**: Estilos modulares y responsivos
 
-## 📱 Interfaz de Usuario
+## Interfaz de Usuario
 
 ### **Pantalla Principal:**
 - **Header**: Título y estado de credenciales AWS
@@ -123,38 +123,38 @@ npm run build
 - Información de credenciales AWS
 - Logs de errores
 
-## 🔐 Seguridad y Permisos
+## Seguridad y Permisos
 
 ### **Permisos AWS Requeridos:**
 ```json
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "s3:GetObject",
-        "s3:PutObject"
-      ],
-      "Resource": [
-        "arn:aws:s3:::factor-redondeo-files/*",
-        "arn:aws:s3:::factor-redondeo-lambda-results-dev/*"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "dynamodb:GetItem",
-        "dynamodb:PutItem",
-        "dynamodb:UpdateItem"
-      ],
-      "Resource": "arn:aws:dynamodb:us-east-1:*:table/factor-redondeo-lambda-jobs-dev"
-    }
-  ]
+ "Version": "2012-10-17",
+ "Statement": [
+ {
+ "Effect": "Allow",
+ "Action": [
+ "s3:GetObject",
+ "s3:PutObject"
+ ],
+ "Resource": [
+ "arn:aws:s3:::factor-redondeo-files/*",
+ "arn:aws:s3:::factor-redondeo-lambda-results-dev/*"
+ ]
+ },
+ {
+ "Effect": "Allow",
+ "Action": [
+ "dynamodb:GetItem",
+ "dynamodb:PutItem",
+ "dynamodb:UpdateItem"
+ ],
+ "Resource": "arn:aws:dynamodb:us-east-1:*:table/factor-redondeo-lambda-jobs-dev"
+ }
+ ]
 }
 ```
 
-## 🚨 Solución de Problemas
+## Solución de Problemas
 
 ### **Error: "Credenciales AWS no configuradas"**
 ```bash
@@ -180,7 +180,7 @@ aws configure
 # Verificar que las Lambdas estén desplegadas y funcionando
 ```
 
-## 📊 Monitoreo y Logs
+## Monitoreo y Logs
 
 ### **CloudWatch Logs:**
 - Cada Lambda tiene sus propios logs
@@ -194,7 +194,7 @@ aws configure
 - Bucket `factor-redondeo-files` para archivos subidos
 - Bucket `factor-redondeo-lambda-results-dev` para resultados
 
-## 🔄 Migración desde Sistema Anterior
+## Migración desde Sistema Anterior
 
 ### **Cambios Principales:**
 1. **Sin serverless**: Configuración manual de AWS
@@ -208,7 +208,7 @@ aws configure
 - **Mejor manejo de errores**: Reintentos automáticos
 - **Mejor rendimiento**: Sin timeouts de 15 minutos
 
-## 🎯 Próximos Pasos
+## Próximos Pasos
 
 ### **1. Configurar API Gateway:**
 - Crear API REST para exponer las Lambdas
@@ -231,7 +231,7 @@ aws configure
 
 ---
 
-## 📞 Soporte
+## Soporte
 
 Para problemas técnicos o preguntas sobre la implementación:
 1. Revisar logs en CloudWatch
@@ -241,4 +241,4 @@ Para problemas técnicos o preguntas sobre la implementación:
 
 ---
 
-*Este frontend está diseñado para ser robusto, escalable y fácil de usar. Cada componente tiene una responsabilidad específica y todo se comunica a través de AWS de manera asíncrona.* 🚀
+*Este frontend está diseñado para ser robusto, escalable y fácil de usar. Cada componente tiene una responsabilidad específica y todo se comunica a través de AWS de manera asíncrona.* 

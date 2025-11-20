@@ -1,10 +1,10 @@
-# 🔐 Políticas IAM - Invenadro
+# Políticas IAM - Invenadro
 
 **Políticas necesarias para desplegar Invenadro en AWS con GitHub Actions**
 
 ---
 
-## 📋 ÍNDICE
+## ÍNDICE
 
 1. [¿Qué necesito?](#qué-necesito)
 2. [Estructura de Archivos](#estructura-de-archivos)
@@ -13,14 +13,14 @@
 
 ---
 
-## ⚡ ¿QUÉ NECESITO?
+## ¿QUÉ NECESITO?
 
 ### **SOLO necesitas las políticas de GitHub Actions**
 
 Las políticas de `01-github-actions/` son suficientes para:
-- ✅ Crear toda la infraestructura (Lambdas, S3, DynamoDB, etc.)
-- ✅ Desplegar con `serverless deploy`
-- ✅ Gestionar los 4 ambientes (jul-dev, jul-qa, nadro-qa, nadro-prod)
+- Crear toda la infraestructura (Lambdas, S3, DynamoDB, etc.)
+- Desplegar con `serverless deploy`
+- Gestionar los 4 ambientes (jul-dev, jul-qa, nadro-qa, nadro-prod)
 
 **Serverless Framework automáticamente:**
 - Crea los roles IAM para las Lambdas
@@ -31,29 +31,29 @@ Las políticas de `01-github-actions/` son suficientes para:
 
 ---
 
-## 📂 ESTRUCTURA DE ARCHIVOS
+## ESTRUCTURA DE ARCHIVOS
 
 ```
 permisos/
-├── README.md                              ← Este documento
+├── README.md ← Este documento
 │
-└── 01-github-actions/                     ← ⭐ POLÍTICAS PRINCIPALES
-    ├── README.md
-    ├── invenadro-jul-dev-policy-part1-compute.json
-    ├── invenadro-jul-dev-policy-part2-infrastructure.json
-    ├── invenadro-jul-qa-policy-part1-compute.json
-    ├── invenadro-jul-qa-policy-part2-infrastructure.json
-    ├── invenadro-nadro-qa-policy-part1-compute.json
-    ├── invenadro-nadro-qa-policy-part2-infrastructure.json
-    ├── invenadro-nadro-prod-policy-part1-compute.json
-    └── invenadro-nadro-prod-policy-part2-infrastructure.json
+└── 01-github-actions/ ← ⭐ POLÍTICAS PRINCIPALES
+ ├── README.md
+ ├── invenadro-jul-dev-policy-part1-compute.json
+ ├── invenadro-jul-dev-policy-part2-infrastructure.json
+ ├── invenadro-jul-qa-policy-part1-compute.json
+ ├── invenadro-jul-qa-policy-part2-infrastructure.json
+ ├── invenadro-nadro-qa-policy-part1-compute.json
+ ├── invenadro-nadro-qa-policy-part2-infrastructure.json
+ ├── invenadro-nadro-prod-policy-part1-compute.json
+ └── invenadro-nadro-prod-policy-part2-infrastructure.json
 ```
 
 ---
 
 ---
 
-## 🔑 POLÍTICAS DE GITHUB ACTIONS
+## POLÍTICAS DE GITHUB ACTIONS
 
 **Carpeta:** [`01-github-actions/`](./01-github-actions/)
 
@@ -89,7 +89,7 @@ Debido al límite de 6,144 caracteres de AWS IAM, cada ambiente requiere 2 polí
 
 ---
 
-## ✅ CHECKLIST DE VALIDACIÓN
+## CHECKLIST DE VALIDACIÓN
 
 ```
 CUENTA AWS 1 (975130647458 - jul-dev / jul-qa):
@@ -132,7 +132,7 @@ DEPLOY:
 
 ---
 
-## 🌍 AMBIENTES
+## AMBIENTES
 
 | Ambiente | Cuenta AWS | Región | Uso |
 |----------|-----------|--------|-----|
@@ -143,7 +143,7 @@ DEPLOY:
 
 ---
 
-## 🚀 PASOS PARA IMPLEMENTAR
+## PASOS PARA IMPLEMENTAR
 
 ### 1. Solicitar políticas a Arquitectura/Infraestructura
 
@@ -152,10 +152,10 @@ DEPLOY:
 Necesito estas 2 políticas agregadas a mi grupo IAM:
 
 1. invenadro-jul-dev-policy-part1-compute.json
-   (Lambda, S3, DynamoDB)
+ (Lambda, S3, DynamoDB)
 
 2. invenadro-jul-dev-policy-part2-infrastructure.json
-   (CloudFormation, API Gateway, Step Functions, etc.)
+ (CloudFormation, API Gateway, Step Functions, etc.)
 ```
 
 **Repetir para cada ambiente:** jul-qa, nadro-qa, nadro-prod
@@ -194,39 +194,39 @@ npm run deploy:backend:prod
 
 ---
 
-## 🔒 SEGURIDAD
+## SEGURIDAD
 
 ### Principios Aplicados
 
-✅ **Mínimo Privilegio**
+ **Mínimo Privilegio**
 - Políticas limitadas a recursos específicos del proyecto
 - Sin wildcards globales (`Resource: "*"`) salvo excepciones justificadas
 
-✅ **Segregación por Ambiente**
+ **Segregación por Ambiente**
 - jul-dev y jul-qa en cuenta 975130647458
 - nadro-qa en su propia cuenta
 - nadro-prod en su propia cuenta
 
-✅ **Naming Convention**
+ **Naming Convention**
 - Todos los recursos incluyen el ambiente en el nombre
 - Ejemplo: `invenadro-backend-jul-dev-*`
 
-✅ **Políticas Divididas**
+ **Políticas Divididas**
 - 2 políticas por ambiente (bajo límite de 6,144 caracteres)
 - Permite granularidad sin exceder límites de AWS
 
 ---
 
-## 📞 CONTACTO
+## CONTACTO
 
-**Proyecto:** Invenadro  
-**Repositorio:** https://github.com/jsalinas1616/invenadro  
-**Responsable:** Julián Salinas  
+**Proyecto:** Invenadro 
+**Repositorio:** https://github.com/jsalinas1616/invenadro 
+**Responsable:** Julián Salinas 
 **Email:** jsalinas1616@gmail.com
 
 ---
 
-## 📚 REFERENCIAS
+## REFERENCIAS
 
 - [AWS IAM Best Practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html)
 - [Lambda Security](https://docs.aws.amazon.com/lambda/latest/dg/lambda-security.html)

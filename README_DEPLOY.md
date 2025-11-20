@@ -1,20 +1,20 @@
-# 🚀 Guía de Deployment - Invenadro
+# Guía de Deployment - Invenadro
 
 ## Deployment Automático con Git + GitHub Actions
 
 ---
 
-## 🎯 TL;DR - Deployment en 1 Comando
+## TL;DR - Deployment en 1 Comando
 
 ```bash
 git push origin dev
 ```
 
-**¡Y listo!** GitHub Actions despliega todo automáticamente. ✨
+**¡Y listo!** GitHub Actions despliega todo automáticamente. 
 
 ---
 
-## 📋 Tabla de Contenidos
+## Tabla de Contenidos
 
 1. [Cómo Funciona el Deployment Automático](#cómo-funciona-el-deployment-automático)
 2. [Ambientes y Branches](#ambientes-y-branches)
@@ -26,75 +26,75 @@ git push origin dev
 
 ---
 
-## 🔄 Cómo Funciona el Deployment Automático
+## Cómo Funciona el Deployment Automático
 
 ### Arquitectura del Sistema
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  TU LOCAL                                                   │
-│                                                             │
-│  git add .                                                  │
-│  git commit -m "feat: nueva funcionalidad"                 │
-│  git push origin dev                    ← SOLO ESTO HACES  │
+│ TU LOCAL │
+│ │
+│ git add . │
+│ git commit -m "feat: nueva funcionalidad" │
+│ git push origin dev ← SOLO ESTO HACES │
 └────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
+ │
+ ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  GITHUB ACTIONS (Automático)                                │
-│                                                             │
-│  1. ✅ Detecta push a branch 'dev'                          │
-│  2. ✅ Inicia workflow: deploy-dev.yml                      │
-│  3. ✅ Usa credenciales: AWS_ACCESS_KEY_ID_DEV              │
+│ GITHUB ACTIONS (Automático) │
+│ │
+│ 1. Detecta push a branch 'dev' │
+│ 2. Inicia workflow: deploy-dev.yml │
+│ 3. Usa credenciales: AWS_ACCESS_KEY_ID_DEV │
 └────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
+ │
+ ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  AWS - DEPLOYMENT BACKEND (3-4 min)                         │
-│                                                             │
-│  ✅ Deploy 8 Lambda Functions                               │
-│  ✅ Deploy API Gateway                                      │
-│  ✅ Deploy Step Functions                                   │
-│  ✅ Deploy DynamoDB Table                                   │
-│  ✅ Deploy S3 Buckets (3)                                   │
-│  ✅ Deploy Cognito User Pool                                │
+│ AWS - DEPLOYMENT BACKEND (3-4 min) │
+│ │
+│ Deploy 8 Lambda Functions │
+│ Deploy API Gateway │
+│ Deploy Step Functions │
+│ Deploy DynamoDB Table │
+│ Deploy S3 Buckets (3) │
+│ Deploy Cognito User Pool │
 └────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
+ │
+ ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  BUILD FRONTEND (1-2 min)                                   │
-│                                                             │
-│  ✅ npm install                                             │
-│  ✅ REACT_APP_STAGE=jul-dev npm run build                   │
-│  ✅ Frontend detecta ambiente automáticamente               │
-│  ✅ Carga config de environments.js[jul-dev]                │
+│ BUILD FRONTEND (1-2 min) │
+│ │
+│ npm install │
+│ REACT_APP_STAGE=jul-dev npm run build │
+│ Frontend detecta ambiente automáticamente │
+│ Carga config de environments.js[jul-dev] │
 └────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
+ │
+ ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  AWS - DEPLOYMENT FRONTEND (2-3 min)                        │
-│                                                             │
-│  ✅ Deploy S3 Bucket (website)                              │
-│  ✅ Upload archivos del build                               │
-│  ✅ Deploy CloudFront Distribution                          │
-│  ✅ Invalidate CloudFront cache                             │
+│ AWS - DEPLOYMENT FRONTEND (2-3 min) │
+│ │
+│ Deploy S3 Bucket (website) │
+│ Upload archivos del build │
+│ Deploy CloudFront Distribution │
+│ Invalidate CloudFront cache │
 └────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
+ │
+ ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  ✅ DEPLOYMENT COMPLETO                                     │
-│                                                             │
-│  Frontend:  https://d3qyx007nie7k5.cloudfront.net          │
-│  Backend:   https://c9nzcqgz16.../jul-dev                  │
-│  Cognito:   mx-central-1_WIAYTqFq7                          │
-│                                                             │
-│  ¡Aplicación funcionando end-to-end! 🎉                     │
+│ DEPLOYMENT COMPLETO │
+│ │
+│ Frontend: https://d3qyx007nie7k5.cloudfront.net │
+│ Backend: https://c9nzcqgz16.../jul-dev │
+│ Cognito: mx-central-1_WIAYTqFq7 │
+│ │
+│ ¡Aplicación funcionando end-to-end! │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🌍 Ambientes y Branches
+## Ambientes y Branches
 
 | Ambiente | Branch | Stage | Workflow | Tiempo Estimado |
 |----------|--------|-------|----------|-----------------|
@@ -118,7 +118,7 @@ git push origin main
 
 ---
 
-## 📝 Paso a Paso: Qué Pasa Cuando Haces Push
+## Paso a Paso: Qué Pasa Cuando Haces Push
 
 ### 1️⃣ **Push Local → GitHub**
 
@@ -127,9 +127,9 @@ git push origin dev
 ```
 
 **Qué pasa**:
-- ✅ Git sube tus commits a GitHub
-- ✅ GitHub detecta cambios en branch `dev`
-- ✅ Trigger automático del workflow
+- Git sube tus commits a GitHub
+- GitHub detecta cambios en branch `dev`
+- Trigger automático del workflow
 
 **Tiempo**: ~5 segundos
 
@@ -203,38 +203,38 @@ REACT_APP_STAGE=jul-dev npm run build
 **Qué pasa**:
 
 1. **Instala dependencias**:
-   ```bash
-   npm install
-   ```
+ ```bash
+ npm install
+ ```
 
 2. **Build con ambiente**:
-   ```bash
-   REACT_APP_STAGE=jul-dev npm run build
-   ```
+ ```bash
+ REACT_APP_STAGE=jul-dev npm run build
+ ```
 
 3. **Frontend detecta ambiente**:
-   ```javascript
-   // FrontEnd-lambdas/src/config/environments.js
-   const envStage = process.env.REACT_APP_STAGE; // "jul-dev"
-   return environments[envStage]; // Config de jul-dev
-   ```
+ ```javascript
+ // FrontEnd-lambdas/src/config/environments.js
+ const envStage = process.env.REACT_APP_STAGE; // "jul-dev"
+ return environments[envStage]; // Config de jul-dev
+ ```
 
 4. **Carga configuración correcta**:
-   ```javascript
-   {
-     apiGateway: {
-       url: 'https://c9nzcqgz16.../jul-dev' // ✅ Correcto
-     },
-     cognito: {
-       userPoolId: 'mx-central-1_WIAYTqFq7' // ✅ Correcto
-     }
-   }
-   ```
+ ```javascript
+ {
+ apiGateway: {
+ url: 'https://c9nzcqgz16.../jul-dev' // Correcto
+ },
+ cognito: {
+ userPoolId: 'mx-central-1_WIAYTqFq7' // Correcto
+ }
+ }
+ ```
 
 5. **Genera archivos optimizados**:
-   - HTML, CSS, JS minificados
-   - Source maps
-   - Assets optimizados
+ - HTML, CSS, JS minificados
+ - Source maps
+ - Assets optimizados
 
 **Output**: Carpeta `build/` lista para deployment
 
@@ -260,30 +260,30 @@ npx serverless deploy --stage jul-dev --verbose
 **Proceso**:
 
 1. **Crear/Actualizar S3 Bucket**:
-   - Configurado como website
-   - IndexDocument: `index.html`
-   - ErrorDocument: `index.html` (para SPA routing)
+ - Configurado como website
+ - IndexDocument: `index.html`
+ - ErrorDocument: `index.html` (para SPA routing)
 
 2. **Subir archivos**:
-   ```bash
-   # Plugin: serverless-s3-sync
-   Uploading: index.html
-   Uploading: static/js/*.js
-   Uploading: static/css/*.css
-   Uploading: assets/*
-   ```
+ ```bash
+ # Plugin: serverless-s3-sync
+ Uploading: index.html
+ Uploading: static/js/*.js
+ Uploading: static/css/*.css
+ Uploading: assets/*
+ ```
 
 3. **Configurar CloudFront**:
-   - Origin: S3 Website
-   - Custom error responses (403, 404 → index.html)
-   - Cache behaviors
-   - HTTPS redirect
+ - Origin: S3 Website
+ - Custom error responses (403, 404 → index.html)
+ - Cache behaviors
+ - HTTPS redirect
 
 4. **Invalidar caché**:
-   ```bash
-   # Plugin: serverless-cloudfront-invalidate
-   Creating invalidation for paths: /*
-   ```
+ ```bash
+ # Plugin: serverless-cloudfront-invalidate
+ Creating invalidation for paths: /*
+ ```
 
 **Outputs importantes**:
 ```
@@ -308,10 +308,10 @@ npx serverless info --stage jul-dev
 ```
 
 **Muestra**:
-- ✅ Endpoints deployados
-- ✅ Funciones deployadas
-- ✅ URLs públicas
-- ✅ CloudFormation stack name
+- Endpoints deployados
+- Funciones deployadas
+- URLs públicas
+- CloudFormation stack name
 
 **Tiempo**: ~10 segundos
 
@@ -320,18 +320,18 @@ npx serverless info --stage jul-dev
 ### 7️⃣ **Notificación de Éxito**
 
 ```bash
-✅ Deployment to jul-dev completed successfully!
-🚀 Check your AWS console for the deployed resources
+ Deployment to jul-dev completed successfully!
+ Check your AWS console for the deployed resources
 ```
 
 **GitHub Actions**:
-- ✅ Status: Success (verde)
-- ✅ Log completo disponible
-- ✅ Artifacts disponibles (si aplica)
+- Status: Success (verde)
+- Log completo disponible
+- Artifacts disponibles (si aplica)
 
 ---
 
-## 👀 Ver el Progreso del Deployment
+## Ver el Progreso del Deployment
 
 ### Opción 1: GitHub Actions UI
 
@@ -341,10 +341,10 @@ npx serverless info --stage jul-dev
 
 **Ejemplo**:
 ```
-✓ Checkout code (5s)
-✓ Setup Node.js (10s)
-✓ Configure AWS Credentials (2s)
-✓ Install dependencies (20s)
+ Checkout code (5s)
+ Setup Node.js (10s)
+ Configure AWS Credentials (2s)
+ Install dependencies (20s)
 ⏳ Deploy Backend (3m 45s) ← En progreso
 ⏸ Build Frontend (esperando)
 ⏸ Deploy Frontend (esperando)
@@ -362,9 +362,9 @@ npx serverless info --stage jul-dev
 
 **Estados**:
 - `CREATE_IN_PROGRESS` → Creando
-- `CREATE_COMPLETE` → ✅ Creado
+- `CREATE_COMPLETE` → Creado
 - `UPDATE_IN_PROGRESS` → Actualizando
-- `UPDATE_COMPLETE` → ✅ Actualizado
+- `UPDATE_COMPLETE` → Actualizado
 
 #### Frontend (S3 + CloudFront)
 
@@ -385,14 +385,14 @@ npx serverless logs -f initiator --stage jul-dev --tail
 
 # Ver estado del stack
 aws cloudformation describe-stacks \
-  --stack-name invenadro-backend-jul-dev \
-  --region mx-central-1 \
-  --query 'Stacks[0].StackStatus'
+ --stack-name invenadro-backend-jul-dev \
+ --region mx-central-1 \
+ --query 'Stacks[0].StackStatus'
 ```
 
 ---
 
-## ✅ Después del Deployment
+## Después del Deployment
 
 ### 1️⃣ **Obtener URLs**
 
@@ -413,22 +413,22 @@ API Gateway URL: https://c9nzcqgz16.../jul-dev
 ### 2️⃣ **Probar la Aplicación**
 
 1. **Abrir frontend**:
-   ```
-   https://d3qyx007nie7k5.cloudfront.net
-   ```
+ ```
+ https://d3qyx007nie7k5.cloudfront.net
+ ```
 
 2. **Verificar en consola del navegador** (F12):
-   ```
-   🌍 Ambiente detectado por REACT_APP_STAGE: jul-dev
-   🌍 Lambda Service configurado para ambiente: jul-dev
-   📡 API Gateway: https://c9nzcqgz16.../jul-dev
-   🔐 Cognito configurado para ambiente: jul-dev
-   👤 User Pool: mx-central-1_WIAYTqFq7
-   ```
+ ```
+ Ambiente detectado por REACT_APP_STAGE: jul-dev
+ Lambda Service configurado para ambiente: jul-dev
+ API Gateway: https://c9nzcqgz16.../jul-dev
+ Cognito configurado para ambiente: jul-dev
+ User Pool: mx-central-1_WIAYTqFq7
+ ```
 
 3. **Login**:
-   - Usa credenciales de Cognito
-   - Primera vez: crear usuario en AWS Console
+ - Usa credenciales de Cognito
+ - Primera vez: crear usuario en AWS Console
 
 ---
 
@@ -436,21 +436,21 @@ API Gateway URL: https://c9nzcqgz16.../jul-dev
 
 ```bash
 aws cognito-idp admin-create-user \
-  --user-pool-id mx-central-1_WIAYTqFq7 \
-  --username test@ejemplo.com \
-  --user-attributes Name=email,Value=test@ejemplo.com \
-  --temporary-password TempPass123!
+ --user-pool-id mx-central-1_WIAYTqFq7 \
+ --username test@ejemplo.com \
+ --user-attributes Name=email,Value=test@ejemplo.com \
+ --temporary-password TempPass123!
 ```
 
 ---
 
 ### 4️⃣ **Probar End-to-End**
 
-1. ✅ Login con Cognito
-2. ✅ Subir archivo Excel
-3. ✅ Ver progreso del procesamiento
-4. ✅ Descargar resultados
-5. ✅ Descargar Excel por cliente
+1. Login con Cognito
+2. Subir archivo Excel
+3. Ver progreso del procesamiento
+4. Descargar resultados
+5. Descargar Excel por cliente
 
 ---
 
@@ -489,7 +489,7 @@ npx serverless deploy --stage jul-qa
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Error: "Deployment failed"
 
@@ -500,8 +500,8 @@ https://github.com/jsalinas1616/invenadro/actions
 
 # En CloudFormation
 aws cloudformation describe-stack-events \
-  --stack-name invenadro-backend-jul-dev \
-  --region mx-central-1
+ --stack-name invenadro-backend-jul-dev \
+ --region mx-central-1
 ```
 
 ---
@@ -536,18 +536,18 @@ Cause: User: ... is not authorized to perform: kms:Decrypt
 - La clave KMS AWS-managed tiene políticas restrictivas
 - Cuando Step Functions invoca Lambda, falla el descifrado de env vars
 
-**Solución (⚠️ EJECUTAR UNA SOLA VEZ CON USUARIO ADMIN)**:
+**Solución (️ EJECUTAR UNA SOLA VEZ CON USUARIO ADMIN)**:
 
 ```bash
 # Desde la raíz del proyecto
-# ⚠️ REQUIERE usuario con permisos admin (kms:PutKeyPolicy)
+# ️ REQUIERE usuario con permisos admin (kms:PutKeyPolicy)
 AWS_PROFILE=tu-perfil-admin ./scripts/fix-kms-key-policy.sh
 ```
 
 **¿Cuándo ejecutarlo?**:
-- ✅ **UNA VEZ** al deployar por primera vez en una cuenta AWS
-- ✅ Si ves el error `KMSAccessDeniedException` en Step Functions
-- ❌ **NO** es necesario ejecutarlo en cada deploy (solo la primera vez)
+- **UNA VEZ** al deployar por primera vez en una cuenta AWS
+- Si ves el error `KMSAccessDeniedException` en Step Functions
+- **NO** es necesario ejecutarlo en cada deploy (solo la primera vez)
 
 **¿Por qué requiere admin?**:
 - El script modifica la key policy de la clave KMS AWS-managed
@@ -561,7 +561,7 @@ AWS_PROFILE=tu-perfil-admin ./scripts/fix-kms-key-policy.sh
 **Verificar que funcionó**:
 ```bash
 # Subir un Excel desde el frontend
-# Si el Step Function completa sin error → ✅ Funcionó
+# Si el Step Function completa sin error → Funcionó
 ```
 
 ---
@@ -580,24 +580,24 @@ AWS_PROFILE=tu-perfil-admin ./scripts/fix-kms-key-policy.sh
 
 **Verificar**:
 1. **Consola del navegador** (F12):
-   ```
-   ¿Aparece "🌍 Ambiente detectado"?
-   ¿Las URLs son correctas?
-   ```
+ ```
+ ¿Aparece " Ambiente detectado"?
+ ¿Las URLs son correctas?
+ ```
 
 2. **Network tab**:
-   ```
-   ¿Las llamadas a API fallan?
-   ¿Hay errores CORS?
-   ```
+ ```
+ ¿Las llamadas a API fallan?
+ ¿Hay errores CORS?
+ ```
 
 3. **CloudFront**:
-   ```bash
-   # Invalidar caché si no ves cambios
-   aws cloudfront create-invalidation \
-     --distribution-id d3qyx007nie7k5 \
-     --paths "/*"
-   ```
+ ```bash
+ # Invalidar caché si no ves cambios
+ aws cloudfront create-invalidation \
+ --distribution-id d3qyx007nie7k5 \
+ --paths "/*"
+ ```
 
 ---
 
@@ -612,27 +612,27 @@ http://invenadro-frontend-jul-dev.s3-website.mx-central-1.amazonaws.com
 
 # O invalidar caché
 aws cloudfront create-invalidation \
-  --distribution-id d3qyx007nie7k5 \
-  --paths "/*"
+ --distribution-id d3qyx007nie7k5 \
+ --paths "/*"
 ```
 
 ---
 
-## 📊 Resumen del Proceso
+## Resumen del Proceso
 
 | Paso | Acción | Automático | Tiempo |
 |------|--------|------------|--------|
 | 1 | Push a GitHub | Manual | 5 seg |
-| 2 | GitHub Actions inicia | ✅ Sí | 10 seg |
-| 3 | Deploy Backend | ✅ Sí | 3-4 min |
-| 4 | Build Frontend | ✅ Sí | 1-2 min |
-| 5 | Deploy Frontend | ✅ Sí | 2-3 min |
-| 6 | Deployment Info | ✅ Sí | 10 seg |
-| **TOTAL** | | **✅ 100% Automático** | **~6-8 min** |
+| 2 | GitHub Actions inicia | Sí | 10 seg |
+| 3 | Deploy Backend | Sí | 3-4 min |
+| 4 | Build Frontend | Sí | 1-2 min |
+| 5 | Deploy Frontend | Sí | 2-3 min |
+| 6 | Deployment Info | Sí | 10 seg |
+| **TOTAL** | | ** 100% Automático** | **~6-8 min** |
 
 ---
 
-## 🎯 Comandos Rápidos
+## Comandos Rápidos
 
 ### Ver último deployment
 ```bash
@@ -641,9 +641,9 @@ https://github.com/jsalinas1616/invenadro/actions
 
 # CloudFormation
 aws cloudformation list-stacks \
-  --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE \
-  --query 'StackSummaries[?contains(StackName, `invenadro`)].{Name:StackName,Status:StackStatus,Time:LastUpdatedTime}' \
-  --output table
+ --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE \
+ --query 'StackSummaries[?contains(StackName, `invenadro`)].{Name:StackName,Status:StackStatus,Time:LastUpdatedTime}' \
+ --output table
 ```
 
 ### Ver recursos deployados
@@ -668,7 +668,7 @@ aws logs tail /aws/lambda/invenadro-backend-jul-dev-initiator --follow
 
 ---
 
-## 📚 Documentación Relacionada
+## Documentación Relacionada
 
 - **README Principal**: [`README.md`](./README.md)
 - **Multi-Ambiente**: [`MULTI_ENVIRONMENT.md`](./MULTI_ENVIRONMENT.md)
@@ -677,7 +677,7 @@ aws logs tail /aws/lambda/invenadro-backend-jul-dev-initiator --follow
 
 ---
 
-## ✨ Conclusión
+## Conclusión
 
 **¿Cómo hacer deployment?**
 
@@ -686,22 +686,22 @@ git push origin dev
 ```
 
 **¿Qué pasa?**
-1. ✅ GitHub Actions detecta push
-2. ✅ Despliega backend (8 lambdas + infra)
-3. ✅ Builds frontend con ambiente correcto
-4. ✅ Despliega frontend a CloudFront
-5. ✅ Todo conectado automáticamente
+1. GitHub Actions detecta push
+2. Despliega backend (8 lambdas + infra)
+3. Builds frontend con ambiente correcto
+4. Despliega frontend a CloudFront
+5. Todo conectado automáticamente
 
 **¿Cuánto tarda?**
 - ~6-8 minutos total
 
 **¿Qué obtienes?**
-- ✅ Aplicación funcionando end-to-end
-- ✅ Frontend en CloudFront (CDN global)
-- ✅ Backend en AWS (serverless)
-- ✅ Todo configurado correctamente
+- Aplicación funcionando end-to-end
+- Frontend en CloudFront (CDN global)
+- Backend en AWS (serverless)
+- Todo configurado correctamente
 
 ---
 
-**¡Es así de simple!** 🚀🎉
+**¡Es así de simple!** 
 

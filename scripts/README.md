@@ -1,17 +1,17 @@
 # Scripts de Automatización - Invenadro
 
-## 📦 Scripts Disponibles
+## Scripts Disponibles
 
-1. **🤖 update-frontend-config.sh** - Actualiza config del frontend con valores del backend
-2. **🔄 sync-cloudfront-urls.sh** - Sincroniza URLs de CloudFront en el backend (NUEVO)
+1. **update-frontend-config.sh** - Actualiza config del frontend con valores del backend
+2. **sync-cloudfront-urls.sh** - Sincroniza URLs de CloudFront en el backend (NUEVO)
 
 ---
 
-## 🔄 sync-cloudfront-urls.sh (NUEVO)
+## sync-cloudfront-urls.sh (NUEVO)
 
 Script automático que **obtiene la URL de CloudFront del frontend desplegado** y actualiza el `serverless.yml` del backend con la URL correcta para CORS.
 
-### 🎯 Problema que Resuelve
+### Problema que Resuelve
 
 **Antes**: Después de deployar el frontend, AWS CloudFront genera una URL aleatoria (ej: `d3qyx007nie7k5.cloudfront.net`). Tenías que:
 1. Ver en la consola de AWS cuál es
@@ -19,9 +19,9 @@ Script automático que **obtiene la URL de CloudFront del frontend desplegado** 
 3. Actualizar `serverless.yml` del backend
 4. Re-deployar el backend
 
-**Ahora**: **Un solo comando** obtiene la URL de CloudFront del stack desplegado y actualiza el backend automáticamente. ✨
+**Ahora**: **Un solo comando** obtiene la URL de CloudFront del stack desplegado y actualiza el backend automáticamente. 
 
-### 🚀 Uso
+### Uso
 
 ```bash
 # Sintaxis
@@ -33,7 +33,7 @@ Script automático que **obtiene la URL de CloudFront del frontend desplegado** 
 ./scripts/sync-cloudfront-urls.sh nadro-prod
 ```
 
-### 📋 Flujo Completo (Ambiente Nuevo)
+### Flujo Completo (Ambiente Nuevo)
 
 ```bash
 # 1. Deploy backend (primera vez)
@@ -45,12 +45,12 @@ cd ../../FrontEnd-lambdas
 npm run build
 cd ../services/frontend
 npx serverless deploy --stage jul-qa
-# ☝️ CloudFront se crea con URL random: d123abc.cloudfront.net
+# ️ CloudFront se crea con URL random: d123abc.cloudfront.net
 
-# 3. Sincronizar URL de CloudFront al backend 🤖
+# 3. Sincronizar URL de CloudFront al backend 
 cd ../..
 ./scripts/sync-cloudfront-urls.sh jul-qa
-# ☝️ Actualiza serverless.yml con la URL real
+# ️ Actualiza serverless.yml con la URL real
 
 # 4. Re-deploy backend con URL correcta
 cd services/backend
@@ -62,61 +62,61 @@ git commit -m "chore: Actualizar CloudFront URL para jul-qa"
 git push origin qa
 ```
 
-### 📊 ¿Qué Actualiza?
+### ¿Qué Actualiza?
 
 Actualiza la línea correspondiente al stage en `services/backend/serverless.yml`:
 
 **ANTES** (con placeholder):
 ```yaml
 custom:
-  allowedOrigins:
-    jul-qa: 'http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
+ allowedOrigins:
+ jul-qa: 'http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
 ```
 
 **DESPUÉS** (con CloudFront real):
 ```yaml
 custom:
-  allowedOrigins:
-    jul-qa: 'https://d3qyx007nie7k5.cloudfront.net,http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
+ allowedOrigins:
+ jul-qa: 'https://d3qyx007nie7k5.cloudfront.net,http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
 ```
 
-### 🔍 Output del Script
+### Output del Script
 
 ```bash
 $ ./scripts/sync-cloudfront-urls.sh jul-qa
 
-ℹ️  Stage: jul-qa
+ℹ️ Stage: jul-qa
 
-ℹ️  Verificando stack del frontend...
-✅ Stack encontrado: invenadro-frontend-jul-qa (Estado: UPDATE_COMPLETE)
+ℹ️ Verificando stack del frontend...
+ Stack encontrado: invenadro-frontend-jul-qa (Estado: UPDATE_COMPLETE)
 
-ℹ️  Obteniendo CloudFront URL...
-✅ CloudFront URL: https://d3qyx007nie7k5.cloudfront.net
+ℹ️ Obteniendo CloudFront URL...
+ CloudFront URL: https://d3qyx007nie7k5.cloudfront.net
 
-ℹ️  Orígenes permitidos:
-   https://d3qyx007nie7k5.cloudfront.net,http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000
+ℹ️ Orígenes permitidos:
+ https://d3qyx007nie7k5.cloudfront.net,http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000
 
-ℹ️  Actualizando services/backend/serverless.yml...
-✅ Línea de jul-qa actualizada
+ℹ️ Actualizando services/backend/serverless.yml...
+ Línea de jul-qa actualizada
 
-ℹ️  Cambio realizado:
-    jul-qa: 'https://d3qyx007nie7k5.cloudfront.net,http://...'
+ℹ️ Cambio realizado:
+ jul-qa: 'https://d3qyx007nie7k5.cloudfront.net,http://...'
 
-✅ ¡Configuración actualizada!
+ ¡Configuración actualizada!
 
-ℹ️  Próximos pasos:
-   1. Revisar cambios: git diff services/backend/serverless.yml
-   2. Re-deploy backend:
-      cd services/backend
-      npx serverless deploy --stage jul-qa
-   3. Commit los cambios:
-      git add services/backend/serverless.yml
-      git commit -m "chore: Actualizar CloudFront URL para jul-qa"
+ℹ️ Próximos pasos:
+ 1. Revisar cambios: git diff services/backend/serverless.yml
+ 2. Re-deploy backend:
+ cd services/backend
+ npx serverless deploy --stage jul-qa
+ 3. Commit los cambios:
+ git add services/backend/serverless.yml
+ git commit -m "chore: Actualizar CloudFront URL para jul-qa"
 
-⚠️  Archivo backup guardado en: services/backend/serverless.yml.backup
+️ Archivo backup guardado en: services/backend/serverless.yml.backup
 ```
 
-### ⚠️ Prerequisitos
+### ️ Prerequisitos
 
 1. **Frontend desplegado** en el stage que quieres sincronizar
 2. **AWS CLI configurado** con el perfil `default`
@@ -124,30 +124,30 @@ $ ./scripts/sync-cloudfront-urls.sh jul-qa
 
 ---
 
-## 🤖 update-frontend-config.sh
+## update-frontend-config.sh
 
 Script automático que actualiza la configuración del frontend (`environments.js`) con los valores reales del backend deployado en AWS.
 
-### 🎯 Problema que Resuelve
+### Problema que Resuelve
 
 Antes: Después de deployar el backend, tenías que **copiar manualmente** las URLs, IDs de Cognito, ARNs, etc. y pegarlos en `environments.js`.
 
-Ahora: **Un solo comando** obtiene todos los valores del backend en AWS y actualiza el frontend automáticamente. ✨
+Ahora: **Un solo comando** obtiene todos los valores del backend en AWS y actualiza el frontend automáticamente. 
 
 ---
 
-## 📋 Prerequisitos
+## Prerequisitos
 
 1. **AWS CLI configurado** con el perfil `default`
 2. **jq** instalado (para parsear JSON)
-   ```bash
-   brew install jq  # macOS
-   ```
+ ```bash
+ brew install jq # macOS
+ ```
 3. **Backend desplegado** en el stage que quieres configurar
 
 ---
 
-## 🚀 Uso
+## Uso
 
 ### Sintaxis
 
@@ -170,7 +170,7 @@ Ahora: **Un solo comando** obtiene todos los valores del backend en AWS y actual
 
 ---
 
-## 🔄 Flujo Completo de Deployment
+## Flujo Completo de Deployment
 
 ### Para un ambiente NUEVO (ej: jul-qa)
 
@@ -179,7 +179,7 @@ Ahora: **Un solo comando** obtiene todos los valores del backend en AWS y actual
 cd services/backend
 npx serverless deploy --stage jul-qa
 
-# 2. Actualizar frontend config automáticamente 🤖
+# 2. Actualizar frontend config automáticamente 
 cd ../..
 ./scripts/update-frontend-config.sh jul-qa
 
@@ -203,7 +203,7 @@ Si cambias algo en el backend (ej: recrear Cognito User Pool):
 cd services/backend
 npx serverless deploy --stage jul-qa
 
-# 2. Actualizar frontend config automáticamente 🤖
+# 2. Actualizar frontend config automáticamente 
 cd ../..
 ./scripts/update-frontend-config.sh jul-qa
 
@@ -215,7 +215,7 @@ git push origin qa
 
 ---
 
-## 📊 ¿Qué Valores Actualiza?
+## ¿Qué Valores Actualiza?
 
 El script obtiene y actualiza automáticamente:
 
@@ -233,74 +233,74 @@ El script obtiene y actualiza automáticamente:
 
 ---
 
-## 🔍 Output del Script
+## Output del Script
 
 ```bash
 $ ./scripts/update-frontend-config.sh jul-qa
 
-ℹ️  Stage válido: jul-qa
-ℹ️  Obteniendo configuración del backend...
-   Stack: invenadro-backend-jul-qa
-   Región: mx-central-1
+ℹ️ Stage válido: jul-qa
+ℹ️ Obteniendo configuración del backend...
+ Stack: invenadro-backend-jul-qa
+ Región: mx-central-1
 
-✅ Stack encontrado en AWS
-ℹ️  Obteniendo outputs del CloudFormation...
-✅ Configuración obtenida correctamente
+ Stack encontrado en AWS
+ℹ️ Obteniendo outputs del CloudFormation...
+ Configuración obtenida correctamente
 
-📊 Valores del backend jul-qa:
-   API Gateway: https://xxxxx.execute-api.mx-central-1.amazonaws.com/jul-qa
-   User Pool ID: mx-central-1_XXXXX
-   Client ID: xxxxxxxxxxxxxxxxxx
-   Uploads Bucket: invenadro-backend-jul-qa-uploads
-   Results Bucket: invenadro-backend-jul-qa-results
-   Jobs Table: invenadro-backend-jul-qa-jobs
-   Account ID: 975130647458
+ Valores del backend jul-qa:
+ API Gateway: https://xxxxx.execute-api.mx-central-1.amazonaws.com/jul-qa
+ User Pool ID: mx-central-1_XXXXX
+ Client ID: xxxxxxxxxxxxxxxxxx
+ Uploads Bucket: invenadro-backend-jul-qa-uploads
+ Results Bucket: invenadro-backend-jul-qa-results
+ Jobs Table: invenadro-backend-jul-qa-jobs
+ Account ID: 975130647458
 
-ℹ️  Actualizando FrontEnd-lambdas/src/config/environments.js...
-📝 Leyendo archivo: .../FrontEnd-lambdas/src/config/environments.js
-🔍 Buscando configuración para stage: jul-qa
-🔄 Actualizando valores para jul-qa...
-  ✓ API Gateway URL: https://xxxxx...
-  ✓ User Pool ID: mx-central-1_XXXXX
-  ✓ Client ID: xxxxxxxxxxxxxxxxxx
-  ✓ Results Bucket: invenadro-backend-jul-qa-results
-  ✓ Uploads Bucket: invenadro-backend-jul-qa-uploads
-  ✓ Jobs Table: invenadro-backend-jul-qa-jobs
-  ✓ Step Function ARN: arn:aws:states:...
-  ✓ Account ID: 975130647458
-  ✓ Region: mx-central-1
+ℹ️ Actualizando FrontEnd-lambdas/src/config/environments.js...
+ Leyendo archivo: .../FrontEnd-lambdas/src/config/environments.js
+ Buscando configuración para stage: jul-qa
+ Actualizando valores para jul-qa...
+ API Gateway URL: https://xxxxx...
+ User Pool ID: mx-central-1_XXXXX
+ Client ID: xxxxxxxxxxxxxxxxxx
+ Results Bucket: invenadro-backend-jul-qa-results
+ Uploads Bucket: invenadro-backend-jul-qa-uploads
+ Jobs Table: invenadro-backend-jul-qa-jobs
+ Step Function ARN: arn:aws:states:...
+ Account ID: 975130647458
+ Region: mx-central-1
 
-💾 Guardando cambios en .../environments.js
-✅ Archivo actualizado correctamente
+ Guardando cambios en .../environments.js
+ Archivo actualizado correctamente
 
-📊 Resumen de cambios:
-   Stage: jul-qa
-   API Gateway: https://xxxxx...
-   Cognito: mx-central-1_XXXXX
-   Region: mx-central-1
+ Resumen de cambios:
+ Stage: jul-qa
+ API Gateway: https://xxxxx...
+ Cognito: mx-central-1_XXXXX
+ Region: mx-central-1
 
-✅ Archivo environments.js actualizado correctamente
+ Archivo environments.js actualizado correctamente
 
-ℹ️  Próximos pasos:
-   1. Revisar los cambios: git diff FrontEnd-lambdas/src/config/environments.js
-   2. Hacer commit: git add FrontEnd-lambdas/src/config/environments.js
-   3. Commit: git commit -m "chore: Actualizar config jul-qa con URLs del backend"
-   4. Push: git push origin <branch>
+ℹ️ Próximos pasos:
+ 1. Revisar los cambios: git diff FrontEnd-lambdas/src/config/environments.js
+ 2. Hacer commit: git add FrontEnd-lambdas/src/config/environments.js
+ 3. Commit: git commit -m "chore: Actualizar config jul-qa con URLs del backend"
+ 4. Push: git push origin <branch>
 
-✅ ¡Proceso completado! 🎉
+ ¡Proceso completado! 
 ```
 
 ---
 
-## ⚠️ Troubleshooting
+## ️ Troubleshooting
 
 ### Error: "El stack no existe en AWS"
 
 ```bash
-❌ El stack invenadro-backend-jul-qa no existe en AWS
-⚠️  Primero debes deployar el backend:
-   cd services/backend
-   npx serverless deploy --stage jul-qa
+ El stack invenadro-backend-jul-qa no existe en AWS
+️ Primero debes deployar el backend:
+ cd services/backend
+ npx serverless deploy --stage jul-qa
 ```
 
 **Solución**: Deployar el backend primero.
@@ -315,7 +315,7 @@ $ ./scripts/update-frontend-config.sh jul-qa
 
 **Solución**: Instalar jq
 ```bash
-brew install jq  # macOS
+brew install jq # macOS
 ```
 
 ---
@@ -323,12 +323,12 @@ brew install jq  # macOS
 ### Error: "No se pudieron obtener todos los valores"
 
 ```bash
-❌ No se pudieron obtener todos los valores necesarios del stack
+ No se pudieron obtener todos los valores necesarios del stack
 
 Valores obtenidos:
-  API URL: MISSING
-  User Pool ID: MISSING
-  Client ID: MISSING
+ API URL: MISSING
+ User Pool ID: MISSING
+ Client ID: MISSING
 ```
 
 **Causas posibles**:
@@ -340,81 +340,81 @@ Valores obtenidos:
 ```bash
 # Verificar que el stack existe y tiene outputs
 aws cloudformation describe-stacks \
-  --stack-name invenadro-backend-jul-qa \
-  --region mx-central-1 \
-  --query 'Stacks[0].Outputs'
+ --stack-name invenadro-backend-jul-qa \
+ --region mx-central-1 \
+ --query 'Stacks[0].Outputs'
 ```
 
 ---
 
-## 📁 Archivos del Sistema
+## Archivos del Sistema
 
 ```
 scripts/
-├── sync-cloudfront-urls.sh      # Sincroniza URLs de CloudFront (bash) ⭐ NUEVO
-├── update-frontend-config.sh    # Actualiza config del frontend (bash)
-├── update-environments-js.js    # Helper para actualizar environments.js (Node.js)
-└── README.md                     # Esta documentación
+├── sync-cloudfront-urls.sh # Sincroniza URLs de CloudFront (bash) ⭐ NUEVO
+├── update-frontend-config.sh # Actualiza config del frontend (bash)
+├── update-environments-js.js # Helper para actualizar environments.js (Node.js)
+└── README.md # Esta documentación
 ```
 
 ---
 
-## 🔧 Cómo Funciona (Internamente)
+## Cómo Funciona (Internamente)
 
 1. **Validar parámetros**: Verifica que el stage es válido (jul-dev, jul-qa, nadro-qa, nadro-prod)
 
 2. **Verificar stack**: Confirma que el backend está deployado en AWS
-   ```bash
-   aws cloudformation describe-stacks --stack-name invenadro-backend-<stage>
-   ```
+ ```bash
+ aws cloudformation describe-stacks --stack-name invenadro-backend-<stage>
+ ```
 
 3. **Obtener outputs**: Extrae todos los outputs de CloudFormation
-   ```bash
-   aws cloudformation describe-stacks ... --query 'Stacks[0].Outputs'
-   ```
+ ```bash
+ aws cloudformation describe-stacks ... --query 'Stacks[0].Outputs'
+ ```
 
 4. **Parsear valores**: Usa `jq` para extraer cada valor específico
 
 5. **Actualizar environments.js**: Ejecuta el script Node.js que:
-   - Lee el archivo `environments.js`
-   - Busca el objeto del stage específico
-   - Reemplaza cada campo con el nuevo valor usando regex
-   - Guarda el archivo actualizado
+ - Lee el archivo `environments.js`
+ - Busca el objeto del stage específico
+ - Reemplaza cada campo con el nuevo valor usando regex
+ - Guarda el archivo actualizado
 
 6. **Confirmar**: Muestra resumen y próximos pasos
 
 ---
 
-## 💡 Ventajas del Sistema Automático
+## Ventajas del Sistema Automático
 
 | Antes (Manual) | Ahora (Automático) |
 |----------------|-------------------|
-| ❌ Copiar/pegar 9 valores diferentes | ✅ Un solo comando |
-| ❌ Propenso a errores de tipeo | ✅ Sin errores humanos |
-| ❌ ~5-10 minutos por ambiente | ✅ ~30 segundos por ambiente |
-| ❌ Aburrido y repetitivo | ✅ Eficiente y confiable |
+| Copiar/pegar 9 valores diferentes | Un solo comando |
+| Propenso a errores de tipeo | Sin errores humanos |
+| ~5-10 minutos por ambiente | ~30 segundos por ambiente |
+| Aburrido y repetitivo | Eficiente y confiable |
 
 ---
 
-## 🚀 Integración con CI/CD (Futuro)
+## Integración con CI/CD (Futuro)
 
 Este script se puede integrar en GitHub Actions para automatizar completamente:
 
 ```yaml
 # .github/workflows/deploy-qa.yml
 - name: Update Frontend Config
-  run: |
-    ./scripts/update-frontend-config.sh jul-qa
-    git config user.name "github-actions[bot]"
-    git config user.email "github-actions[bot]@users.noreply.github.com"
-    git add FrontEnd-lambdas/src/config/environments.js
-    git commit -m "chore: Auto-update frontend config for jul-qa [skip ci]"
-    git push
+ run: |
+ ./scripts/update-frontend-config.sh jul-qa
+ git config user.name "github-actions[bot]"
+ git config user.email "github-actions[bot]@users.noreply.github.com"
+ git add FrontEnd-lambdas/src/config/environments.js
+ git commit -m "chore: Auto-update frontend config for jul-qa [skip ci]"
+ git push
 ```
 
 ---
 
-## 📚 Referencias
+## Referencias
 
 - **Documentación Principal**: `MULTI_ENVIRONMENT.md`
 - **Backend Serverless**: `services/backend/serverless.yml`
@@ -422,7 +422,7 @@ Este script se puede integrar en GitHub Actions para automatizar completamente:
 
 ---
 
-## ✅ Checklist de Uso
+## Checklist de Uso
 
 - [ ] Backend deployado en el stage deseado
 - [ ] AWS CLI configurado con perfil `default`
@@ -434,5 +434,5 @@ Este script se puede integrar en GitHub Actions para automatizar completamente:
 
 ---
 
-**¡Ahora actualizar la configuración del frontend es tan fácil como ejecutar un comando!** 🎉
+**¡Ahora actualizar la configuración del frontend es tan fácil como ejecutar un comando!** 
 

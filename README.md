@@ -4,7 +4,7 @@ Sistema serverless en AWS para optimización de inventarios.
 
 ---
 
-## 🚀 Deployment Rápido
+## Deployment Rápido
 
 ### Prerequisitos
 
@@ -19,21 +19,21 @@ aws --version
 npm install -g serverless
 
 # 4. jq (para scripts automáticos)
-brew install jq  # macOS
+brew install jq # macOS
 ```
 
 ---
 
-## 📦 Deploy Completo (Backend + Frontend)
+## Deploy Completo (Backend + Frontend)
 
 ### Opción 1: Automático con GitHub Actions (Recomendado)
 
 ```bash
 # Push a la rama correspondiente
-git push origin dev       # → jul-dev
-git push origin qa        # → jul-qa
-git push origin nadro-qa  # → nadro-qa
-git push origin main      # → nadro-prod
+git push origin dev # → jul-dev
+git push origin qa # → jul-qa
+git push origin nadro-qa # → nadro-qa
+git push origin main # → nadro-prod
 
 # GitHub Actions se encarga de todo automáticamente
 ```
@@ -58,7 +58,7 @@ npx serverless deploy --stage jul-dev --verbose
 npx serverless info --stage jul-dev
 ```
 
-#### **Paso 2: Actualizar Configuración del Frontend (Automático) 🤖**
+#### **Paso 2: Actualizar Configuración del Frontend (Automático) **
 
 ```bash
 # Volver a raíz
@@ -109,7 +109,7 @@ npx serverless info --stage jul-dev
 
 ---
 
-## 🌍 Ambientes Disponibles
+## Ambientes Disponibles
 
 | Ambiente | Stage | Branch | Cuenta AWS |
 |----------|-------|--------|------------|
@@ -120,7 +120,7 @@ npx serverless info --stage jul-dev
 
 ---
 
-## 🔄 Deploy de un Ambiente Nuevo
+## Deploy de un Ambiente Nuevo
 
 ### Ejemplo: Crear ambiente `jul-qa`
 
@@ -145,12 +145,12 @@ REACT_APP_STAGE=jul-qa npm run build
 cd ../services/frontend
 npx serverless deploy --stage jul-qa
 
-# ¡Listo! 🎉
+# ¡Listo! 
 ```
 
 ---
 
-## 📊 Ver Info de Deployment
+## Ver Info de Deployment
 
 ```bash
 # Backend
@@ -164,7 +164,7 @@ npx serverless info --stage jul-dev
 
 ---
 
-## 🗑️ Eliminar un Ambiente
+## ️ Eliminar un Ambiente
 
 ```bash
 # Frontend (primero)
@@ -178,7 +178,7 @@ npx serverless remove --stage jul-dev
 
 ---
 
-## 🛠️ Comandos Útiles
+## ️ Comandos Útiles
 
 ### Backend
 
@@ -198,17 +198,17 @@ npx serverless metrics --stage jul-dev
 ```bash
 # Invalidar caché de CloudFront
 aws cloudfront create-invalidation \
-  --distribution-id D3QYX007NIE7K5 \
-  --paths "/*"
+ --distribution-id D3QYX007NIE7K5 \
+ --paths "/*"
 
 # Ver logs de CloudFront
 aws cloudfront get-distribution \
-  --id D3QYX007NIE7K5
+ --id D3QYX007NIE7K5
 ```
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Error: "Stack does not exist"
 ```bash
@@ -237,7 +237,7 @@ echo $REACT_APP_STAGE
 
 # 2. Verificar configuración en consola del navegador
 # Abre DevTools (F12) y busca:
-# "🌍 Ambiente detectado por REACT_APP_STAGE: jul-dev"
+# " Ambiente detectado por REACT_APP_STAGE: jul-dev"
 
 # 3. Actualizar configuración
 ./scripts/update-frontend-config.sh jul-dev
@@ -245,7 +245,7 @@ echo $REACT_APP_STAGE
 
 ---
 
-## 📚 Documentación Adicional
+## Documentación Adicional
 
 - **Multi-Ambiente**: [`MULTI_ENVIRONMENT.md`](./MULTI_ENVIRONMENT.md)
 - **Scripts Automáticos**: [`scripts/README.md`](./scripts/README.md)
@@ -255,66 +255,66 @@ echo $REACT_APP_STAGE
 
 ---
 
-## 🎯 Arquitectura
+## Arquitectura
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    USUARIO FINAL                        │
+│ USUARIO FINAL │
 └────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
+ │
+ ▼
 ┌─────────────────────────────────────────────────────────┐
-│              CloudFront (CDN)                           │
-│              Frontend React (S3 Website)                │
+│ CloudFront (CDN) │
+│ Frontend React (S3 Website) │
 └────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
+ │
+ ▼
 ┌─────────────────────────────────────────────────────────┐
-│              API Gateway                                │
-│              (Cognito Auth)                             │
+│ API Gateway │
+│ (Cognito Auth) │
 └────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
+ │
+ ▼
 ┌─────────────────────────────────────────────────────────┐
-│         Lambda Functions (8 funciones)                  │
-│         - initiator                                     │
-│         - client-separator                              │
-│         - processor (motor principal)                   │
-│         - status-checker                                │
-│         - client-aggregator                             │
-│         - download-result                               │
-│         - excel-generator                               │
-│         - get-presigned-url                             │
+│ Lambda Functions (8 funciones) │
+│ - initiator │
+│ - client-separator │
+│ - processor (motor principal) │
+│ - status-checker │
+│ - client-aggregator │
+│ - download-result │
+│ - excel-generator │
+│ - get-presigned-url │
 └────────┬─────────────┬──────────────┬───────────────────┘
-         │             │              │
-         ▼             ▼              ▼
-    ┌────────┐   ┌─────────┐   ┌──────────┐
-    │   S3   │   │ DynamoDB│   │Step      │
-    │Uploads │   │  Jobs   │   │Functions │
-    │Results │   │  Table  │   │          │
-    └────────┘   └─────────┘   └──────────┘
+ │ │ │
+ ▼ ▼ ▼
+ ┌────────┐ ┌─────────┐ ┌──────────┐
+ │ S3 │ │ DynamoDB│ │Step │
+ │Uploads │ │ Jobs │ │Functions │
+ │Results │ │ Table │ │ │
+ └────────┘ └─────────┘ └──────────┘
 ```
 
 ---
 
-## 🔐 Cognito (Autenticación)
+## Cognito (Autenticación)
 
 ```bash
 # Crear usuario de prueba
 aws cognito-idp admin-create-user \
-  --user-pool-id mx-central-1_WIAYTqFq7 \
-  --username test@ejemplo.com \
-  --user-attributes Name=email,Value=test@ejemplo.com \
-  --temporary-password TempPass123!
+ --user-pool-id mx-central-1_WIAYTqFq7 \
+ --username test@ejemplo.com \
+ --user-attributes Name=email,Value=test@ejemplo.com \
+ --temporary-password TempPass123!
 
 # Listar usuarios
 aws cognito-idp list-users \
-  --user-pool-id mx-central-1_WIAYTqFq7
+ --user-pool-id mx-central-1_WIAYTqFq7
 ```
 
 ---
 
-## 💰 Costos Estimados
+## Costos Estimados
 
 | Servicio | Costo Mensual (estimado) |
 |----------|--------------------------|
@@ -331,20 +331,20 @@ aws cognito-idp list-users \
 
 ---
 
-## 🤝 Soporte
+## Soporte
 
 - **Issues**: [GitHub Issues](https://github.com/jsalinas1616/invenadro/issues)
 - **Documentación**: Ver carpeta `permisos/` y archivos `.md`
 
 ---
 
-## 📝 License
+## License
 
 Propietario - Uso interno
 
 ---
 
-**¿Listo para deployar?** 🚀
+**¿Listo para deployar?** 
 
 ```bash
 # Rápido y simple:
@@ -354,4 +354,4 @@ cd FrontEnd-lambdas && REACT_APP_STAGE=jul-dev npm run build
 cd ../services/frontend && npx serverless deploy --stage jul-dev
 ```
 
-**¡Y ya está funcionando!** 🎉
+**¡Y ya está funcionando!** 
