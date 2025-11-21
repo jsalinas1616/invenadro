@@ -5,12 +5,14 @@ Este módulo implementa un CRUD completo para gestionar configuraciones de mostr
 ## 📁 Estructura
 
 ```
-config-crud/
+functionsCRUDConfiguracion/
 ├── create-config/     # Lambda para crear configuraciones
 ├── read-config/       # Lambda para leer configuraciones
 ├── update-config/     # Lambda para actualizar configuraciones
 └── delete-config/     # Lambda para eliminar configuraciones
 ```
+
+**Nota:** Esta carpeta está separada de `functions/` para mantener una organización clara entre las lambdas del proceso de cálculo (Step Functions) y las lambdas del CRUD.
 
 ## 🔌 API Endpoints
 

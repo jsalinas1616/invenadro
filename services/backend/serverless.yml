@@ -287,7 +287,7 @@ functions:
   
   createConfig:
     name: ${self:service}-${self:provider.stage}-create-config
-    handler: functions/config-crud/create-config/index.handler
+    handler: functionsCRUDConfiguracion/create-config/index.handler
     timeout: 30
     memorySize: 256
     environment:
@@ -308,7 +308,7 @@ functions:
 
   readConfig:
     name: ${self:service}-${self:provider.stage}-read-config
-    handler: functions/config-crud/read-config/index.handler
+    handler: functionsCRUDConfiguracion/read-config/index.handler
     timeout: 30
     memorySize: 256
     environment:
@@ -337,7 +337,7 @@ functions:
 
   updateConfig:
     name: ${self:service}-${self:provider.stage}-update-config
-    handler: functions/config-crud/update-config/index.handler
+    handler: functionsCRUDConfiguracion/update-config/index.handler
     timeout: 30
     memorySize: 256
     environment:
@@ -358,7 +358,7 @@ functions:
 
   deleteConfig:
     name: ${self:service}-${self:provider.stage}-delete-config
-    handler: functions/config-crud/delete-config/index.handler
+    handler: functionsCRUDConfiguracion/delete-config/index.handler
     timeout: 30
     memorySize: 256
     environment:
