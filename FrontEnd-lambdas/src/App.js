@@ -52,6 +52,7 @@ import lambdaService from './services/lambdaService';
 import ConvergenceModal from './components/ConvergenceModal';
 import CustomAuthenticator from './components/CustomAuthenticator';
 import Sidebar from './components/Sidebar';
+import ConfiguracionesPage from './pages/ConfiguracionesPage';
 
 // Registrar componentes de Chart.js
 ChartJS.register(
@@ -1715,6 +1716,11 @@ function App() {
                     <p>Módulo en desarrollo. Próximamente podrás calcular el factor de redondeo para farmacias independientes con IPP.</p>
                   </Alert>
                 </Container>
+              )}
+
+              {/* Módulo de Configuraciones de Mostrador */}
+              {activeModule === 'configuraciones' && (
+                <ConfiguracionesPage />
               )}
             </div>
           </div>

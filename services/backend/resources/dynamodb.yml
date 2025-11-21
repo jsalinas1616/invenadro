@@ -15,3 +15,19 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
       # Tags removidos - Serverless Framework los agrega automáticamente desde provider.tags
+
+  # Tabla para CRUD de Configuraciones de Mostrador
+  ConfiguracionesMostradorTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:service}-${self:provider.stage}-configuraciones-mostrador
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: mostradorId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: mostradorId
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      # Tags removidos - Serverless Framework los agrega automáticamente desde provider.tags

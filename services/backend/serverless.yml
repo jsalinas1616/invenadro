@@ -280,6 +280,103 @@ functions:
             type: COGNITO_USER_POOLS
             authorizerId: !Ref ApiGatewayAuthorizer
 
+  # ==========================================
+  # CRUD CONFIGURACIONES DE MOSTRADOR
+  # (Funciones separadas, NO van al Step Function)
+  # ==========================================
+  
+  createConfig:
+    name: ${self:service}-${self:provider.stage}-create-config
+    handler: functions/config-crud/create-config/index.handler
+    timeout: 30
+    memorySize: 256
+    environment:
+      CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: !GetAtt ConfiguracionesMostradorTable.Arn
+    events:
+      - http:
+          path: /configuraciones
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  readConfig:
+    name: ${self:service}-${self:provider.stage}-read-config
+    handler: functions/config-crud/read-config/index.handler
+    timeout: 30
+    memorySize: 256
+    environment:
+      CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:Scan
+        Resource: !GetAtt ConfiguracionesMostradorTable.Arn
+    events:
+      - http:
+          path: /configuraciones
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+      - http:
+          path: /configuraciones/{mostradorId}
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  updateConfig:
+    name: ${self:service}-${self:provider.stage}-update-config
+    handler: functions/config-crud/update-config/index.handler
+    timeout: 30
+    memorySize: 256
+    environment:
+      CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: !GetAtt ConfiguracionesMostradorTable.Arn
+    events:
+      - http:
+          path: /configuraciones/{mostradorId}
+          method: put
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  deleteConfig:
+    name: ${self:service}-${self:provider.stage}-delete-config
+    handler: functions/config-crud/delete-config/index.handler
+    timeout: 30
+    memorySize: 256
+    environment:
+      CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:DeleteItem
+        Resource: !GetAtt ConfiguracionesMostradorTable.Arn
+    events:
+      - http:
+          path: /configuraciones/{mostradorId}
+          method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
 # CloudFormation Resources
 resources:
   - ${file(resources/dynamodb.yml)}

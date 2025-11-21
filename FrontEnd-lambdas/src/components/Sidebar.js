@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Nav } from 'react-bootstrap';
-import { FaHospital, FaStore, FaChevronRight, FaChevronDown, FaCalculator, FaTh } from 'react-icons/fa';
+import { FaHospital, FaStore, FaChevronRight, FaChevronDown, FaCalculator, FaTh, FaCog } from 'react-icons/fa';
 import './Sidebar.css';
 
 const Sidebar = ({ activeModule, onModuleChange, visible }) => {
@@ -73,6 +73,26 @@ const Sidebar = ({ activeModule, onModuleChange, visible }) => {
             </Nav.Link>
           </Nav>
         )}
+      </div>
+
+      {/* Configuraciones */}
+      <div className="sidebar-section">
+        <div className="sidebar-section-title">
+          <div className="d-flex align-items-center">
+            <FaCog className="me-2" />
+            CONFIGURACIONES
+          </div>
+        </div>
+        
+        <Nav className="flex-column sidebar-nav">
+          <Nav.Link 
+            className={activeModule === 'configuraciones' ? 'active' : ''}
+            onClick={() => onModuleChange('configuraciones')}
+          >
+            <FaCog className="me-2" />
+            Configuraciones de Mostrador
+          </Nav.Link>
+        </Nav>
       </div>
     </div>
   );
