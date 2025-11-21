@@ -6,16 +6,27 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 const TABLE_NAME = process.env.CONFIG_TABLE;
 
-// CORS Headers
-const corsHeaders = {
-  'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGINS || '*',
-  'Access-Control-Allow-Credentials': true,
-  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-  'Access-Control-Allow-Methods': 'DELETE,OPTIONS'
+// Función helper para CORS dinámico
+const getCorsHeaders = (event) => {
+  const origin = event.headers?.origin || event.headers?.Origin;
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim());
+  
+  // Si el origin está en la lista permitida, devuélvelo
+  // Si no, usa el primero de la lista o '*'
+  const allowedOrigin = allowedOrigins.includes(origin) ? origin : (allowedOrigins[0] || '*');
+  
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Credentials': true,
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+    'Access-Control-Allow-Methods': 'DELETE,OPTIONS'
+  };
 };
 
 exports.handler = async (event) => {
   console.log('DELETE Config - Evento recibido:', JSON.stringify(event, null, 2));
+
+  const corsHeaders = getCorsHeaders(event);
 
   // Manejar OPTIONS (CORS preflight)
   if (event.httpMethod === 'OPTIONS') {
