@@ -104,7 +104,6 @@ const CustomAuthenticator = ({ children }) => {
               headerDiv.innerHTML = `
                 <img src="/logo-invenadro-512.png" alt="Invenadro Logo" class="auth-logo"/>
                 <h2 class="auth-title">Sistema de Optimización Invenadro</h2>
-                <p class="auth-subtitle">Panel de control</p>
               `;
               form.prepend(headerDiv);
 
