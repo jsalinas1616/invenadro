@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card, Button, Alert, Modal, Toast, ToastContainer } from 'react-bootstrap';
 import { FaPlus, FaCog, FaExclamationTriangle } from 'react-icons/fa';
 import ConfigTable from '../components/configuraciones/ConfigTable';
@@ -17,24 +17,21 @@ const ConfiguracionesPage = () => {
   const [configToDelete, setConfigToDelete] = useState(null);
   const [toasts, setToasts] = useState([]);
 
-  // Cargar configuraciones al montar
-  useEffect(() => {
-    loadConfigs();
-  }, []);
-
   // Funciones de Toast
-  const addToast = (message, variant = 'info') => {
+  const addToast = useCallback((message, variant = 'info') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, variant }]);
-    setTimeout(() => removeToast(id), 4000);
-  };
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 4000);
+  }, []);
 
-  const removeToast = (id) => {
+  const removeToast = useCallback((id) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
+  }, []);
 
   // Cargar todas las configuraciones
-  const loadConfigs = async () => {
+  const loadConfigs = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -47,7 +44,12 @@ const ConfiguracionesPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [addToast]);
+
+  // Cargar configuraciones al montar
+  useEffect(() => {
+    loadConfigs();
+  }, [loadConfigs]);
 
   // Abrir modal para crear
   const handleCreate = () => {
