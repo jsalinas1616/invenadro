@@ -1111,38 +1111,41 @@ function App() {
           {/* Header Moderno */}
           <Navbar className="navbar-modern shadow-lg">
             <Container fluid>
-              {/* Botón Toggle Sidebar */}
-              <Button 
-                className="btn-toggle-sidebar me-3"
-                onClick={toggleSidebar}
-                title={sidebarVisible ? "Ocultar menú" : "Mostrar menú"}
-              >
-                {sidebarVisible ? <FaTimes /> : <FaBars />}
-              </Button>
-              
-              {/* Logo y Título */}
-              <Navbar.Brand className="navbar-brand-modern">
-                <div className="d-flex align-items-center gap-3">
-                  <div className="logo-container-hd">
-                    <img 
-                      src="/logo-invenadro-512.png" 
-                      alt="Invenadro Logo" 
-                      height="50"
-                      className="logo-img-hd"
-                    />
-                  </div>
-                  <div className="brand-text">
-                    <h5 className="mb-0 fw-bold text-white">Invenadro</h5>
-                    <small className="text-white-50 d-block" style={{ fontSize: '0.7rem', marginTop: '-2px' }}>Sistema de Optimización</small>
-                  </div>
+              <div className="d-flex align-items-center w-100">
+                {/* Botón Toggle Sidebar */}
+                <Button 
+                  className="btn-toggle-sidebar"
+                  onClick={toggleSidebar}
+                  title={sidebarVisible ? "Ocultar menú" : "Mostrar menú"}
+                  style={{ marginRight: '0.5rem' }}
+                >
+                  {sidebarVisible ? <FaTimes /> : <FaBars />}
+                </Button>
+                
+                {/* Logo pegado después del botón X */}
+                <div className="logo-container-hd" style={{ marginRight: '1rem' }}>
+                  <img 
+                    src="/logo-invenadro-512.png" 
+                    alt="Invenadro Logo" 
+                    height="50"
+                    className="logo-img-hd"
+                  />
                 </div>
-              </Navbar.Brand>
-              
-              {/* Separador */}
-              <div className="navbar-separator"></div>
-              
-              {/* Usuario y Logout */}
-              <div className="d-flex align-items-center gap-4">
+                
+                {/* Título */}
+                <div className="brand-text">
+                  <h5 className="mb-0 fw-bold text-white">Invenadro</h5>
+                  <small className="text-white-50 d-block" style={{ fontSize: '0.7rem', marginTop: '-2px' }}>Sistema de Optimización</small>
+                </div>
+                
+                {/* Spacer para empujar contenido a la derecha */}
+                <div className="flex-grow-1"></div>
+                
+                {/* Separador */}
+                <div className="navbar-separator"></div>
+                
+                {/* Usuario y Logout */}
+                <div className="d-flex align-items-center gap-4">
                 {/* Info del usuario */}
                 <div className="user-info">
                   <div className="user-avatar">
@@ -1164,6 +1167,7 @@ function App() {
                   <FaSignOutAlt className="me-2" />
                   Salir
                 </Button>
+                </div>
               </div>
             </Container>
           </Navbar>
