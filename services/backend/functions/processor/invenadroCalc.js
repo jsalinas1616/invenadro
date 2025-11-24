@@ -222,11 +222,11 @@ const procesarExcelConConfig = async (fileBuffer, customConfig = {}) => {
   const startTime = new Date();
   
   try {
-    console.log('🚀 Iniciando procesamiento de Excel con configuración personalizada...');
+    console.log('Iniciando procesamiento de Excel con configuración personalizada...');
     
     // Combinar configuración por defecto con personalizada
     const configReglas = { ...CONFIG_REGLAS_DEFAULT, ...customConfig };
-    console.log('📋 Configuración aplicada:', configReglas);
+    console.log('Configuración aplicada:', configReglas);
     
     // Leer Excel desde buffer
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
@@ -235,7 +235,7 @@ const procesarExcelConConfig = async (fileBuffer, customConfig = {}) => {
     
     // Convertir a JSON
     const datos = XLSX.utils.sheet_to_json(worksheet);
-    console.log(`📊 Datos leídos: ${datos.length} registros`);
+    console.log(`Datos leídos: ${datos.length} registros`);
     
     if (datos.length === 0) {
       throw new Error('El archivo Excel no contiene datos válidos');
@@ -244,23 +244,23 @@ const procesarExcelConConfig = async (fileBuffer, customConfig = {}) => {
     // APLICAR LAS 4 REGLAS SECUENCIALMENTE
     
     // Regla 1: Valor Óptimo Redondeado
-    console.log('⚡ Aplicando Regla 1: Valor Óptimo Redondeado...');
+    console.log('Aplicando Regla 1: Valor Óptimo Redondeado...');
     let datosProcesados = calcularValorOptimoRedondeado(datos, configReglas);
     
     // Regla 2: Valor Óptimo Rescate
-    console.log('⚡ Aplicando Regla 2: Valor Óptimo Rescate...');
+    console.log('Aplicando Regla 2: Valor Óptimo Rescate...');
     datosProcesados = calcularValorOptimoRescate(datosProcesados);
     
     // Regla 3: Joroba
-    console.log('⚡ Aplicando Regla 3: Joroba...');
+    console.log('Aplicando Regla 3: Joroba...');
     datosProcesados = aplicarJoroba(datosProcesados, configReglas);
     
     // Regla 4: Sub Empaque
-    console.log('⚡ Aplicando Regla 4: Sub Empaque...');
+    console.log('Aplicando Regla 4: Sub Empaque...');
     datosProcesados = aplicarSubEmpaque(datosProcesados);
     
     // CALCULAR RESUMEN FINAL
-    console.log('📊 Calculando resumen final...');
+    console.log('Calculando resumen final...');
     
     const resumenFinal = {
       registros: datosProcesados.length,
@@ -292,8 +292,8 @@ const procesarExcelConConfig = async (fileBuffer, customConfig = {}) => {
     const endTime = new Date();
     resumenFinal.tiempoEjecucionMs = endTime - startTime;
     
-    console.log('✅ Procesamiento completado exitosamente');
-    console.log('📊 Resumen final:', resumenFinal);
+    console.log('Procesamiento completado exitosamente');
+    console.log('Resumen final:', resumenFinal);
     
     return {
       success: true,
@@ -303,7 +303,7 @@ const procesarExcelConConfig = async (fileBuffer, customConfig = {}) => {
     };
     
   } catch (error) {
-    console.error('❌ Error en procesarExcelConConfig:', error);
+    console.error('Error en procesarExcelConConfig:', error);
     throw error;
   }
 };
@@ -322,7 +322,7 @@ const procesarExcel = async (rutaArchivo) => {
     const fileBuffer = fs.readFileSync(rutaArchivo);
     return await procesarExcelConConfig(fileBuffer);
   } catch (error) {
-    console.error('❌ Error en procesarExcel:', error);
+    console.error('Error en procesarExcel:', error);
     throw error;
   }
 };

@@ -31,7 +31,7 @@ exports.handler = async (event) => {
                 email: claims.email || claims['cognito:username'],
                 username: claims['cognito:username']
             };
-            console.log('👤 Usuario descargando resultado:', userInfo.email);
+            console.log('Usuario descargando resultado:', userInfo.email);
         }
         
         // Extraer processId del path parameters (viene de API Gateway)
@@ -51,10 +51,10 @@ exports.handler = async (event) => {
         const JOBS_TABLE = process.env.JOBS_TABLE;
         const RESULTS_BUCKET = process.env.RESULTS_BUCKET;
         if (!JOBS_TABLE) {
-            throw new Error('❌ JOBS_TABLE no está configurado en variables de entorno');
+            throw new Error('JOBS_TABLE no está configurado en variables de entorno');
         }
         if (!RESULTS_BUCKET) {
-            throw new Error('❌ RESULTS_BUCKET no está configurado en variables de entorno');
+            throw new Error('RESULTS_BUCKET no está configurado en variables de entorno');
         }
         
         // customConfig puede venir del event o ser null para llamadas desde API Gateway
@@ -160,7 +160,7 @@ exports.handler = async (event) => {
             let datosParaFrontend;
             
             if (isMultiClient) {
-                // ✅ RESULTADO MULTI-CLIENTE CONSOLIDADO
+                // RESULTADO MULTI-CLIENTE CONSOLIDADO
                 console.log('Detectado resultado MULTI-CLIENTE, preparando datos consolidados...');
                 datosParaFrontend = {
                     processId: processId,
@@ -190,12 +190,12 @@ exports.handler = async (event) => {
                     resultLocation: `s3://${bucketName}/${key}`,
                     timestamp: resultado.timestamp,
                     
-                    // ✅ NUEVO: Tiempos del proceso principal
+                    // NUEVO: Tiempos del proceso principal
                     processStartTime: processStartTime,
                     processEndTime: processEndTime
                 };
             } else {
-                // ✅ RESULTADO SINGLE-CLIENT (original)
+                // RESULTADO SINGLE-CLIENT (original)
                 console.log('Detectado resultado SINGLE-CLIENT, preparando datos individuales...');
                 datosParaFrontend = {
                     processId: processId,
@@ -231,7 +231,7 @@ exports.handler = async (event) => {
                     resultLocation: `s3://${bucketName}/${key}`,
                     timestamp: resultado.timestamp,
                     
-                    // ✅ NUEVO: Tiempos del proceso principal
+                    // NUEVO: Tiempos del proceso principal
                     processStartTime: processStartTime,
                     processEndTime: processEndTime
                 };
@@ -248,7 +248,7 @@ exports.handler = async (event) => {
                 body: JSON.stringify(datosParaFrontend)
             };
         } else {
-            // ⚡ LLAMADA DESDE STEP FUNCTION - Solo información esencial (< 32KB)
+            // LLAMADA DESDE STEP FUNCTION - Solo información esencial (< 32KB)
             return {
                 processId: processId,
                 status: 'COMPLETED',

@@ -75,21 +75,21 @@ const leerDatosExcel = async (input, configReglas = null) => {
           }
         });
         
-        // 🔄 TRUCO: FORZAR uso de Material como EAN/UPC para Databricks
+        // TRUCO: FORZAR uso de Material como EAN/UPC para Databricks
         // SIEMPRE usar Material (1, 2, 3... o 40513, 15232... todos son válidos)
         // El formateo a 18 dígitos se hace en databricksService.js
         if (objeto['Material']) {
           const originalEAN = objeto['EAN/UPC'];
           objeto['EAN/UPC'] = objeto['Material'];  // SIEMPRE reemplazar
-          console.log(`[EXCEL MAPPING] ✅ Material ${objeto['Material']} → EAN/UPC (era "${originalEAN}")`);
+          console.log(`[EXCEL MAPPING] Material ${objeto['Material']} → EAN/UPC (era "${originalEAN}")`);
         } else {
-          console.log(`[EXCEL MAPPING] ⚠️ No hay Material, usando EAN/UPC original`);
+          console.log(`[EXCEL MAPPING] No hay Material, usando EAN/UPC original`);
         }
         
         return objeto;
       });
     
-    // 🚀 FILTRO DE PRECIO MÁXIMO - ELIMINAR PRODUCTOS CAROS DESDE EL INICIO
+    // FILTRO DE PRECIO MÁXIMO - ELIMINAR PRODUCTOS CAROS DESDE EL INICIO
     if (configReglas && typeof configReglas.precioMaximo === 'number') {
       const totalAntesFiltro = datosProcesados.length;
       
@@ -117,9 +117,9 @@ const leerDatosExcel = async (input, configReglas = null) => {
       });
       
       const productosExcluidos = totalAntesFiltro - datosProcesados.length;
-      console.log(`[FILTRO] 💰 Precio máximo: $${configReglas.precioMaximo}`);
-      console.log(`[FILTRO] ✅ Productos incluidos: ${datosProcesados.length}`);
-      console.log(`[FILTRO] ❌ Productos excluidos: ${productosExcluidos} (precio > $${configReglas.precioMaximo})`);
+      console.log(`[FILTRO] Precio máximo: $${configReglas.precioMaximo}`);
+      console.log(`[FILTRO] Productos incluidos: ${datosProcesados.length}`);
+      console.log(`[FILTRO] Productos excluidos: ${productosExcluidos} (precio > $${configReglas.precioMaximo})`);
     }
     
     const tiempoProcesamientoTotal = Date.now() - tiempoProcesamiento;

@@ -163,8 +163,8 @@ const procesarExcelConConfiguracion = async (input, customConfig = {}, tipoProce
   
   try {
     // Combinar configuración por defecto con personalizada
-    console.log('🔍 [CONFIG DEBUG NORMAL] CONFIG_REGLAS_DEFAULT:', JSON.stringify(CONFIG_REGLAS_DEFAULT, null, 2));
-    console.log('🔍 [CONFIG DEBUG NORMAL] customConfig (normal):', JSON.stringify(customConfig, null, 2));
+    console.log('[CONFIG DEBUG NORMAL] CONFIG_REGLAS_DEFAULT:', JSON.stringify(CONFIG_REGLAS_DEFAULT, null, 2));
+    console.log('[CONFIG DEBUG NORMAL] customConfig (normal):', JSON.stringify(customConfig, null, 2));
     
     const configReglas = { ...CONFIG_REGLAS_DEFAULT, ...customConfig };
     
@@ -173,7 +173,7 @@ const procesarExcelConConfiguracion = async (input, customConfig = {}, tipoProce
       configReglas.diasDeInversionParaReglasP = customConfig.diasInversionDeseados;
     }
     
-    console.log('🔍 [CONFIG DEBUG NORMAL] configReglas FINAL (merged):', JSON.stringify(configReglas, null, 2));
+    console.log('[CONFIG DEBUG NORMAL] configReglas FINAL (merged):', JSON.stringify(configReglas, null, 2));
     
     // PASO 1: CARGAR DATOS
     console.log('[1] [excelReader] Iniciando lectura de Excel...');
@@ -184,19 +184,19 @@ const procesarExcelConConfiguracion = async (input, customConfig = {}, tipoProce
     console.log('[1.5] [validador] Validando estructura de columnas...');
     const validacionColumnas = validarColumnasRequeridas(datos);
     if (!validacionColumnas.esValido) {
-      console.error('[1.5] [validador] ❌ Faltan columnas obligatorias:', validacionColumnas.columnasFaltantes);
-      console.error('[1.5] [validador] ✅ Columnas encontradas:', validacionColumnas.columnasEncontradas);
-      console.error('[1.5] [validador] 📋 Columnas disponibles:', validacionColumnas.columnasDisponibles);
+      console.error('[1.5] [validador] Faltan columnas obligatorias:', validacionColumnas.columnasFaltantes);
+      console.error('[1.5] [validador] Columnas encontradas:', validacionColumnas.columnasEncontradas);
+      console.error('[1.5] [validador] Columnas disponibles:', validacionColumnas.columnasDisponibles);
       
-      const mensajeDetallado = `❌ EXCEL INVÁLIDO - Faltan columnas obligatorias:\n\n` +
-                              `🔴 COLUMNAS FALTANTES:\n${validacionColumnas.columnasFaltantes.map(col => `• ${col}`).join('\n')}\n\n` +
-                              `✅ COLUMNAS ENCONTRADAS:\n${validacionColumnas.columnasEncontradas.map(col => `• ${col}`).join('\n')}\n\n` +
-                              `💡 Agrega las columnas faltantes a tu Excel y vuelve a intentar.`;
+      const mensajeDetallado = `EXCEL INVÁLIDO - Faltan columnas obligatorias:\n\n` +
+                              `COLUMNAS FALTANTES:\n${validacionColumnas.columnasFaltantes.map(col => `• ${col}`).join('\n')}\n\n` +
+                              `COLUMNAS ENCONTRADAS:\n${validacionColumnas.columnasEncontradas.map(col => `• ${col}`).join('\n')}\n\n` +
+                              `Agrega las columnas faltantes a tu Excel y vuelve a intentar.`;
       
       throw new Error(mensajeDetallado);
     }
-    console.log('[1.5] [validador] ✅ Todas las columnas requeridas encontradas');
-    console.log('[1.5] [validador] 📊 Columnas válidas:', validacionColumnas.columnasEncontradas.join(', '));
+    console.log('[1.5] [validador] Todas las columnas requeridas encontradas');
+    console.log('[1.5] [validador] Columnas válidas:', validacionColumnas.columnasEncontradas.join(', '));
     
     // PASO 2: CARGAR DATOS DE DATABRICKS
     console.log('[2] [consulta databricks] Iniciando carga de datos de ventas...');
@@ -230,9 +230,9 @@ const procesarExcelConConfiguracion = async (input, customConfig = {}, tipoProce
     // PASO 4: DETERMINAR FACTOR A USAR (OPTIMIZADO O FORZADO)
     let factorFinal, tipoFactor, resultadoOptimizacion, historialIteraciones;
     
-    console.log('🔥 [DEBUG V27] configReglas.factorForzado:', configReglas.factorForzado);
-    console.log('🔥 [DEBUG V27] configReglas.factorForzado !== null:', configReglas.factorForzado !== null);
-    console.log('🔥 [DEBUG V27] configReglas.factorForzado !== undefined:', configReglas.factorForzado !== undefined);
+    console.log('[DEBUG V27] configReglas.factorForzado:', configReglas.factorForzado);
+    console.log('[DEBUG V27] configReglas.factorForzado !== null:', configReglas.factorForzado !== null);
+    console.log('[DEBUG V27] configReglas.factorForzado !== undefined:', configReglas.factorForzado !== undefined);
     
     // USAR FACTOR FORZADO SI ESTÁ CONFIGURADO
     if (configReglas.factorForzado !== null && configReglas.factorForzado !== undefined) {
@@ -243,7 +243,7 @@ const procesarExcelConConfiguracion = async (input, customConfig = {}, tipoProce
       const { calcularConFactor } = require('./optimization/calculationEngine');
       resultadoOptimizacion = await calcularConFactor(datosConDatabricks, factorFinal, configReglas, valorParseado);
       resultadoOptimizacion.factor = factorFinal; // Asegurar que el factor esté en el resultado
-      historialIteraciones = []; // ✅ AGREGADO: Inicializar array vacío para factor forzado
+      historialIteraciones = []; //AGREGADO: Inicializar array vacío para factor forzado
       
     } else {
       console.log('[3] [Factor de redondeo] Iniciando optimización automática...');
@@ -263,7 +263,7 @@ const procesarExcelConConfiguracion = async (input, customConfig = {}, tipoProce
         );
         factorFinal = resultadoOptimizacion.factor;
         historialIteraciones = resultadoOptimizacion.historialIteraciones;  
-        console.log(' [JULIAN] ESTO ES LO QUE invenadroCalc_modular HISTORIAL ITERACIONES', historialIteraciones);
+        console.log('ESTO ES LO QUE invenadroCalc_modular HISTORIAL ITERACIONES', historialIteraciones);
 
         tipoFactor = 'factor_optimo';
         console.log('[3] [Factor de redondeo] Factor óptimo encontrado: ' + factorFinal);
@@ -379,38 +379,38 @@ const procesarExcelConConfiguracion = async (input, customConfig = {}, tipoProce
     const tiempoEjecucionMs = tiempoProcesamiento - tiempoInicio;
     
     // 📋 RESUMEN FINAL DE PROCESAMIENTO  
-    console.log(`[OPTIMIZATION] 📋 ===== RESUMEN FINAL PROCESAMIENTO =====`);
-    console.log(`[OPTIMIZATION] 📊 Total registros procesados: ${datosFinales.length}`);
-    console.log(`[OPTIMIZATION] 🏆 Factor final: ${factorFinal} (inicial: ${configReglas.factorRedondeo})`);
-    console.log(`[OPTIMIZATION] ⚡ Método usado: ${resultadoOptimizacion?.algoritmo || 'Factor Manual'}`);
+    console.log(`[OPTIMIZATION] ===== RESUMEN FINAL PROCESAMIENTO =====`);
+    console.log(`[OPTIMIZATION] Total registros procesados: ${datosFinales.length}`);
+    console.log(`[OPTIMIZATION] Factor final: ${factorFinal} (inicial: ${configReglas.factorRedondeo})`);
+    console.log(`[OPTIMIZATION] Método usado: ${resultadoOptimizacion?.algoritmo || 'Factor Manual'}`);
     if (resultadoOptimizacion?.iteracionesRealizadas) {
-      console.log(`[OPTIMIZATION] 🔄 Iteraciones: ${resultadoOptimizacion.iteracionesRealizadas}`);
+      console.log(`[OPTIMIZATION] Iteraciones: ${resultadoOptimizacion.iteracionesRealizadas}`);
     }
-    console.log(`[OPTIMIZATION] ⏱️ Tiempo total: ${Math.round(tiempoEjecucionMs/1000)}s`);
+    console.log(`[OPTIMIZATION] Tiempo total: ${Math.round(tiempoEjecucionMs/1000)}s`);
     console.log(`[OPTIMIZATION] `);
-    console.log(`[OPTIMIZATION] 🔧 ===== REGLAS APLICADAS EN ORDEN =====`);
-    console.log(`[OPTIMIZATION] 1️⃣ Factor Redondeo: ${factorFinal} ${resultadoOptimizacion ? '(optimizado automáticamente)' : '(manual)'}`);
-    console.log(`[OPTIMIZATION] 2️⃣ Óptimo Rescate: Aplicado según configuración`);
-    console.log(`[OPTIMIZATION] 3️⃣ Regla Óptimo P: Aplicada`);
-    console.log(`[OPTIMIZATION] 4️⃣ Regla Óptimo Q: Aplicada`);
-    console.log(`[OPTIMIZATION] 5️⃣ Sub Empaque: Consultado APIs (cache optimizado)`);
-    console.log(`[OPTIMIZATION] 6️⃣ Joroba: ${configConFactorFinal.joroba}% aplicado`);
-    console.log(`[OPTIMIZATION] 7️⃣ Óptimo Venta: Calculado como resultado final`);
+    console.log(`[OPTIMIZATION]  ===== REGLAS APLICADAS EN ORDEN =====`);
+    console.log(`[OPTIMIZATION] Factor Redondeo: ${factorFinal} ${resultadoOptimizacion ? '(optimizado automáticamente)' : '(manual)'}`);
+    console.log(`[OPTIMIZATION] Óptimo Rescate: Aplicado según configuración`);
+    console.log(`[OPTIMIZATION] Regla Óptimo P: Aplicada`);
+    console.log(`[OPTIMIZATION] Regla Óptimo Q: Aplicada`);
+    console.log(`[OPTIMIZATION] Sub Empaque: Consultado APIs (cache optimizado)`);
+    console.log(`[OPTIMIZATION] Joroba: ${configConFactorFinal.joroba}% aplicado`);
+    console.log(`[OPTIMIZATION] Óptimo Venta: Calculado como resultado final`);
     console.log(`[OPTIMIZATION] `);
-    console.log(`[OPTIMIZATION] ⚙️ ===== CONFIGURACIÓN UTILIZADA =====`);
-    console.log(`[OPTIMIZATION] 🎯 Factor Redondeo: ${factorFinal}`);
-    console.log(`[OPTIMIZATION] 🐪 Joroba: ${configConFactorFinal.joroba}%`);
-    console.log(`[OPTIMIZATION] 📅 Días Inversión Deseados: ${configConFactorFinal.diasInversionDeseados}`);
-    console.log(`[OPTIMIZATION] 📊 Días Reporte Subido: ${configConFactorFinal.diasDeInverionReporteSubido}`);
-    console.log(`[OPTIMIZATION] 💰 Precio Máximo: $${configConFactorFinal.precioMaximo}`);
+    console.log(`[OPTIMIZATION] ===== CONFIGURACIÓN UTILIZADA =====`);
+    console.log(`[OPTIMIZATION] Factor Redondeo: ${factorFinal}`);
+    console.log(`[OPTIMIZATION] Joroba: ${configConFactorFinal.joroba}%`);
+    console.log(`[OPTIMIZATION] Días Inversión Deseados: ${configConFactorFinal.diasInversionDeseados}`);
+    console.log(`[OPTIMIZATION] Días Reporte Subido: ${configConFactorFinal.diasDeInverionReporteSubido}`);
+    console.log(`[OPTIMIZATION] Precio Máximo: $${configConFactorFinal.precioMaximo}`);
     console.log(`[OPTIMIZATION] `);
-    console.log(`[OPTIMIZATION] ✅ ===== PROCESAMIENTO COMPLETADO =====`);
-    console.log(`[OPTIMIZATION] 📁 Archivo Excel generado con factor: ${factorFinal}`);
-    console.log(`[OPTIMIZATION] 🎉 Sistema Factor de Redondeo - Procesamiento Exitoso!`);
+    console.log(`[OPTIMIZATION] ===== PROCESAMIENTO COMPLETADO =====`);
+    console.log(`[OPTIMIZATION] Archivo Excel generado con factor: ${factorFinal}`);
+    console.log(`[OPTIMIZATION] Sistema Factor de Redondeo - Procesamiento Exitoso!`);
     
     const resumen = generarResumenFinal(datosFinales, resultadoOptimizacion, configConFactorFinal, valorParseado, llamadasDatabricks, tiempoEjecucionMs);
     
-    console.log('[11] [resumen final] Registros: ' + resumen.registros + ', Factor: ' + resumen.factorOptimo + ', RegistrosMayorCero: ' + resumen.registrosMayorCero);
+    console.log('[resumen final] Registros: ' + resumen.registros + ', Factor: ' + resumen.factorOptimo + ', RegistrosMayorCero: ' + resumen.registrosMayorCero);
     
     return {
       datos: datosFinales,
@@ -419,7 +419,7 @@ const procesarExcelConConfiguracion = async (input, customConfig = {}, tipoProce
       archivoSalidaExcel: archivoExcel, // Para compatibilidad con el controller
       archivoSalidaCSV: archivoCSV,
       factorRedondeoEncontrado: factorFinal,
-      convergenciaData: historialIteraciones || [] // ✅ AGREGADO: Datos de convergencia
+      convergenciaData: historialIteraciones || [] // AGREGADO: Datos de convergencia
     };
     
   } catch (error) {
@@ -474,7 +474,7 @@ const generarResumenFinal = (datos, resultadoOptimizacion, configReglas, inversi
     inversionOriginal: inversionOriginal,
     inversionDeseada: inversionDeseada,
     llamadasDatabricks: llamadasDatabricks,
-    tiempoEjecucionMs: tiempoEjecucionMs // ⏱️ AGREGAR TIEMPO DE EJECUCIÓN
+    tiempoEjecucionMs: tiempoEjecucionMs //AGREGAR TIEMPO DE EJECUCIÓN
   };
 };
 
@@ -492,12 +492,12 @@ const procesarExcelConConfigConProgreso = async (excelBuffer, customConfig = {},
   
   try {
     // Combinar configuración por defecto con parámetros personalizados
-    console.log('🔍 [CONFIG DEBUG] CONFIG_REGLAS_DEFAULT:', JSON.stringify(CONFIG_REGLAS_DEFAULT, null, 2));
-    console.log('🔍 [CONFIG DEBUG] customConfig (del frontend):', JSON.stringify(customConfig, null, 2));
+    console.log('[CONFIG DEBUG] CONFIG_REGLAS_DEFAULT:', JSON.stringify(CONFIG_REGLAS_DEFAULT, null, 2));
+    console.log('[CONFIG DEBUG] customConfig (del frontend):', JSON.stringify(customConfig, null, 2));
     
     const configReglas = { ...CONFIG_REGLAS_DEFAULT, ...customConfig };
     
-    console.log('🔍 [CONFIG DEBUG] configReglas FINAL (merged):', JSON.stringify(configReglas, null, 2));
+    console.log('[CONFIG DEBUG] configReglas FINAL (merged):', JSON.stringify(configReglas, null, 2));
     
     progressCallback('Leyendo archivo Excel...', 10, `Archivo recibido: ${(excelBuffer.length / 1024 / 1024).toFixed(2)} MB`);
     
@@ -588,7 +588,7 @@ const procesarExcelConConfigConProgreso = async (excelBuffer, customConfig = {},
       
       factorFinal2 = resultadoOptimizacion2.factor;
       historialIteraciones = resultadoOptimizacion2.historialIteraciones;
-      console.log(' [JULIAN] ESTO ES LO QUE invenadroCalc_modular HISTORIAL ITERACIONES (frontend)', historialIteraciones);
+      console.log('ESTO ES LO QUE invenadroCalc_modular HISTORIAL ITERACIONES (frontend)', historialIteraciones);
       tipoFactor2 = 'factor_optimo';
       
       progressCallback('Factor óptimo encontrado', 45, `Factor: ${factorFinal2}`);
@@ -675,18 +675,18 @@ const procesarExcelConConfigConProgreso = async (excelBuffer, customConfig = {},
     console.log('[11] [resumen final] Registros: ' + resumen.registros + ', Factor: ' + resumen.factorOptimo + ', RegistrosMayorCero: ' + resumen.registrosMayorCero + ' (frontend)');
 
     // Exportar los datos procesados
-    console.log('🚀 LLEGANDO A EXPORTAR EXCEL');
-    console.log('🚀 ANTES DE exportarAExcel');
+    console.log('LLEGANDO A EXPORTAR EXCEL');
+    console.log('ANTES DE exportarAExcel');
     const nombreBase2 = `datos_procesados_frontend_${tipoFactor2}`;
-    console.log('📁 Intentando exportar Excel con nombre:', `${nombreBase2}.xlsx`);
-    console.log('📁 Datos a exportar:', datosFinales.length, 'registros');
-    console.log('🚀 LLAMANDO A exportarAExcel...');
+    console.log('Intentando exportar Excel con nombre:', `${nombreBase2}.xlsx`);
+    console.log('Datos a exportar:', datosFinales.length, 'registros');
+    console.log('LLAMANDO A exportarAExcel...');
     const archivoExcel = await exportarAExcel(datosFinales, `${nombreBase2}.xlsx`);
-    console.log('🚀 DESPUÉS DE exportarAExcel');
-    console.log('📁 Resultado de exportarAExcel:', archivoExcel);
-    console.log('📁 Tipo de archivoExcel:', typeof archivoExcel);
-    console.log('📁 ¿archivoExcel es truthy?:', !!archivoExcel);
-    console.log('📁 archivoExcel.split("/").pop():', archivoExcel ? archivoExcel.split('/').pop() : 'NO HAY ARCHIVO');
+    console.log('DESPUÉS DE exportarAExcel');
+    console.log('Resultado de exportarAExcel:', archivoExcel);
+    console.log('Tipo de archivoExcel:', typeof archivoExcel);
+    console.log('¿archivoExcel es truthy?:', !!archivoExcel);
+    console.log('archivoExcel.split("/").pop():', archivoExcel ? archivoExcel.split('/').pop() : 'NO HAY ARCHIVO');
     
     progressCallback('Procesamiento completado', 95, `${registrosMayoresACero} productos optimizados`);
 

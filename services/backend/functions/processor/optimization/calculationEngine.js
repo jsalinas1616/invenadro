@@ -36,7 +36,7 @@ const calcularSoloSumaParaOptimizacion = async (datos, factor, configReglas, inv
     const datosConOptimoP = reglaOptimoP(datosConRescate, configConFactor);
     const datosConOptimoQ = reglaOptimoQ(datosConOptimoP, configConFactor);
     
-    // 🚀 SubEmpaque: Ya debería estar en cache (precargado en el flujo principal)
+    // SubEmpaque: Ya debería estar en cache (precargado en el flujo principal)
     // Esta llamada será súper rápida porque usa cache
     const datosConSubEmpaque = await aplicarSubEmpaque(datosConOptimoQ);
     
@@ -167,13 +167,13 @@ const calcularConFactor = async (datos, factor, configReglas, inversionOriginal 
     const inversionDeseadaCalculada = (inversionOriginal / configConFactor.diasDeInverionReporteSubido) * 
       configConFactor.diasInversionDeseados;
     
-    console.log('🔍 [OPTIMIZATION DEBUG] Inversión deseada calculada:', inversionDeseadaCalculada.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-    console.log('🔍 [OPTIMIZATION DEBUG] Suma óptimo venta final:', sumaOptimioVentaFinal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    console.log('[OPTIMIZATION DEBUG] Inversión deseada calculada:', inversionDeseadaCalculada.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    console.log('[OPTIMIZATION DEBUG] Suma óptimo venta final:', sumaOptimioVentaFinal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     
     // Calcular diferencia absoluta
     const diferencia = Math.abs(inversionDeseadaCalculada - sumaOptimioVentaFinal);
-    console.log('🔍 [OPTIMIZATION DEBUG] Diferencia absoluta:', diferencia.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-    console.log('🔍 [OPTIMIZATION DEBUG] === FIN CÁLCULO ===');
+    console.log('[OPTIMIZATION DEBUG] Diferencia absoluta:', diferencia.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    console.log('[OPTIMIZATION DEBUG] === FIN CÁLCULO ===');
     
     return {
       factor,

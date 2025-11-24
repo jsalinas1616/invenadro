@@ -7,16 +7,16 @@ const dynamoDB = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-east
 
 exports.handler = async (event) => {
     try {
-        console.log('🔄 CLIENT AGGREGATOR - Evento recibido:', JSON.stringify(event, null, 2));
+        console.log('CLIENT AGGREGATOR - Evento recibido:', JSON.stringify(event, null, 2));
         
-        // ✅ VALIDAR VARIABLES DE ENTORNO
+        // VALIDAR VARIABLES DE ENTORNO
         const JOBS_TABLE = process.env.JOBS_TABLE;
         const RESULTS_BUCKET = process.env.RESULTS_BUCKET;
         if (!JOBS_TABLE) {
-            throw new Error('❌ JOBS_TABLE no está configurado en variables de entorno');
+            throw new Error('JOBS_TABLE no está configurado en variables de entorno');
         }
         if (!RESULTS_BUCKET) {
-            throw new Error('❌ RESULTS_BUCKET no está configurado en variables de entorno');
+            throw new Error('RESULTS_BUCKET no está configurado en variables de entorno');
         }
         
         const { processId, s3Bucket } = event;
@@ -29,24 +29,24 @@ exports.handler = async (event) => {
         await updateDynamoDBStatus(processId, 'AGGREGATING', 'Iniciando agregación de resultados multi-cliente...', JOBS_TABLE);
         
         // Obtener información de las ejecuciones
-        console.log('📋 Obteniendo información de ejecuciones...');
+        console.log('Obteniendo información de ejecuciones...');
         const executionsInfo = await getExecutionsInfo(s3Bucket, processId);
         
-        console.log('📊 Información de ejecuciones:', {
+        console.log('Información de ejecuciones:', {
             totalClientes: executionsInfo.totalClientes,
             clientes: executionsInfo.executions.map(e => e.cliente)
         });
         
         // Recopilar resultados de cada cliente
-        console.log('📥 Recopilando resultados de cada cliente...');
+        console.log('Recopilando resultados de cada cliente...');
         const resultadosClientes = await recopilarResultadosClientes(s3Bucket, executionsInfo, RESULTS_BUCKET);
         
         // Generar reporte consolidado
-        console.log('📊 Generando reporte consolidado...');
+        console.log('Generando reporte consolidado...');
         const reporteConsolidado = await generarReporteConsolidado(resultadosClientes, executionsInfo);
         
         // Generar Excel consolidado
-        console.log('📋 Generando Excel consolidado...');
+        console.log('Generando Excel consolidado...');
         const archivoExcelConsolidado = await generarExcelConsolidado(resultadosClientes, executionsInfo);
         
         // 🔧 FIX: Guardar en el bucket de RESULTS, no en UPLOADS
@@ -87,7 +87,7 @@ exports.handler = async (event) => {
         };
         
     } catch (error) {
-        console.error('❌ Error en client-aggregator:', error);
+        console.error('Error en client-aggregator:', error);
         
         // Actualizar estado de error en DynamoDB
         if (event.processId) {
@@ -117,7 +117,7 @@ async function getExecutionsInfo(bucket, processId) {
         return JSON.parse(content);
         
     } catch (error) {
-        console.error('❌ Error obteniendo info de ejecuciones:', error);
+        console.error('Error obteniendo info de ejecuciones:', error);
         throw new Error(`No se pudo obtener información de ejecuciones: ${error.message}`);
     }
 }
@@ -133,7 +133,7 @@ async function recopilarResultadosClientes(bucket, executionsInfo, resultsBucket
     for (let i = 0; i < executionsInfo.executions.length; i++) {
         const execution = executionsInfo.executions[i];
         try {
-            console.log(`📥 [${i + 1}/${executionsInfo.executions.length}] Cliente: ${execution.cliente}`);
+            console.log(`[${i + 1}/${executionsInfo.executions.length}] Cliente: ${execution.cliente}`);
             
             // Actualizar progreso en DynamoDB cada 5 clientes
             if (i % 5 === 0 || i === executionsInfo.executions.length - 1) {
@@ -183,10 +183,10 @@ async function recopilarResultadosClientes(bucket, executionsInfo, resultsBucket
             // Liberar memoria del resultado completo
             chunks.length = 0;
             
-            console.log(`✅ Resultado obtenido para ${execution.cliente}: ${resultado.resumenFinal?.registros || 'N/A'} registros`);
+            console.log(`Resultado obtenido para ${execution.cliente}: ${resultado.resumenFinal?.registros || 'N/A'} registros`);
             
         } catch (error) {
-            console.error(`❌ Error obteniendo resultado para ${execution.cliente}:`, error);
+            console.error(`Error obteniendo resultado para ${execution.cliente}:`, error);
             
             resultados.push({
                 cliente: execution.cliente,
@@ -371,8 +371,8 @@ async function updateDynamoDBStatus(processId, status, details, jobsTable) {
                 ":time": { S: new Date().toISOString() }
             }
         }));
-        console.log(`📝 Estado actualizado: ${status} - ${details}`);
+        console.log(`Estado actualizado: ${status} - ${details}`);
     } catch (error) {
-        console.error('❌ Error actualizando DynamoDB:', error);
+        console.error('Error actualizando DynamoDB:', error);
     }
 }

@@ -20,14 +20,14 @@ exports.handler = async (event) => {
             console.warn('[INIT] Continuando sin Databricks (ventas en 0)');
         }
         
-        // ✅ VALIDAR VARIABLES DE ENTORNO
+        // VALIDAR VARIABLES DE ENTORNO
         const JOBS_TABLE = process.env.JOBS_TABLE;
         const RESULTS_BUCKET = process.env.RESULTS_BUCKET;
         if (!JOBS_TABLE) {
-            throw new Error('❌ JOBS_TABLE no está configurado en variables de entorno');
+            throw new Error(' JOBS_TABLE no está configurado en variables de entorno');
         }
         if (!RESULTS_BUCKET) {
-            throw new Error('❌ RESULTS_BUCKET no está configurado en variables de entorno');
+            throw new Error('RESULTS_BUCKET no está configurado en variables de entorno');
         }
         
         // Extraer datos del evento

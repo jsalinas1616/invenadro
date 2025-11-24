@@ -3,7 +3,7 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 const s3Client = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
 
-// 🔐 ORÍGENES PERMITIDOS PARA CORS - Desde variable de entorno por ambiente
+//ORÍGENES PERMITIDOS PARA CORS - Desde variable de entorno por ambiente
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
     : ['http://localhost:3000']; // Fallback solo para desarrollo local
@@ -23,7 +23,7 @@ exports.handler = async (event) => {
     console.log('Event:', JSON.stringify(event, null, 2));
 
     try {
-        // 🔐 EXTRAER INFORMACIÓN DEL USUARIO AUTENTICADO
+        //EXTRAER INFORMACIÓN DEL USUARIO AUTENTICADO
         let userInfo = null;
         if (event.requestContext?.authorizer?.claims) {
             const claims = event.requestContext.authorizer.claims;
@@ -54,17 +54,17 @@ exports.handler = async (event) => {
             };
         }
 
-        // ✅ VALIDAR VARIABLE DE ENTORNO
+        //VALIDAR VARIABLE DE ENTORNO
         const bucket = process.env.UPLOADS_BUCKET;
         if (!bucket) {
-            throw new Error('❌ UPLOADS_BUCKET no está configurado en variables de entorno');
+            throw new Error('UPLOADS_BUCKET no está configurado en variables de entorno');
         }
         
         // 🔐 Incluir username en el key para trazabilidad
         const userPrefix = userInfo ? `${userInfo.username}/` : '';
         const key = `uploads/${userPrefix}${Date.now()}-${fileName}`;
 
-        console.log(`📤 Generando presigned URL para: s3://${bucket}/${key}`);
+        console.log(`Generando presigned URL para: s3://${bucket}/${key}`);
 
         // Crear comando de PutObject
         const command = new PutObjectCommand({

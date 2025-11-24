@@ -12,7 +12,7 @@ const cacheDatabricks = new Map();
 const limpiarCacheDatabricks = () => {
   const tamanoAnterior = cacheDatabricks.size;
   cacheDatabricks.clear();
-  console.log(`[DATABRICKS CACHE] 🧹 Cache limpiado: ${tamanoAnterior} entradas eliminadas`);
+  console.log(`[DATABRICKS CACHE] Cache limpiado: ${tamanoAnterior} entradas eliminadas`);
   return tamanoAnterior;
 };
 
@@ -204,7 +204,7 @@ const cargarDatosVentasDatabricks = async (datos, configReglas, configCalculos =
       } else {
         // Datos encontrados exitosamente
         statsEANs.encontrados++;
-        console.log(`[DATABRICKS] ✅ Material ${eanUPC} (${eanUPCFormateado}) encontrado - Trim: ${resultado.trim}, Anual: ${resultado.anual}`);
+        console.log(`[DATABRICKS] Material ${eanUPC} (${eanUPCFormateado}) encontrado - Trim: ${resultado.trim}, Anual: ${resultado.anual}`);
       }
       
       return {

@@ -282,13 +282,13 @@ const getVentasBulk = async (eanList, mostrador) => {
     const datos = result.result?.data_array || [];
     
     if (datos.length === 0) {
-      console.log(`[DATABRICKS] ❌ NO SE ENCONTRARON DATOS - Revisando query...`);
-      console.log(`[DATABRICKS] ❌ Customer buscado: '${mostradorNormalizado}'`);
-      console.log(`[DATABRICKS] ❌ Total EANs buscados: ${eansLimpios.length}`);
-      console.log(`[DATABRICKS] ❌ Primeros EANs: ${eansLimpios.slice(0, 3).join(', ')}`);
+      console.log(`[DATABRICKS] NO SE ENCONTRARON DATOS - Revisando query...`);
+      console.log(`[DATABRICKS] Customer buscado: '${mostradorNormalizado}'`);
+      console.log(`[DATABRICKS] Total EANs buscados: ${eansLimpios.length}`);
+      console.log(`[DATABRICKS] Primeros EANs: ${eansLimpios.slice(0, 3).join(', ')}`);
     } else {
-      console.log(`[DATABRICKS] ✅ DATOS ENCONTRADOS: ${datos.length} registros`);
-      console.log(`[DATABRICKS] ✅ Ejemplo: ${JSON.stringify(datos[0])}`);
+      console.log(`[DATABRICKS] DATOS ENCONTRADOS: ${datos.length} registros`);
+      console.log(`[DATABRICKS] Ejemplo: ${JSON.stringify(datos[0])}`);
     }
     
     console.log(`[DATABRICKS] Bulk query completado: ${datos.length} registros obtenidos`);

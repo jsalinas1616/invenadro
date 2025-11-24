@@ -8,7 +8,7 @@ const logFilePath = path.join(__dirname, '../../logs.txt');
 const clearLogs = () => {
   // NO hacer nada en AWS Lambda (sistema read-only)
   if (process.env.AWS_LAMBDA_FUNCTION_NAME) {
-    console.log('🚫 AWS Lambda detectado - limpieza de logs omitida');
+    console.log('AWS Lambda detectado - limpieza de logs omitida');
     return;
   }
   
@@ -62,7 +62,7 @@ const getLogFilePath = () => {
 const setupGlobalLogging = () => {
   // EN AWS LAMBDA: NO hacer override de console para evitar loops infinitos
   if (process.env.AWS_LAMBDA_FUNCTION_NAME) {
-    console.log('🚫 AWS Lambda detectado - logging global deshabilitado para evitar errores EROFS');
+    console.log('AWS Lambda detectado - logging global deshabilitado para evitar errores EROFS');
     return;
   }
   

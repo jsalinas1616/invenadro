@@ -6,10 +6,10 @@ exports.handler = async (event) => {
     try {
         console.log('Evento recibido en lambda-status-checker:', JSON.stringify(event, null, 2));
         
-        // ✅ VALIDAR VARIABLE DE ENTORNO
+        // VALIDAR VARIABLE DE ENTORNO
         const JOBS_TABLE = process.env.JOBS_TABLE;
         if (!JOBS_TABLE) {
-            throw new Error('❌ JOBS_TABLE no está configurado en variables de entorno');
+            throw new Error('JOBS_TABLE no está configurado en variables de entorno');
         }
         
         // Extraer processId del path parameters (viene de API Gateway)
@@ -25,10 +25,10 @@ exports.handler = async (event) => {
         
         console.log('ProcessId extraído:', processId);
         
-        // 🔥 NUEVO: Si viene un status en el payload, ACTUALIZAR el estado en DynamoDB
+        // NUEVO: Si viene un status en el payload, ACTUALIZAR el estado en DynamoDB
         // Esto se usa cuando el Step Function detecta un error y quiere notificar al frontend
         if (event.status && (event.status === 'FAILED' || event.status === 'COMPLETED' || event.status === 'ERROR')) {
-            console.log(`🔄 Actualizando estado a: ${event.status}`);
+            console.log(`Actualizando estado a: ${event.status}`);
             
             const updateExpression = event.status === 'FAILED' 
                 ? "SET #status = :status, errorMessage = :error, errorTime = :time, message = :message"
@@ -54,7 +54,7 @@ exports.handler = async (event) => {
                 ExpressionAttributeValues: expressionValues
             }));
             
-            console.log(`✅ Estado actualizado a ${event.status} en DynamoDB`);
+            console.log(`Estado actualizado a ${event.status} en DynamoDB`);
             
             // Retornar inmediatamente después de actualizar
             return {
@@ -70,7 +70,7 @@ exports.handler = async (event) => {
         
         // Verificar si es monitoreo multi-cliente
         if (event.checkType === 'MULTI_CLIENT_MONITORING' && event.executions) {
-            console.log('🔄 Modo MULTI_CLIENT_MONITORING detectado');
+            console.log('Modo MULTI_CLIENT_MONITORING detectado');
             return await monitorMultiClientExecutions(event.executions);
         }
         
@@ -109,7 +109,7 @@ exports.handler = async (event) => {
                 startTime: startTime,
                 endTime: endTime,
                 errorMessage: errorMessage,
-                message: message, // ✅ NUEVO: Incluir mensaje de progreso
+                message: message, //NUEVO: Incluir mensaje de progreso
                 timestamp: new Date().toISOString()
             })
         };
@@ -208,7 +208,7 @@ async function monitorMultiClientExecutions(executions) {
     const allCompleted = (completedCount + failedCount) === totalExecutions;
     const hasErrors = failedCount > 0;
     
-    console.log(`📊 Resumen: ${completedCount} completados, ${failedCount} fallidos, ${runningCount} ejecutándose`);
+    console.log(`Resumen: ${completedCount} completados, ${failedCount} fallidos, ${runningCount} ejecutándose`);
     
     // Devolver resultado para el Step Function
     return {

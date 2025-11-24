@@ -9,12 +9,12 @@ const dynamoDB = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-east
 
 exports.handler = async (event) => {
     try {
-        console.log('🔀 CLIENT SEPARATOR - Evento recibido:', JSON.stringify(event, null, 2));
+        console.log('CLIENT SEPARATOR - Evento recibido:', JSON.stringify(event, null, 2));
         
-        // ✅ VALIDAR VARIABLE DE ENTORNO
+        // VALIDAR VARIABLE DE ENTORNO
         const JOBS_TABLE = process.env.JOBS_TABLE;
         if (!JOBS_TABLE) {
-            throw new Error('❌ JOBS_TABLE no está configurado en variables de entorno');
+            throw new Error('JOBS_TABLE no está configurado en variables de entorno');
         }
         
         const { s3Bucket, s3Key, customConfig, processId } = event;
@@ -27,14 +27,14 @@ exports.handler = async (event) => {
         await updateDynamoDBStatus(processId, 'SEPARATING_CLIENTS', 'Analizando archivo para detectar clientes múltiples...', JOBS_TABLE);
         
         // Descargar archivo de S3
-        console.log('📥 Descargando archivo de S3...');
+        console.log('Descargando archivo de S3...');
         const fileBuffer = await downloadFileFromS3(s3Bucket, s3Key);
         
         // Analizar Excel para detectar clientes
-        console.log('🔍 Analizando clientes en el archivo...');
+        console.log('Analizando clientes en el archivo...');
         const clientesInfo = await analizarClientesEnExcel(fileBuffer);
         
-        console.log('📊 Análisis completado:', {
+        console.log('Análisis completado:', {
             totalClientes: clientesInfo.length,
             clientes: clientesInfo.map(c => c.cliente)
         });
@@ -42,7 +42,7 @@ exports.handler = async (event) => {
         // Decidir el flujo según número de clientes
         if (clientesInfo.length === 1) {
             // SINGLE CLIENTE - Procesar directamente
-            console.log('🎯 SINGLE CLIENTE detectado - Procesando directamente');
+            console.log('SINGLE CLIENTE detectado - Procesando directamente');
             
             await updateDynamoDBStatus(processId, 'PROCESSING_SINGLE', `Cliente único detectado: ${clientesInfo[0].cliente}`, JOBS_TABLE);
             
@@ -51,7 +51,7 @@ exports.handler = async (event) => {
             
         } else if (clientesInfo.length > 1) {
             // MULTI CLIENTE - Separar y procesar cada uno
-            console.log('🔄 MULTI CLIENTE detectado - Iniciando separación');
+            console.log('MULTI CLIENTE detectado - Iniciando separación');
             
             await updateDynamoDBStatus(processId, 'PROCESSING_MULTI', `Múltiples clientes detectados: ${clientesInfo.length}`, JOBS_TABLE);
             
@@ -63,7 +63,7 @@ exports.handler = async (event) => {
         }
         
     } catch (error) {
-        console.error('❌ Error en client-separator:', error);
+        console.error('Error en client-separator:', error);
         
         // Actualizar estado de error en DynamoDB si tenemos processId
         if (event.processId) {
@@ -128,11 +128,11 @@ async function analizarClientesEnExcel(fileBuffer) {
         throw new Error(`No se encontró columna de Cliente. Columnas disponibles: ${headers.filter(h => h).join(', ')}`);
     }
     
-    console.log(`🎯 Columna de cliente detectada: "${columnaCliente}"`);
+    console.log(`Columna de cliente detectada: "${columnaCliente}"`);
     
     // Leer todos los datos para contar clientes
     const datos = XLSX.utils.sheet_to_json(worksheet);
-    console.log(`📋 Total registros leídos: ${datos.length}`);
+    console.log(`Total registros leídos: ${datos.length}`);
     
     if (datos.length === 0) {
         throw new Error('El archivo Excel no contiene datos válidos');
@@ -158,7 +158,7 @@ async function analizarClientesEnExcel(fileBuffer) {
         columnaCliente: columnaCliente
     })).sort((a, b) => b.totalRegistros - a.totalRegistros);
     
-    console.log('📊 Clientes detectados:');
+    console.log('Clientes detectados:');
     clientesInfo.forEach(info => {
         console.log(`  - ${info.cliente}: ${info.totalRegistros} registros`);
     });
@@ -173,7 +173,7 @@ async function analizarClientesEnExcel(fileBuffer) {
  * PROCESAR CLIENTE ÚNICO - Retornar info para que continúe la ejecución actual
  */
 async function procesarClienteUnico(event, clienteInfo) {
-    console.log('🎯 Cliente único detectado:', clienteInfo.cliente);
+    console.log('Cliente único detectado:', clienteInfo.cliente);
     
     // NO crear nueva ejecución, solo devolver la información para que 
     // el Step Function actual continúe con ProcesarClienteUnico
@@ -193,7 +193,7 @@ async function procesarClienteUnico(event, clienteInfo) {
  * Procesa uno por uno para liberar memoria entre iteraciones
  */
 async function procesarMultiplesClientes(event, clientesInfo, fileBuffer) {
-    console.log('🔄 Procesando múltiples clientes:', clientesInfo.length);
+    console.log('Procesando múltiples clientes:', clientesInfo.length);
     
     const { s3Bucket, customConfig, processId } = event;
     const executions = [];
@@ -210,7 +210,7 @@ async function procesarMultiplesClientes(event, clientesInfo, fileBuffer) {
     // Procesar cada cliente uno por uno
     for (let i = 0; i < clientesInfo.length; i++) {
         const clienteInfo = clientesInfo[i];
-        console.log(`📝 [${i + 1}/${clientesInfo.length}] Procesando cliente: ${clienteInfo.cliente}`);
+        console.log(`[${i + 1}/${clientesInfo.length}] Procesando cliente: ${clienteInfo.cliente}`);
         
         // Actualizar progreso en DynamoDB
         const JOBS_TABLE_LOCAL = process.env.JOBS_TABLE || 'invenadro-backend-jul-dev-jobs';
@@ -247,7 +247,7 @@ async function procesarMultiplesClientes(event, clientesInfo, fileBuffer) {
             }
         }
         
-        console.log(`  📊 ${datosCliente.length} registros para ${clienteInfo.cliente}`);
+        console.log(`${datosCliente.length} registros para ${clienteInfo.cliente}`);
         
         // Crear workbook para este cliente
         const nuevoWorkbook = XLSX.utils.book_new();
@@ -270,13 +270,13 @@ async function procesarMultiplesClientes(event, clientesInfo, fileBuffer) {
             ContentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         }));
         
-        console.log(`  ✅ Archivo subido: ${clienteKey}`);
+        console.log(`Archivo subido: ${clienteKey}`);
         
         // Crear ejecución individual
         const stepFunctionArn = process.env.PROCESSOR_STEP_FUNCTION_ARN;
         
         if (!stepFunctionArn) {
-            throw new Error('❌ PROCESSOR_STEP_FUNCTION_ARN no está configurado');
+            throw new Error('PROCESSOR_STEP_FUNCTION_ARN no está configurado');
         }
         
         const executionInput = {
@@ -308,7 +308,7 @@ async function procesarMultiplesClientes(event, clientesInfo, fileBuffer) {
             totalRegistros: clienteInfo.totalRegistros
         });
         
-        console.log(`  🚀 Ejecución iniciada: ${result.executionArn.split(':').pop()}`);
+        console.log(`Ejecución iniciada: ${result.executionArn.split(':').pop()}`);
         
         // Forzar garbage collection si está disponible
         if (global.gc) {
@@ -331,7 +331,7 @@ async function procesarMultiplesClientes(event, clientesInfo, fileBuffer) {
         ContentType: 'application/json'
     }));
     
-    console.log('✅ Todos los clientes procesados exitosamente');
+    console.log('Todos los clientes procesados exitosamente');
     
     return {
         statusCode: 200,
@@ -361,8 +361,8 @@ async function updateDynamoDBStatus(processId, status, details, jobsTable) {
                 ":time": { S: new Date().toISOString() }
             }
         }));
-        console.log(`📝 Estado actualizado: ${status} - ${details}`);
+        console.log(`Estado actualizado: ${status} - ${details}`);
     } catch (error) {
-        console.error('❌ Error actualizando DynamoDB:', error);
+        console.error('Error actualizando DynamoDB:', error);
     }
 }

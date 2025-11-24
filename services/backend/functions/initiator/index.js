@@ -26,7 +26,7 @@ exports.handler = async (event) => {
     try {
         console.log('Evento recibido:', JSON.stringify(event, null, 2));
         
-        // 🔐 EXTRAER INFORMACIÓN DEL USUARIO AUTENTICADO
+        // EXTRAER INFORMACIÓN DEL USUARIO AUTENTICADO
         let userInfo = null;
         if (event.requestContext?.authorizer?.claims) {
             const claims = event.requestContext.authorizer.claims;
@@ -74,7 +74,7 @@ exports.handler = async (event) => {
         const bucketName = s3Bucket;
         const key = s3Key;
         
-        console.log(`📦 Procesando archivo desde S3: s3://${bucketName}/${key}`);
+        console.log(`Procesando archivo desde S3: s3://${bucketName}/${key}`);
         
         // Iniciar Step Function
         const stateMachineArn = process.env.STEP_FUNCTION_ARN;
@@ -128,7 +128,7 @@ exports.handler = async (event) => {
             originalname: { S: originalname || 'inventario.xlsx' }
         };
         
-        // 🔐 AGREGAR INFO DEL USUARIO (para auditoría)
+        //AGREGAR INFO DEL USUARIO (para auditoría)
         if (userInfo) {
             dynamoItem.user = {
                 M: {

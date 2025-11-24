@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
-// 🎨 Función helper para definir columnas calculadas
+// Función helper para definir columnas calculadas
 const getColumnasCalculadas = () => [
   'valor optimo redondeado',
   'valor optimo rescate aplicado', 
@@ -40,7 +40,7 @@ const determinarDirectorioExport = () => {
                      process.env.AWS_EXECUTION_ENV !== undefined;
   const esAppRunner = process.env.NODE_ENV === 'production' && !esAWSLambda;
   
-  console.log('🔍 Detección de entorno:', {
+  console.log('Detección de entorno:', {
     AWS_LAMBDA_FUNCTION_NAME: process.env.AWS_LAMBDA_FUNCTION_NAME,
     LAMBDA_TASK_ROOT: process.env.LAMBDA_TASK_ROOT,
     AWS_EXECUTION_ENV: process.env.AWS_EXECUTION_ENV,
@@ -48,13 +48,13 @@ const determinarDirectorioExport = () => {
   });
   
   if (esAWSLambda) {
-    console.log('✅ Entorno detectado: AWS Lambda - usando /tmp');
+    console.log('Entorno detectado: AWS Lambda - usando /tmp');
     return '/tmp';
   } else if (esAppRunner) {
-    console.log('✅ Entorno detectado: App Runner - usando /app/export');
+    console.log('Entorno detectado: App Runner - usando /app/export');
     return '/app/export';  // App Runner usa /app como workdir
   } else {
-    console.log('✅ Entorno detectado: Local development - usando ./export');
+    console.log('Entorno detectado: Local development - usando ./export');
     return './export';     // Local development
   }
 };
@@ -75,18 +75,18 @@ const subirAchivoAS3 = async (rutaArchivo, nombreArchivo) => {
     
     // Retornar la URL de S3
     const s3Url = `https://${S3_BUCKET}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/exports/${nombreArchivo}`;
-    console.log('📤 Archivo subido a S3:', s3Url);
+    console.log('Archivo subido a S3:', s3Url);
     
     return s3Url;
   } catch (error) {
-    console.error('❌ Error subiendo a S3:', error);
+    console.error('Error subiendo a S3:', error);
     throw error;
   }
 };
 
 const exportarAExcel = async (datos, nombreArchivo = 'datos_export.xlsx') => {
   try {
-    console.log('📁 exportarAExcel iniciado con:', {
+    console.log('exportarAExcel iniciado con:', {
       datosLength: datos?.length,
       nombreArchivo,
       datosType: typeof datos,
@@ -175,7 +175,7 @@ const exportarAExcel = async (datos, nombreArchivo = 'datos_export.xlsx') => {
     // Crear la carpeta export si no existe
     if (!fs.existsSync(carpetaExport)) {
       fs.mkdirSync(carpetaExport, { recursive: true });
-      console.log(`📁 Directorio creado: ${carpetaExport}`);
+      console.log(`Directorio creado: ${carpetaExport}`);
     }
     
     // Crear la ruta completa del archivo con timestamp
@@ -183,19 +183,19 @@ const exportarAExcel = async (datos, nombreArchivo = 'datos_export.xlsx') => {
     const nombreConTimestamp = nombreArchivo.replace('.xlsx', `_${timestamp}.xlsx`);
     const rutaCompleta = path.join(carpetaExport, nombreConTimestamp);
     
-    console.log(`💾 Guardando Excel en: ${rutaCompleta}`);
+    console.log(`Guardando Excel en: ${rutaCompleta}`);
     
     // Escribir el archivo
-    console.log('📁 Intentando escribir archivo en:', rutaCompleta);
+    console.log('Intentando escribir archivo en:', rutaCompleta);
     await workbook.xlsx.writeFile(rutaCompleta);
-    console.log('📁 Archivo escrito exitosamente');
+    console.log('Archivo escrito exitosamente');
     
     // Determinar si estamos en producción (AppRunner o Lambda)
     const esProduccion = process.env.NODE_ENV === 'production' || process.env.LAMBDA_FUNCTION_NAME;
     
     if (esProduccion) {
       // En producción, subir a S3
-      console.log('☁️ Modo producción: subiendo archivo a S3...');
+      console.log('Modo producción: subiendo archivo a S3...');
       const s3Url = await subirAchivoAS3(rutaCompleta, nombreConTimestamp);
       
       // Limpiar archivo local después de subir a S3
@@ -209,11 +209,11 @@ const exportarAExcel = async (datos, nombreArchivo = 'datos_export.xlsx') => {
       return s3Url;
     } else {
       // En desarrollo, retornar ruta local
-      console.log('🏠 Modo desarrollo: archivo guardado localmente');
+      console.log('Modo desarrollo: archivo guardado localmente');
       return rutaCompleta;
     }
   } catch (error) {
-    console.error('❌ Error exportando a Excel:', error);
+    console.error('Error exportando a Excel:', error);
     throw error;
   }
 };
@@ -231,7 +231,7 @@ const exportarACSV = (datos, nombreArchivo = 'datos_export.csv') => {
     // Crear la carpeta export si no existe
     if (!fs.existsSync(carpetaExport)) {
       fs.mkdirSync(carpetaExport, { recursive: true });
-      console.log(`📁 Directorio creado: ${carpetaExport}`);
+      console.log(`Directorio creado: ${carpetaExport}`);
     }
     
     // Obtener headers del primer objeto
@@ -272,20 +272,20 @@ const exportarACSV = (datos, nombreArchivo = 'datos_export.csv') => {
     const nombreConTimestamp = nombreArchivo.replace('.csv', `_${timestamp}.csv`);
     const rutaCompleta = path.join(carpetaExport, nombreConTimestamp);
     
-    console.log(`💾 Guardando CSV en: ${rutaCompleta}`);
+    console.log(`Guardando CSV en: ${rutaCompleta}`);
     
     // Escribir el archivo
     fs.writeFileSync(rutaCompleta, csvContent, 'utf8');
     
     return rutaCompleta;
   } catch (error) {
-    console.error('❌ Error exportando a CSV:', error);
+    console.error('Error exportando a CSV:', error);
     throw error;
   }
 };
 
 /**
- * 🚀 Crear archivo Excel en memoria (para SQS Worker)
+ * Crear archivo Excel en memoria (para SQS Worker)
  * 
  * Esta función crea un archivo Excel en memoria y retorna el buffer,
  * sin guardarlo en disco. Útil para subir directamente a S3.
@@ -364,12 +364,12 @@ const createExcelFile = async (datos) => {
     // Crear buffer en memoria
     const buffer = await workbook.xlsx.writeBuffer();
     
-    console.log(`📊 Excel buffer creado: ${buffer.length} bytes`);
+    console.log(`Excel buffer creado: ${buffer.length} bytes`);
     
     return buffer;
     
   } catch (error) {
-    console.error('❌ Error creando Excel buffer:', error);
+    console.error('Error creando Excel buffer:', error);
     throw error;
   }
 };

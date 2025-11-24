@@ -10,7 +10,7 @@
  * @returns {Array} Datos con campos 'Regla OptimoQ aplicada' y 'valor ReglaOptimoQ'
  */
 const reglaOptimoQ = (datosConOptimoP, configReglas) => {
-  console.log(`[REGLA OPTIMO Q] 🚀 DEBUG INICIANDO - Total productos: ${datosConOptimoP.length}`);
+  console.log(`[REGLA OPTIMO Q] DEBUG INICIANDO - Total productos: ${datosConOptimoP.length}`);
   
   // Validación estricta: configReglas obligatorio (consistencia)
   if (!configReglas) {
@@ -21,11 +21,11 @@ const reglaOptimoQ = (datosConOptimoP, configReglas) => {
       let valorOptimoQAplicado = false;
       let valorOptimoQ = item['valor ReglaOptimoP'] ?? 0; // Por defecto arrastra el valor de OptimoP
 
-      // 🎯 LÓGICA ESPECÍFICA DE LA REGLA OPTIMOQ
+      // LÓGICA ESPECÍFICA DE LA REGLA OPTIMOQ
       // Criterios: valor ReglaOptimoP = 0 Y Venta Neta Trimestral > 1 (según documento)
       const ventaTrimestralDatabricks = parseFloat(item['VtasTrimDataBrick']) || 0;
 
-      // 🎯 LÓGICA CORRECTA DE LA REGLA OPTIMOQ
+      // LÓGICA CORRECTA DE LA REGLA OPTIMOQ
       // Criterio: valor ReglaOptimoP = 0 Y VtasTrimDataBrick >= 2
       if (item['valor ReglaOptimoP'] === 0 && ventaTrimestralDatabricks >= 2) {
         valorOptimoQAplicado = true;
@@ -45,7 +45,7 @@ const reglaOptimoQ = (datosConOptimoP, configReglas) => {
     const productosConReglaAplicada = resultados.filter(item => item['Regla OptimoQ aplicada']).length;
     const productosSinReglaAplicada = resultados.filter(item => !item['Regla OptimoQ aplicada']).length;
     
-    console.log(`[REGLA OPTIMO Q] 📊 RESUMEN:`);
+    console.log(`[REGLA OPTIMO Q] RESUMEN:`);
     console.log(`[REGLA OPTIMO Q] - Total productos: ${resultados.length}`);
     console.log(`[REGLA OPTIMO Q] - Con Regla OptimoQ aplicada: ${productosConReglaAplicada}`);
     console.log(`[REGLA OPTIMO Q] - Sin Regla OptimoQ aplicada: ${productosSinReglaAplicada}`);
