@@ -290,6 +290,18 @@ functions:
     handler: functionsCRUDConfiguracion/create-config/index.handler
     timeout: 30
     memorySize: 256
+    package:
+      individually: true
+      patterns:
+        - 'functionsCRUDConfiguracion/create-config/**'
+        - '!functionsCRUDConfiguracion/read-config/**'
+        - '!functionsCRUDConfiguracion/update-config/**'
+        - '!functionsCRUDConfiguracion/delete-config/**'
+        - '!functions/**'
+        - '!.git/**'
+        - '!.github/**'
+        - '!.vscode/**'
+        - '!*.md'
     environment:
       CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
     iamRoleStatements:
@@ -311,6 +323,18 @@ functions:
     handler: functionsCRUDConfiguracion/read-config/index.handler
     timeout: 30
     memorySize: 256
+    package:
+      individually: true
+      patterns:
+        - 'functionsCRUDConfiguracion/read-config/**'
+        - '!functionsCRUDConfiguracion/create-config/**'
+        - '!functionsCRUDConfiguracion/update-config/**'
+        - '!functionsCRUDConfiguracion/delete-config/**'
+        - '!functions/**'
+        - '!.git/**'
+        - '!.github/**'
+        - '!.vscode/**'
+        - '!*.md'
     environment:
       CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
     iamRoleStatements:
@@ -340,6 +364,18 @@ functions:
     handler: functionsCRUDConfiguracion/update-config/index.handler
     timeout: 30
     memorySize: 256
+    package:
+      individually: true
+      patterns:
+        - 'functionsCRUDConfiguracion/update-config/**'
+        - '!functionsCRUDConfiguracion/create-config/**'
+        - '!functionsCRUDConfiguracion/read-config/**'
+        - '!functionsCRUDConfiguracion/delete-config/**'
+        - '!functions/**'
+        - '!.git/**'
+        - '!.github/**'
+        - '!.vscode/**'
+        - '!*.md'
     environment:
       CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
     iamRoleStatements:
@@ -361,6 +397,18 @@ functions:
     handler: functionsCRUDConfiguracion/delete-config/index.handler
     timeout: 30
     memorySize: 256
+    package:
+      individually: true
+      patterns:
+        - 'functionsCRUDConfiguracion/delete-config/**'
+        - '!functionsCRUDConfiguracion/create-config/**'
+        - '!functionsCRUDConfiguracion/read-config/**'
+        - '!functionsCRUDConfiguracion/update-config/**'
+        - '!functions/**'
+        - '!.git/**'
+        - '!.github/**'
+        - '!.vscode/**'
+        - '!*.md'
     environment:
       CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
     iamRoleStatements:

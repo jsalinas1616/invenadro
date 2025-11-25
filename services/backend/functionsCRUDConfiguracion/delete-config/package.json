@@ -4,8 +4,8 @@
   "description": "Lambda para eliminar configuraciones de mostrador",
   "main": "index.js",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.0.0",
-    "@aws-sdk/lib-dynamodb": "^3.0.0"
+    "@aws-sdk/client-dynamodb": "^3.637.0",
+    "@aws-sdk/lib-dynamodb": "^3.637.0"
   }
 }
 
