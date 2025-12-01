@@ -1,18 +1,10 @@
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
-
-const client = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(client);
-
-const TABLE_NAME = process.env.CONFIG_TABLE;
+const { executeQuery } = require('../../shared/databricks');
 
 // Función helper para CORS dinámico
 const getCorsHeaders = (event) => {
   const origin = event.headers?.origin || event.headers?.Origin;
   const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim());
   
-  // Si el origin está en la lista permitida, devuélvelo
-  // Si no, usa el primero de la lista o '*'
   const allowedOrigin = allowedOrigins.includes(origin) ? origin : (allowedOrigins[0] || '*');
   
   return {
@@ -24,11 +16,10 @@ const getCorsHeaders = (event) => {
 };
 
 exports.handler = async (event) => {
-  console.log('DELETE Config - Evento recibido:', JSON.stringify(event, null, 2));
+  console.log('DELETE Config (Databricks) - Evento recibido:', JSON.stringify(event, null, 2));
 
   const corsHeaders = getCorsHeaders(event);
 
-  // Manejar OPTIONS (CORS preflight)
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -48,11 +39,17 @@ exports.handler = async (event) => {
       };
     }
 
-    // Eliminar de DynamoDB
-    await docClient.send(new DeleteCommand({
-      TableName: TABLE_NAME,
-      Key: { mostradorId }
-    }));
+    const query = `
+      DELETE FROM invenadro.bronze.invenadro_input_automatizacion
+      WHERE mostrador = :mostrador
+    `;
+
+    const parameters = [
+      { name: 'mostrador', value: Number(mostradorId), type: 'LONG' }
+    ];
+
+    console.log('Ejecutando DELETE en Databricks...');
+    await executeQuery(query, { parameters });
 
     console.log('✅ Configuración eliminada:', mostradorId);
 
@@ -77,4 +74,3 @@ exports.handler = async (event) => {
     };
   }
 };
-

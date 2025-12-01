@@ -8,17 +8,27 @@ plugins:
 
 # Configuración personalizada por ambiente
 custom:
+  # Configuración de Databricks (desde variables de entorno .env)
+  databricks:
+    workspaceUrl: ${env:DATABRICKS_WORKSPACE_URL}
+    accessToken: ${env:DATABRICKS_ACCESS_TOKEN}
+    warehouseId: ${env:DATABRICKS_WAREHOUSE_ID}
+    orgId: ${env:DATABRICKS_ORG_ID}
+
   # 🔐 URLs permitidas para CORS por ambiente
-  # NOTA: Las URLs de CloudFront se obtienen dinámicamente del stack de frontend
-  #       Si el frontend no existe aún, se usan solo S3 Website + localhost
   allowedOrigins:
     # Para jul-dev: URL se sincroniza automáticamente con script
     jul-dev: 'http://invenadro-frontend-jul-dev.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
     # Para jul-qa, nadro-qa, nadro-prod: Se construyen dinámicamente
-    # Pattern: https://{cloudfront-id}.cloudfront.net,http://invenadro-frontend-{stage}.s3-website.{region}.amazonaws.com,http://localhost:3000
     jul-qa: 'http://invenadro-frontend-jul-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000,http://127.0.0.1:3000'
     nadro-qa: 'http://invenadro-frontend-nadro-qa.s3-website.mx-central-1.amazonaws.com,http://localhost:3000'
     nadro-prod: 'http://invenadro-frontend-nadro-prod.s3-website.mx-central-1.amazonaws.com'
+  
+  # Configuración de Auth (siempre Cognito en AWS)
+  auth:
+    default:
+      type: COGNITO_USER_POOLS
+      authorizerId: !Ref ApiGatewayAuthorizer
 
 package:
   individually: false
@@ -30,19 +40,20 @@ package:
     - '!.env*'
     - 'node_modules/**'
     - 'functions/**'
+    - 'functionsCRUDConfiguracion/**' # Incluir CRUD
     - 'optimization/**'
     - 'rules/**'
     - 'utils/**'
     - 'data/**'
+    - 'shared/**' # Incluir código compartido
 
 provider:
   name: aws
-  runtime: nodejs22.x
-  region: ${env:AWS_REGION, 'mx-central-1'}
+  runtime: nodejs20.x
+  region: mx-central-1
   stage: ${opt:stage, 'dev'}
   
   # Configuración de logs
-  # Habilitado - el rol se crea automáticamente en resources/api-gateway-role.yml
   logs:
     restApi: true
   
@@ -67,8 +78,11 @@ provider:
     STEP_FUNCTION_ARN: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
     # URLs permitidas para CORS (separadas por coma)
     ALLOWED_ORIGINS: ${self:custom.allowedOrigins.${self:provider.stage}}
-    # Databricks se carga dinámicamente desde AWS Parameter Store
-    # Ver: functions/processor/utils/parameterStore.js
+    # Databricks (disponible para todas las funciones que lo requieran)
+    DATABRICKS_WORKSPACE_URL: ${self:custom.databricks.workspaceUrl}
+    DATABRICKS_ACCESS_TOKEN: ${self:custom.databricks.accessToken}
+    DATABRICKS_WAREHOUSE_ID: ${self:custom.databricks.warehouseId}
+    DATABRICKS_ORG_ID: ${self:custom.databricks.orgId}
 
 # Funciones Lambda
 functions:
@@ -101,17 +115,53 @@ functions:
           path: /calcular-redondeo
           method: post
           cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref ApiGatewayAuthorizer
+          authorizer: ${self:custom.auth.default}
+
+  getPresignedUrl:
+    name: ${self:service}-${self:provider.stage}-get-presigned-url
+    handler: functions/get-presigned-url/index.handler
+    timeout: 30
+    memorySize: 256
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+        Resource:
+          - !Sub "${UploadsBucket.Arn}/*"
+    events:
+      - http:
+          path: /get-presigned-url
+          method: post
+          cors: true
+          authorizer: ${self:custom.auth.default}
+
+  statusChecker:
+    name: ${self:service}-${self:provider.stage}-status-checker
+    handler: functions/status-checker/index.handler
+    timeout: 30
+    memorySize: 256
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource: !GetAtt JobsTable.Arn
+      - Effect: Allow
+        Action:
+          - states:DescribeExecution
+        Resource: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
+    events:
+      - http:
+          path: /status/{processId}
+          method: get
+          cors: true
+          authorizer: ${self:custom.auth.default}
 
   clientSeparator:
     name: ${self:service}-${self:provider.stage}-client-separator
     handler: functions/client-separator/index.handler
     timeout: 900
     memorySize: 1024
-    environment:
-      PROCESSOR_STEP_FUNCTION_ARN: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -124,76 +174,15 @@ functions:
         Action:
           - dynamodb:UpdateItem
         Resource: !GetAtt JobsTable.Arn
-      - Effect: Allow
-        Action:
-          - states:StartExecution
-        Resource: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
 
   processor:
     name: ${self:service}-${self:provider.stage}-processor
     handler: functions/processor/index.handler
     timeout: 900
-    memorySize: 3008
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
-      - Effect: Allow
-        Action:
-          - s3:GetObject
-          - s3:PutObject
-        Resource:
-          - !Sub "${UploadsBucket.Arn}/*"
-          - !Sub "${ResultsBucket.Arn}/*"
-      - Effect: Allow
-        Action:
-          - dynamodb:UpdateItem
-          - dynamodb:GetItem
-        Resource: !GetAtt JobsTable.Arn
-      - Effect: Allow
-        Action:
-          - ssm:GetParameters
-        Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/invenadro/databricks/*'
-
-  statusChecker:
-    name: ${self:service}-${self:provider.stage}-status-checker
-    handler: functions/status-checker/index.handler
-    timeout: 60
-    memorySize: 256
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:GetItem
-          - dynamodb:UpdateItem
-          - dynamodb:Query
-        Resource: !GetAtt JobsTable.Arn
-      - Effect: Allow
-        Action:
-          - states:DescribeExecution
-          - states:ListExecutions
-        Resource: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${self:service}-${self:provider.stage}-StateMachine"
-    events:
-      - http:
-          path: /calcular-redondeo/status/{processId}
-          method: get
-          cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref ApiGatewayAuthorizer
-
-  clientAggregator:
-    name: ${self:service}-${self:provider.stage}-client-aggregator
-    handler: functions/client-aggregator/index.handler
-    timeout: 600
     memorySize: 2048
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
-      - Effect: Allow
-        Action:
           - s3:GetObject
           - s3:PutObject
         Resource:
@@ -201,24 +190,42 @@ functions:
           - !Sub "${ResultsBucket.Arn}/*"
       - Effect: Allow
         Action:
-          - dynamodb:GetItem
+          - ssm:GetParameters
+        Resource: 
+          - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/invenadro/databricks/*"
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: !GetAtt LambdaKMSKey.Arn
+
+  clientAggregator:
+    name: ${self:service}-${self:provider.stage}-client-aggregator
+    handler: functions/client-aggregator/index.handler
+    timeout: 900
+    memorySize: 1024
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+        Resource:
+          - !Sub "${ResultsBucket.Arn}/*"
+      - Effect: Allow
+        Action:
           - dynamodb:UpdateItem
         Resource: !GetAtt JobsTable.Arn
 
   downloadResult:
     name: ${self:service}-${self:provider.stage}-download-result
     handler: functions/download-result/index.handler
-    timeout: 300
+    timeout: 30
     memorySize: 512
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
-      - Effect: Allow
-        Action:
           - s3:GetObject
-        Resource: !Sub "${ResultsBucket.Arn}/*"
+        Resource:
+          - !Sub "${ResultsBucket.Arn}/*"
       - Effect: Allow
         Action:
           - dynamodb:GetItem
@@ -226,64 +233,32 @@ functions:
         Resource: !GetAtt JobsTable.Arn
     events:
       - http:
-          path: /calcular-redondeo/download/{processId}
+          path: /download/{processId}
           method: get
           cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref ApiGatewayAuthorizer
+          authorizer: ${self:custom.auth.default}
 
   excelGenerator:
     name: ${self:service}-${self:provider.stage}-excel-generator
     handler: functions/excel-generator/index.handler
-    timeout: 300
+    timeout: 60
     memorySize: 1024
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - kms:Decrypt
-        Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
-      - Effect: Allow
-        Action:
           - s3:GetObject
-        Resource: !Sub "${ResultsBucket.Arn}/*"
-      - Effect: Allow
-        Action:
-          - dynamodb:GetItem
-          - dynamodb:UpdateItem
-        Resource: !GetAtt JobsTable.Arn
+        Resource:
+          - !Sub "${ResultsBucket.Arn}/*"
     events:
       - http:
           path: /excel/{processId}/{clienteId}
           method: get
           cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref ApiGatewayAuthorizer
+          authorizer: ${self:custom.auth.default}
 
-  getPresignedUrl:
-    name: ${self:service}-${self:provider.stage}-get-presigned-url
-    handler: functions/get-presigned-url/index.handler
-    timeout: 60
-    memorySize: 256
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - s3:PutObject
-        Resource: !Sub "${UploadsBucket.Arn}/*"
-    events:
-      - http:
-          path: /get-presigned-url
-          method: post
-          cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref ApiGatewayAuthorizer
-
-  # ==========================================
-  # CRUD CONFIGURACIONES DE MOSTRADOR
-  # (Funciones separadas, NO van al Step Function)
-  # ==========================================
+  # ===================================================================================
+  # CRUD DE CONFIGURACIONES (Databricks)
+  # ===================================================================================
   
   createConfig:
     name: ${self:service}-${self:provider.stage}-create-config
@@ -294,29 +269,20 @@ functions:
       individually: true
       patterns:
         - 'functionsCRUDConfiguracion/create-config/**'
-        - '!functionsCRUDConfiguracion/read-config/**'
-        - '!functionsCRUDConfiguracion/update-config/**'
-        - '!functionsCRUDConfiguracion/delete-config/**'
+        - 'shared/**'
+        - '!functionsCRUDConfiguracion/**'
         - '!functions/**'
         - '!.git/**'
         - '!.github/**'
         - '!.vscode/**'
         - '!*.md'
-    environment:
-      CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:PutItem
-        Resource: !GetAtt ConfiguracionesMostradorTable.Arn
+    # Variables de entorno heredadas globalmente (Databricks)
     events:
       - http:
           path: /configuraciones
           method: post
           cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref ApiGatewayAuthorizer
+          authorizer: ${self:custom.auth.default}
 
   readConfig:
     name: ${self:service}-${self:provider.stage}-read-config
@@ -327,37 +293,24 @@ functions:
       individually: true
       patterns:
         - 'functionsCRUDConfiguracion/read-config/**'
-        - '!functionsCRUDConfiguracion/create-config/**'
-        - '!functionsCRUDConfiguracion/update-config/**'
-        - '!functionsCRUDConfiguracion/delete-config/**'
+        - 'shared/**'
+        - '!functionsCRUDConfiguracion/**'
         - '!functions/**'
         - '!.git/**'
         - '!.github/**'
         - '!.vscode/**'
         - '!*.md'
-    environment:
-      CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:GetItem
-          - dynamodb:Scan
-        Resource: !GetAtt ConfiguracionesMostradorTable.Arn
     events:
       - http:
           path: /configuraciones
           method: get
           cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref ApiGatewayAuthorizer
+          authorizer: ${self:custom.auth.default}
       - http:
           path: /configuraciones/{mostradorId}
           method: get
           cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref ApiGatewayAuthorizer
+          authorizer: ${self:custom.auth.default}
 
   updateConfig:
     name: ${self:service}-${self:provider.stage}-update-config
@@ -368,29 +321,19 @@ functions:
       individually: true
       patterns:
         - 'functionsCRUDConfiguracion/update-config/**'
-        - '!functionsCRUDConfiguracion/create-config/**'
-        - '!functionsCRUDConfiguracion/read-config/**'
-        - '!functionsCRUDConfiguracion/delete-config/**'
+        - 'shared/**'
+        - '!functionsCRUDConfiguracion/**'
         - '!functions/**'
         - '!.git/**'
         - '!.github/**'
         - '!.vscode/**'
         - '!*.md'
-    environment:
-      CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:UpdateItem
-        Resource: !GetAtt ConfiguracionesMostradorTable.Arn
     events:
       - http:
           path: /configuraciones/{mostradorId}
           method: put
           cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref ApiGatewayAuthorizer
+          authorizer: ${self:custom.auth.default}
 
   deleteConfig:
     name: ${self:service}-${self:provider.stage}-delete-config
@@ -401,66 +344,26 @@ functions:
       individually: true
       patterns:
         - 'functionsCRUDConfiguracion/delete-config/**'
-        - '!functionsCRUDConfiguracion/create-config/**'
-        - '!functionsCRUDConfiguracion/read-config/**'
-        - '!functionsCRUDConfiguracion/update-config/**'
+        - 'shared/**'
+        - '!functionsCRUDConfiguracion/**'
         - '!functions/**'
         - '!.git/**'
         - '!.github/**'
         - '!.vscode/**'
         - '!*.md'
-    environment:
-      CONFIG_TABLE: ${self:service}-${self:provider.stage}-configuraciones-mostrador
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:DeleteItem
-        Resource: !GetAtt ConfiguracionesMostradorTable.Arn
     events:
       - http:
           path: /configuraciones/{mostradorId}
           method: delete
           cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref ApiGatewayAuthorizer
+          authorizer: ${self:custom.auth.default}
 
-# CloudFormation Resources
+# Recursos adicionales (DynamoDB, S3, IAM, Cognito)
 resources:
   - ${file(resources/dynamodb.yml)}
   - ${file(resources/s3.yml)}
-  - ${file(resources/cognito.yml)}
-  - ${file(resources/api-gateway.yml)}
   - ${file(resources/iam.yml)}
-  - ${file(resources/step-functions.yml)}
-  - ${file(resources/api-gateway-role.yml)}
+  - ${file(resources/cognito.yml)}
   - ${file(resources/kms.yml)}
-  - Outputs:
-      ApiGatewayUrl:
-        Description: API Gateway URL
-        Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${self:provider.stage}"
-      
-      StateMachineArn:
-        Description: Step Function State Machine ARN
-        Value: !GetAtt ProcessingStateMachineStepFunctionsStateMachine.Arn
-      
-      JobsTableName:
-        Description: DynamoDB Jobs Table Name
-        Value: !Ref JobsTable
-      
-      UploadsBucketName:
-        Description: S3 Uploads Bucket Name
-        Value: !Ref UploadsBucket
-      
-      ResultsBucketName:
-        Description: S3 Results Bucket Name
-        Value: !Ref ResultsBucket
-      
-      UserPoolId:
-        Description: Cognito User Pool ID
-        Value: !Ref CognitoUserPool
-      
-      UserPoolClientId:
-        Description: Cognito User Pool Client ID
-        Value: !Ref CognitoUserPoolClient
-
+  - ${file(resources/api-gateway.yml)}
+  - ${file(resources/api-gateway-role.yml)}

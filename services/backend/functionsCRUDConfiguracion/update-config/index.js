@@ -1,18 +1,10 @@
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
-
-const client = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(client);
-
-const TABLE_NAME = process.env.CONFIG_TABLE;
+const { executeQuery } = require('../../shared/databricks');
 
 // Función helper para CORS dinámico
 const getCorsHeaders = (event) => {
   const origin = event.headers?.origin || event.headers?.Origin;
   const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim());
   
-  // Si el origin está en la lista permitida, devuélvelo
-  // Si no, usa el primero de la lista o '*'
   const allowedOrigin = allowedOrigins.includes(origin) ? origin : (allowedOrigins[0] || '*');
   
   return {
@@ -24,11 +16,10 @@ const getCorsHeaders = (event) => {
 };
 
 exports.handler = async (event) => {
-  console.log('UPDATE Config - Evento recibido:', JSON.stringify(event, null, 2));
+  console.log('UPDATE Config (Databricks) - Evento recibido:', JSON.stringify(event, null, 2));
 
   const corsHeaders = getCorsHeaders(event);
 
-  // Manejar OPTIONS (CORS preflight)
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -49,33 +40,44 @@ exports.handler = async (event) => {
       };
     }
 
-    // Construir expresión de actualización dinámica
-    const updateExpressions = [];
-    const expressionAttributeNames = {};
-    const expressionAttributeValues = {};
+    // Mapeo de campos frontend a columnas DB
+    const fieldMap = {
+      'tipoInvenadro': { col: 'tipo_inventario', type: 'STRING' },
+      'montoRequerido': { col: 'monto_deseado', type: 'DOUBLE', transform: Number },
+      'incluye_Refrigerados': { col: 'incluye_refrigerados', type: 'BOOLEAN', transform: (v) => v === 'S' || v === true },
+      'incluye_Psicotropicos': { col: 'incluye_psicotropicos', type: 'BOOLEAN', transform: (v) => v === 'S' || v === true },
+      'incluye_Especialidades': { col: 'incluye_especialidades', type: 'BOOLEAN', transform: (v) => v === 'S' || v === true },
+      'incluye_Genericos': { col: 'incluye_genericos', type: 'BOOLEAN', transform: (v) => v === 'S' || v === true },
+      'incluye_Dispositivos_Medicos': { col: 'incluye_dispositivos_medicos', type: 'BOOLEAN', transform: (v) => v === 'S' || v === true },
+      'incluye_Complementos_Alimenticios': { col: 'incluye_complementos_alimenticios', type: 'BOOLEAN', transform: (v) => v === 'S' || v === true },
+      'incluye_Dermatologico': { col: 'incluye_dermatologico', type: 'BOOLEAN', transform: (v) => v === 'S' || v === true },
+      'incluye_OTC': { col: 'incluye_otc', type: 'BOOLEAN', transform: (v) => v === 'S' || v === true },
+      'incluye_Etico_Patente': { col: 'incluye_etico_patente', type: 'BOOLEAN', transform: (v) => v === 'S' || v === true }
+    };
 
-    const allowedFields = [
-      'mostrador', 'tipoInvenadro', 'montoRequerido',
-      'incluye_Refrigerados', 'incluye_Psicotropicos', 'incluye_Especialidades',
-      'incluye_Genericos', 'incluye_Dispositivos_Medicos', 
-      'incluye_Complementos_Alimenticios', 'incluye_Dermatologico',
-      'incluye_OTC', 'incluye_Etico_Patente'
-    ];
+    // Construir query dinámica
+    const setClauses = [];
+    const parameters = [];
 
-    allowedFields.forEach(field => {
+    Object.keys(fieldMap).forEach(field => {
       if (body[field] !== undefined) {
-        updateExpressions.push(`#${field} = :${field}`);
-        expressionAttributeNames[`#${field}`] = field;
-        expressionAttributeValues[`:${field}`] = body[field];
+        const config = fieldMap[field];
+        const value = config.transform ? config.transform(body[field]) : body[field];
+        
+        setClauses.push(`${config.col} = :${config.col}`);
+        parameters.push({ name: config.col, value: value, type: config.type });
       }
     });
 
-    // Agregar timestamp de actualización
-    updateExpressions.push('#updatedAt = :updatedAt');
-    expressionAttributeNames['#updatedAt'] = 'updatedAt';
-    expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+    // Agregar fecha de actualización
+    const fechaActualizacion = new Date().toISOString().split('T')[0];
+    setClauses.push(`fecha_actualizacion = :fecha_actualizacion`);
+    parameters.push({ name: 'fecha_actualizacion', value: fechaActualizacion, type: 'DATE' });
 
-    if (updateExpressions.length === 1) { // Solo timestamp
+    // Agregar ID para el WHERE
+    parameters.push({ name: 'mostrador_id', value: Number(mostradorId), type: 'LONG' });
+
+    if (setClauses.length === 1) { // Solo fecha_actualizacion
       return {
         statusCode: 400,
         headers: corsHeaders,
@@ -83,24 +85,26 @@ exports.handler = async (event) => {
       };
     }
 
-    // Actualizar en DynamoDB
-    const result = await docClient.send(new UpdateCommand({
-      TableName: TABLE_NAME,
-      Key: { mostradorId },
-      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
-      ReturnValues: 'ALL_NEW'
-    }));
+    const query = `
+      UPDATE invenadro.bronze.invenadro_input_automatizacion
+      SET ${setClauses.join(', ')}
+      WHERE mostrador = :mostrador_id
+    `;
+
+    console.log('Ejecutando UPDATE en Databricks...');
+    await executeQuery(query, { parameters });
 
     console.log('✅ Configuración actualizada:', mostradorId);
 
+    // Retornar una respuesta genérica de éxito (no podemos devolver el objeto actualizado fácilmente sin hacer otro SELECT)
+    // El frontend probablemente usa los datos que envió para actualizar su estado local o recarga la lista.
+    
     return {
       statusCode: 200,
       headers: corsHeaders,
       body: JSON.stringify({
         message: 'Configuración actualizada exitosamente',
-        config: result.Attributes
+        config: { mostradorId, ...body, updatedAt: new Date().toISOString() } // Mock de respuesta
       })
     };
 
@@ -116,4 +120,3 @@ exports.handler = async (event) => {
     };
   }
 };
-

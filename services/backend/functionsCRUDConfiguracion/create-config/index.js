@@ -1,11 +1,4 @@
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
-const { v4: uuidv4 } = require('uuid');
-
-const client = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(client);
-
-const TABLE_NAME = process.env.CONFIG_TABLE;
+const { executeQuery } = require('../../shared/databricks');
 
 // Función helper para CORS dinámico
 const getCorsHeaders = (event) => {
@@ -25,7 +18,7 @@ const getCorsHeaders = (event) => {
 };
 
 exports.handler = async (event) => {
-  console.log('CREATE Config - Evento recibido:', JSON.stringify(event, null, 2));
+  console.log('CREATE Config (Databricks) - Evento recibido:', JSON.stringify(event, null, 2));
 
   const corsHeaders = getCorsHeaders(event);
 
@@ -55,35 +48,87 @@ exports.handler = async (event) => {
       }
     }
 
-    // Crear configuración
-    const mostradorId = uuidv4();
-    const timestamp = new Date().toISOString();
-    
+    // Preparar datos para Databricks
+    const mostrador = Number(body.mostrador);
+    const tipo_inventario = body.tipoInvenadro;
+    const monto_deseado = Number(body.montoRequerido);
+    const fecha_actualizacion = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+    // Helper para convertir booleanos/strings a booleanos de SQL
+    const toBool = (val) => (val === 'S' || val === true || val === 'true');
+
+    // Query parametrizado para inserción
+    const query = `
+      INSERT INTO invenadro.bronze.invenadro_input_automatizacion (
+        mostrador,
+        tipo_inventario,
+        monto_deseado,
+        incluye_refrigerados,
+        incluye_psicotropicos,
+        incluye_especialidades,
+        incluye_genericos,
+        incluye_dispositivos_medicos,
+        incluye_complementos_alimenticios,
+        incluye_dermatologico,
+        incluye_otc,
+        incluye_etico_patente,
+        fecha_actualizacion
+      ) VALUES (
+        :mostrador,
+        :tipo_inventario,
+        :monto_deseado,
+        :incluye_refrigerados,
+        :incluye_psicotropicos,
+        :incluye_especialidades,
+        :incluye_genericos,
+        :incluye_dispositivos_medicos,
+        :incluye_complementos_alimenticios,
+        :incluye_dermatologico,
+        :incluye_otc,
+        :incluye_etico_patente,
+        :fecha_actualizacion
+      )
+    `;
+
+    const parameters = [
+      { name: 'mostrador', value: mostrador, type: 'LONG' },
+      { name: 'tipo_inventario', value: tipo_inventario, type: 'STRING' },
+      { name: 'monto_deseado', value: monto_deseado, type: 'DOUBLE' },
+      { name: 'incluye_refrigerados', value: toBool(body.incluye_Refrigerados), type: 'BOOLEAN' },
+      { name: 'incluye_psicotropicos', value: toBool(body.incluye_Psicotropicos), type: 'BOOLEAN' },
+      { name: 'incluye_especialidades', value: toBool(body.incluye_Especialidades), type: 'BOOLEAN' },
+      { name: 'incluye_genericos', value: toBool(body.incluye_Genericos), type: 'BOOLEAN' },
+      { name: 'incluye_dispositivos_medicos', value: toBool(body.incluye_Dispositivos_Medicos), type: 'BOOLEAN' },
+      { name: 'incluye_complementos_alimenticios', value: toBool(body.incluye_Complementos_Alimenticios), type: 'BOOLEAN' },
+      { name: 'incluye_dermatologico', value: toBool(body.incluye_Dermatologico), type: 'BOOLEAN' },
+      { name: 'incluye_otc', value: toBool(body.incluye_OTC), type: 'BOOLEAN' },
+      { name: 'incluye_etico_patente', value: toBool(body.incluye_Etico_Patente), type: 'BOOLEAN' },
+      { name: 'fecha_actualizacion', value: fecha_actualizacion, type: 'DATE' }
+    ];
+
+    console.log('Ejecutando INSERT en Databricks...');
+    await executeQuery(query, { parameters });
+
+    console.log('✅ Configuración creada en Databricks para mostrador:', mostrador);
+
+    // Construir objeto de respuesta similar al anterior para mantener compatibilidad con frontend
     const config = {
-      mostradorId,
-      mostrador: body.mostrador,
-      tipoInvenadro: body.tipoInvenadro,
-      montoRequerido: body.montoRequerido,
-      incluye_Refrigerados: body.incluye_Refrigerados || 'N',
-      incluye_Psicotropicos: body.incluye_Psicotropicos || 'N',
-      incluye_Especialidades: body.incluye_Especialidades || 'N',
-      incluye_Genericos: body.incluye_Genericos || 'N',
-      incluye_Dispositivos_Medicos: body.incluye_Dispositivos_Medicos || 'N',
-      incluye_Complementos_Alimenticios: body.incluye_Complementos_Alimenticios || 'N',
-      incluye_Dermatologico: body.incluye_Dermatologico || 'N',
-      incluye_OTC: body.incluye_OTC || 'N',
-      incluye_Etico_Patente: body.incluye_Etico_Patente || 'N',
-      createdAt: timestamp,
-      updatedAt: timestamp
+      mostradorId: mostrador.toString(), // Frontend espera mostradorId
+      mostrador: mostrador,
+      tipoInvenadro: tipo_inventario,
+      montoRequerido: monto_deseado,
+      // Devolver los valores originales para consistencia
+      incluye_Refrigerados: body.incluye_Refrigerados,
+      incluye_Psicotropicos: body.incluye_Psicotropicos,
+      incluye_Especialidades: body.incluye_Especialidades,
+      incluye_Genericos: body.incluye_Genericos,
+      incluye_Dispositivos_Medicos: body.incluye_Dispositivos_Medicos,
+      incluye_Complementos_Alimenticios: body.incluye_Complementos_Alimenticios,
+      incluye_Dermatologico: body.incluye_Dermatologico,
+      incluye_OTC: body.incluye_OTC,
+      incluye_Etico_Patente: body.incluye_Etico_Patente,
+      updatedAt: new Date().toISOString()
     };
-
-    // Guardar en DynamoDB
-    await docClient.send(new PutCommand({
-      TableName: TABLE_NAME,
-      Item: config
-    }));
-
-    console.log('✅ Configuración creada:', mostradorId);
 
     return {
       statusCode: 201,
@@ -106,4 +151,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
