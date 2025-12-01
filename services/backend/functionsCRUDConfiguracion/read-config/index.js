@@ -17,12 +17,15 @@ const getCorsHeaders = (event) => {
 
 // Mapper de fila SQL a objeto de configuración del frontend
 const mapRowToConfig = (row) => {
-  // Helper para convertir booleanos
-  // Databricks devuelve true/false para booleanos
-  const toFrontendBool = (val) => val === true ? 'S' : 'N'; // Frontend usa 'S'/'N' en checkboxes? No, el frontend usa true/false en el form pero 'S'/'N' en la tabla DynamoDB antigua.
-  // REVISIÓN: En create-config vimos que DynamoDB guardaba 'N' por defecto.
-  // Vamos a devolver booleanos reales si el frontend los soporta, o 'S'/'N' si es legacy.
-  // Viendo ConfigForm.js, parece que maneja ambos. Vamos a devolver 'S'/'N' para mantener compatibilidad estricta con lo que había.
+  // Helper para convertir booleanos de Databricks a formato frontend
+  // Databricks devuelve true/false, frontend espera 'S'/'N'
+  const toFrontendBool = (val) => {
+    // Manejar null, undefined, o cualquier valor falsy
+    if (val === true || val === 'true' || val === 'S' || val === 1) {
+      return 'S';
+    }
+    return 'N';
+  };
   
   return {
     mostradorId: row.mostrador ? row.mostrador.toString() : null, // ID para el frontend
