@@ -1,0 +1,36 @@
+Outputs:
+  ApiGatewayUrl:
+    Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${self:provider.stage}"
+    Export:
+      Name: ${self:service}-${self:provider.stage}-ApiGatewayUrl
+
+  UserPoolId:
+    Value: !Ref CognitoUserPool
+    Export:
+      Name: ${self:service}-${self:provider.stage}-UserPoolId
+
+  UserPoolClientId:
+    Value: !Ref CognitoUserPoolClient
+    Export:
+      Name: ${self:service}-${self:provider.stage}-UserPoolClientId
+
+  UploadsBucketName:
+    Value: !Ref UploadsBucket
+    Export:
+      Name: ${self:service}-${self:provider.stage}-UploadsBucketName
+
+  ResultsBucketName:
+    Value: !Ref ResultsBucket
+    Export:
+      Name: ${self:service}-${self:provider.stage}-ResultsBucketName
+
+  JobsTableName:
+    Value: !Ref JobsTable
+    Export:
+      Name: ${self:service}-${self:provider.stage}-JobsTableName
+    
+  StateMachineArn:
+    Value: !Ref ProcessingStateMachineStepFunctionsStateMachine
+    Export:
+      Name: ${self:service}-${self:provider.stage}-StateMachineArn
+

@@ -367,3 +367,4 @@ resources:
   - ${file(resources/kms.yml)}
   - ${file(resources/api-gateway.yml)}
   - ${file(resources/api-gateway-role.yml)}
+  - ${file(resources/outputs.yml)}
