@@ -268,14 +268,15 @@ functions:
     package:
       individually: true
       patterns:
-        - 'functionsCRUDConfiguracion/create-config/**'
-        - 'shared/**'
         - '!functionsCRUDConfiguracion/**'
         - '!functions/**'
         - '!.git/**'
         - '!.github/**'
         - '!.vscode/**'
         - '!*.md'
+        - 'functionsCRUDConfiguracion/create-config/**'
+        - 'shared/**'
+        - 'node_modules/**'
     # Variables de entorno heredadas globalmente (Databricks)
     events:
       - http:
@@ -292,14 +293,15 @@ functions:
     package:
       individually: true
       patterns:
-        - 'functionsCRUDConfiguracion/read-config/**'
-        - 'shared/**'
         - '!functionsCRUDConfiguracion/**'
         - '!functions/**'
         - '!.git/**'
         - '!.github/**'
         - '!.vscode/**'
         - '!*.md'
+        - 'functionsCRUDConfiguracion/read-config/**'
+        - 'shared/**'
+        - 'node_modules/**'
     events:
       - http:
           path: /configuraciones
@@ -320,14 +322,15 @@ functions:
     package:
       individually: true
       patterns:
-        - 'functionsCRUDConfiguracion/update-config/**'
-        - 'shared/**'
         - '!functionsCRUDConfiguracion/**'
         - '!functions/**'
         - '!.git/**'
         - '!.github/**'
         - '!.vscode/**'
         - '!*.md'
+        - 'functionsCRUDConfiguracion/update-config/**'
+        - 'shared/**'
+        - 'node_modules/**'
     events:
       - http:
           path: /configuraciones/{mostradorId}
@@ -343,14 +346,15 @@ functions:
     package:
       individually: true
       patterns:
-        - 'functionsCRUDConfiguracion/delete-config/**'
-        - 'shared/**'
         - '!functionsCRUDConfiguracion/**'
         - '!functions/**'
         - '!.git/**'
         - '!.github/**'
         - '!.vscode/**'
         - '!*.md'
+        - 'functionsCRUDConfiguracion/delete-config/**'
+        - 'shared/**'
+        - 'node_modules/**'
     events:
       - http:
           path: /configuraciones/{mostradorId}
