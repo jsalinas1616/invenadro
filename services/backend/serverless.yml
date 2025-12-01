@@ -10,10 +10,10 @@ plugins:
 custom:
   # Configuración de Databricks (desde variables de entorno .env)
   databricks:
-    workspaceUrl: ${env:DATABRICKS_WORKSPACE_URL}
-    accessToken: ${env:DATABRICKS_ACCESS_TOKEN}
-    warehouseId: ${env:DATABRICKS_WAREHOUSE_ID}
-    orgId: ${env:DATABRICKS_ORG_ID}
+    workspaceUrl: ${env:DATABRICKS_WORKSPACE_URL, ''}
+    accessToken: ${env:DATABRICKS_ACCESS_TOKEN, ''}
+    warehouseId: ${env:DATABRICKS_WAREHOUSE_ID, ''}
+    orgId: ${env:DATABRICKS_ORG_ID, ''}
 
   # 🔐 URLs permitidas para CORS por ambiente
   allowedOrigins:
