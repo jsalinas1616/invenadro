@@ -3,7 +3,7 @@ name: Deploy to NADRO-PROD
 on:
   push:
     branches:
-      - main
+      - prod
   workflow_dispatch:
 
 env:
