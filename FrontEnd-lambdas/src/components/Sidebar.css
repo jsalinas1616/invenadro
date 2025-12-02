@@ -5,7 +5,7 @@
   border-right: 1px solid #e0e0e0;
   position: fixed;
   left: 0;
-  top: 76px; /* Altura del navbar moderno */
+  top: 100px; /* Altura del navbar moderno */
   overflow-y: auto;
   box-shadow: 2px 0 8px rgba(0,0,0,0.05);
   z-index: 99; /* Debajo del navbar (que tiene z-index: 1000) */

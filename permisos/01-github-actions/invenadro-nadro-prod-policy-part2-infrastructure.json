@@ -23,8 +23,8 @@
         "cloudformation:DeleteChangeSet"
       ],
       "Resource": [
-        "arn:aws:cloudformation:mx-central-1:CUENTA_NADRO_PROD:stack/invenadro-backend-nadro-prod-*",
-        "arn:aws:cloudformation:mx-central-1:CUENTA_NADRO_PROD:stack/invenadro-frontend-nadro-prod/*"
+        "arn:aws:cloudformation:mx-central-1:767398004339:stack/invenadro-backend-nadro-prod-*",
+        "arn:aws:cloudformation:mx-central-1:767398004339:stack/invenadro-frontend-nadro-prod/*"
       ]
     },
     {
@@ -66,7 +66,7 @@
         "states:ListTagsForResource"
       ],
       "Resource": [
-        "arn:aws:states:mx-central-1:CUENTA_NADRO_PROD:stateMachine:invenadro-backend-nadro-prod-*"
+        "arn:aws:states:mx-central-1:767398004339:stateMachine:invenadro-backend-nadro-prod-*"
       ]
     },
     {
@@ -85,10 +85,10 @@
         "logs:TagLogGroup"
       ],
       "Resource": [
-        "arn:aws:logs:mx-central-1:CUENTA_NADRO_PROD:log-group:/aws/lambda/invenadro-backend-nadro-prod-*",
-        "arn:aws:logs:mx-central-1:CUENTA_NADRO_PROD:log-group:/aws/lambda/invenadro-backend-nadro-prod-*:*",
-        "arn:aws:logs:mx-central-1:CUENTA_NADRO_PROD:log-group:/aws/api-gateway/invenadro-backend-nadro-prod",
-        "arn:aws:logs:mx-central-1:CUENTA_NADRO_PROD:log-group:/aws/api-gateway/invenadro-backend-nadro-prod:*"
+        "arn:aws:logs:mx-central-1:767398004339:log-group:/aws/lambda/invenadro-backend-nadro-prod-*",
+        "arn:aws:logs:mx-central-1:767398004339:log-group:/aws/lambda/invenadro-backend-nadro-prod-*:*",
+        "arn:aws:logs:mx-central-1:767398004339:log-group:/aws/api-gateway/invenadro-backend-nadro-prod",
+        "arn:aws:logs:mx-central-1:767398004339:log-group:/aws/api-gateway/invenadro-backend-nadro-prod:*"
       ]
     },
     {
@@ -145,9 +145,9 @@
         "iam:UntagRole"
       ],
       "Resource": [
-        "arn:aws:iam::CUENTA_NADRO_PROD:role/invenadro-backend-nadro-prod-*",
-        "arn:aws:iam::CUENTA_NADRO_PROD:role/invenadro-frontend-nadro-prod-*",
-        "arn:aws:iam::CUENTA_NADRO_PROD:role/serverlessApiGatewayCloudWatchRole*"
+        "arn:aws:iam::767398004339:role/invenadro-backend-nadro-prod-*",
+        "arn:aws:iam::767398004339:role/invenadro-frontend-nadro-prod-*",
+        "arn:aws:iam::767398004339:role/serverlessApiGatewayCloudWatchRole*"
       ]
     },
     {
@@ -182,7 +182,7 @@
         "cognito-idp:GetUserPoolMfaConfig"
       ],
       "Resource": [
-        "arn:aws:cognito-idp:mx-central-1:CUENTA_NADRO_PROD:userpool/*"
+        "arn:aws:cognito-idp:mx-central-1:767398004339:userpool/*"
       ]
     },
     {
@@ -216,8 +216,8 @@
         "kms:ListResourceTags"
       ],
       "Resource": [
-        "arn:aws:kms:mx-central-1:CUENTA_NADRO_PROD:key/*",
-        "arn:aws:kms:mx-central-1:CUENTA_NADRO_PROD:alias/invenadro-backend-nadro-prod-*"
+        "arn:aws:kms:mx-central-1:767398004339:key/*",
+        "arn:aws:kms:mx-central-1:767398004339:alias/invenadro-backend-nadro-prod-*"
       ]
     },
     {

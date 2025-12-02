@@ -8,8 +8,8 @@
         "lambda:CreateFunction"
       ],
       "Resource": [
-        "arn:aws:lambda:mx-central-1:CUENTA_NADRO_PROD:function:invenadro-backend-nadro-prod-*",
-        "arn:aws:lambda:mx-central-1:CUENTA_NADRO_PROD:function:invenadro-frontend-nadro-prod-*"
+        "arn:aws:lambda:mx-central-1:767398004339:function:invenadro-backend-nadro-prod-*",
+        "arn:aws:lambda:mx-central-1:767398004339:function:invenadro-frontend-nadro-prod-*"
       ]
     },
     {
@@ -34,8 +34,8 @@
         "lambda:InvokeFunction"
       ],
       "Resource": [
-        "arn:aws:lambda:mx-central-1:CUENTA_NADRO_PROD:function:invenadro-backend-nadro-prod-*",
-        "arn:aws:lambda:mx-central-1:CUENTA_NADRO_PROD:function:invenadro-frontend-nadro-prod-*"
+        "arn:aws:lambda:mx-central-1:767398004339:function:invenadro-backend-nadro-prod-*",
+        "arn:aws:lambda:mx-central-1:767398004339:function:invenadro-frontend-nadro-prod-*"
       ]
     },
     {
@@ -59,7 +59,7 @@
         "states:UntagResource"
       ],
       "Resource": [
-        "arn:aws:states:mx-central-1:CUENTA_NADRO_PROD:stateMachine:invenadro-backend-nadro-prod-*"
+        "arn:aws:states:mx-central-1:767398004339:stateMachine:invenadro-backend-nadro-prod-*"
       ]
     },
     {
@@ -150,7 +150,7 @@
         "dynamodb:ListTagsOfResource"
       ],
       "Resource": [
-        "arn:aws:dynamodb:mx-central-1:CUENTA_NADRO_PROD:table/invenadro-backend-nadro-prod-*"
+        "arn:aws:dynamodb:mx-central-1:767398004339:table/invenadro-backend-nadro-prod-*"
       ]
     },
     {
