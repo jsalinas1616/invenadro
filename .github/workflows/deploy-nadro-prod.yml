@@ -40,14 +40,14 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install root dependencies
-        run: npm ci
+        run: npm install
 
       - name: Install service dependencies
         run: |
           cd services/backend
-          npm ci
+          npm install
           cd ../frontend
-          npm ci
+          npm install
 
       # ========================================
       # FRONTEND PRIMERO (para obtener CloudFront URL)
@@ -58,7 +58,7 @@ jobs:
           REACT_APP_STAGE: ${{ env.STAGE }}
         run: |
           cd FrontEnd-lambdas
-          npm ci
+          npm install
           npm run build
           echo "✅ Frontend build completado para ambiente: $REACT_APP_STAGE"
 
