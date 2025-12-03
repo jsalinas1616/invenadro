@@ -145,8 +145,8 @@
         "iam:UntagRole"
       ],
       "Resource": [
-        "arn:aws:iam::767398004339:role/invenadro-backend-nadro-prod-*",
-        "arn:aws:iam::767398004339:role/invenadro-frontend-nadro-prod-*",
+        "arn:aws:iam::767398004339:role/invenadro-backend-nadro-*",
+        "arn:aws:iam::767398004339:role/invenadro-frontend-nadro-*",
         "arn:aws:iam::767398004339:role/serverlessApiGatewayCloudWatchRole*"
       ]
     },

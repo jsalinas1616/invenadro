@@ -60,12 +60,6 @@ provider:
   # 🔐 Clave KMS customer-managed para encriptar variables de entorno
   kmsKeyArn: !GetAtt LambdaKMSKey.Arn
   
-  # Forzar nombre de rol para Custom Resources (evitar truncamiento)
-  # Esto asegura que el nombre coincida con los patrones de la política IAM
-  iam:
-    role:
-      name: ${self:service}-${self:provider.stage}-customres-role
-  
   # Tags globales
   tags:
     Project: invenadro
