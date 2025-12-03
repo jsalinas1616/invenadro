@@ -23,7 +23,7 @@
         "cloudformation:DeleteChangeSet"
       ],
       "Resource": [
-        "arn:aws:cloudformation:mx-central-1:767398004339:stack/invenadro-backend-nadro-prod-*",
+        "arn:aws:cloudformation:mx-central-1:767398004339:stack/invenadro-backend-nadro-prod/*",
         "arn:aws:cloudformation:mx-central-1:767398004339:stack/invenadro-frontend-nadro-prod/*"
       ]
     },
