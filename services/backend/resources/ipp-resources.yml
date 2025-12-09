@@ -1,0 +1,153 @@
+# ================================================================
+# RECURSOS AWS PARA MÓDULO IPP (Inventario de Precisión Predictiva)
+# ================================================================
+
+Resources:
+  # ==========================================
+  # DYNAMODB TABLE - IPP JOBS
+  # ==========================================
+  IPPJobsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:service}-${self:provider.stage}-ipp-jobs
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      AttributeDefinitions:
+        - AttributeName: job_id
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: S
+      KeySchema:
+        - AttributeName: job_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: created_at-index
+          KeySchema:
+            - AttributeName: created_at
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Project
+          Value: invenadro
+        - Key: Module
+          Value: IPP
+        - Key: ManagedBy
+          Value: serverless
+        - Key: Stage
+          Value: ${self:provider.stage}
+
+  # ==========================================
+  # S3 BUCKET - IPP RAW DATA (desde Job 1)
+  # ==========================================
+  IPPRawBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ${self:service}-${self:provider.stage}-ipp-raw
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldData
+            Status: Enabled
+            ExpirationInDays: 30
+            NoncurrentVersionExpirationInDays: 7
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Project
+          Value: invenadro
+        - Key: Module
+          Value: IPP
+        - Key: Purpose
+          Value: raw-data-from-job1
+        - Key: ManagedBy
+          Value: serverless
+        - Key: Stage
+          Value: ${self:provider.stage}
+
+  # ==========================================
+  # S3 BUCKET - IPP PROCESSED DATA (después de factor)
+  # ==========================================
+  IPPProcessedBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ${self:service}-${self:provider.stage}-ipp-processed
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldData
+            Status: Enabled
+            ExpirationInDays: 30
+            NoncurrentVersionExpirationInDays: 7
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Project
+          Value: invenadro
+        - Key: Module
+          Value: IPP
+        - Key: Purpose
+          Value: processed-data-for-job2
+        - Key: ManagedBy
+          Value: serverless
+        - Key: Stage
+          Value: ${self:provider.stage}
+
+# ==========================================
+# OUTPUTS
+# ==========================================
+Outputs:
+  IPPJobsTableName:
+    Description: Nombre de la tabla DynamoDB para jobs IPP
+    Value: !Ref IPPJobsTable
+    Export:
+      Name: ${self:service}-${self:provider.stage}-ipp-jobs-table
+  
+  IPPJobsTableArn:
+    Description: ARN de la tabla DynamoDB para jobs IPP
+    Value: !GetAtt IPPJobsTable.Arn
+    Export:
+      Name: ${self:service}-${self:provider.stage}-ipp-jobs-table-arn
+  
+  IPPRawBucketName:
+    Description: Nombre del bucket S3 para raw data IPP
+    Value: !Ref IPPRawBucket
+    Export:
+      Name: ${self:service}-${self:provider.stage}-ipp-raw-bucket
+  
+  IPPRawBucketArn:
+    Description: ARN del bucket S3 para raw data IPP
+    Value: !GetAtt IPPRawBucket.Arn
+    Export:
+      Name: ${self:service}-${self:provider.stage}-ipp-raw-bucket-arn
+  
+  IPPProcessedBucketName:
+    Description: Nombre del bucket S3 para processed data IPP
+    Value: !Ref IPPProcessedBucket
+    Export:
+      Name: ${self:service}-${self:provider.stage}-ipp-processed-bucket
+  
+  IPPProcessedBucketArn:
+    Description: ARN del bucket S3 para processed data IPP
+    Value: !GetAtt IPPProcessedBucket.Arn
+    Export:
+      Name: ${self:service}-${self:provider.stage}-ipp-processed-bucket-arn
+

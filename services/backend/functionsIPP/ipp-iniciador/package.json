@@ -1,0 +1,13 @@
+{
+  "name": "ipp-iniciador",
+  "version": "1.0.0",
+  "description": "Lambda IPP: Iniciar proceso y trigger Databricks Job 1",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.637.0",
+    "@aws-sdk/lib-dynamodb": "^3.637.0",
+    "axios": "^1.6.0",
+    "uuid": "^9.0.1"
+  }
+}
+

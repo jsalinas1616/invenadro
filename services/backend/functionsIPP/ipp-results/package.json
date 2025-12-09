@@ -1,0 +1,11 @@
+{
+  "name": "ipp-results",
+  "version": "1.0.0",
+  "description": "Lambda IPP: Obtener resultados finales",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.637.0",
+    "@aws-sdk/lib-dynamodb": "^3.637.0"
+  }
+}
+

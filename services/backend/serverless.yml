@@ -41,6 +41,7 @@ package:
     - 'node_modules/**'
     - 'functions/**'
     - 'functionsCRUDConfiguracion/**' # Incluir CRUD
+    - 'functionsIPP/**' # Incluir IPP
     - 'optimization/**'
     - 'rules/**'
     - 'utils/**'
@@ -362,6 +363,94 @@ functions:
           cors: true
           authorizer: ${self:custom.auth.default}
 
+  # ===================================================================================
+  # MÓDULO IPP (Inventario de Precisión Predictiva)
+  # ===================================================================================
+  
+  ippVerificador:
+    name: ${self:service}-${self:provider.stage}-ipp-verificador
+    handler: functionsIPP/ipp-verificador/index.handler
+    timeout: 60
+    memorySize: 512
+    environment:
+      IPP_JOBS_TABLE: !Ref IPPJobsTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: !GetAtt IPPJobsTable.Arn
+    events:
+      - http:
+          path: /ipp/validate-clients
+          method: post
+          cors: true
+          authorizer: ${self:custom.auth.default}
+  
+  ippIniciador:
+    name: ${self:service}-${self:provider.stage}-ipp-iniciador
+    handler: functionsIPP/ipp-iniciador/index.handler
+    timeout: 60
+    memorySize: 512
+    environment:
+      IPP_JOBS_TABLE: !Ref IPPJobsTable
+      IPP_RAW_BUCKET: !Ref IPPRawBucket
+      DATABRICKS_JOB1_ID: ${param:DATABRICKS_IPP_JOB1_ID, ''}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+        Resource: !GetAtt IPPJobsTable.Arn
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+        Resource: !Sub "${IPPRawBucket.Arn}/*"
+    events:
+      - http:
+          path: /ipp/start
+          method: post
+          cors: true
+          authorizer: ${self:custom.auth.default}
+  
+  ippStatus:
+    name: ${self:service}-${self:provider.stage}-ipp-status
+    handler: functionsIPP/ipp-status/index.handler
+    timeout: 30
+    memorySize: 256
+    environment:
+      IPP_JOBS_TABLE: !Ref IPPJobsTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource: !GetAtt IPPJobsTable.Arn
+    events:
+      - http:
+          path: /ipp/status/{job_id}
+          method: get
+          cors: true
+          authorizer: ${self:custom.auth.default}
+  
+  ippResults:
+    name: ${self:service}-${self:provider.stage}-ipp-results
+    handler: functionsIPP/ipp-results/index.handler
+    timeout: 30
+    memorySize: 256
+    environment:
+      IPP_JOBS_TABLE: !Ref IPPJobsTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: !GetAtt IPPJobsTable.Arn
+    events:
+      - http:
+          path: /ipp/results/{job_id}
+          method: get
+          cors: true
+          authorizer: ${self:custom.auth.default}
+
 # Recursos adicionales (DynamoDB, S3, IAM, Cognito)
 resources:
   - ${file(resources/dynamodb.yml)}
@@ -372,4 +461,5 @@ resources:
   - ${file(resources/api-gateway.yml)}
   - ${file(resources/api-gateway-role.yml)}
   - ${file(resources/step-functions.yml)}
+  - ${file(resources/ipp-resources.yml)}
   - ${file(resources/outputs.yml)}

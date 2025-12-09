@@ -124,6 +124,7 @@ jobs:
             --param="DATABRICKS_ACCESS_TOKEN=${{ secrets.DATABRICKS_ACCESS_TOKEN }}" \
             --param="DATABRICKS_WAREHOUSE_ID=${{ secrets.DATABRICKS_WAREHOUSE_ID }}" \
             --param="DATABRICKS_ORG_ID=${{ secrets.DATABRICKS_ORG_ID }}" \
+            --param="DATABRICKS_IPP_JOB1_ID=${{ secrets.DATABRICKS_IPP_JOB1_ID }}" \
             --verbose
 
       # ========================================

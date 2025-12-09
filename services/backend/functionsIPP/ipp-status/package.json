@@ -1,0 +1,12 @@
+{
+  "name": "ipp-status",
+  "version": "1.0.0",
+  "description": "Lambda IPP: Consultar estado del proceso",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.637.0",
+    "@aws-sdk/lib-dynamodb": "^3.637.0",
+    "axios": "^1.6.0"
+  }
+}
+
