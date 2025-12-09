@@ -70,7 +70,7 @@ const validateMostradores = async (mostradorIds) => {
   const result = await executeQuery(query);
   console.log('RESULTADO DE LA CONSULTA:', result);
   const columns = result.manifest.schema.columns.map(c => c.name);
-  const rows = result.result.data_array || [];s
+  const rows = result.result.data_array || [];
   
   // Mostradores encontrados en DB
   const foundMostradores = rows.map(row => String(row[0]));
