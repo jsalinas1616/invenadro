@@ -4,6 +4,7 @@ import ClientInputForm from '../components/ipp/ClientInputForm';
 import ClientValidationTable from '../components/ipp/ClientValidationTable';
 import ValidationWarningModal from '../components/ipp/ValidationWarningModal';
 import IPPProcessStatus from '../components/ipp/IPPProcessStatus';
+import ippService from '../services/ippService';
 
 /**
  * IPPPage - Página principal del módulo IPP (Inventario de Precisión Predictiva)
@@ -34,26 +35,20 @@ function IPPPage() {
     setError(null);
     
     try {
-      // TODO: Llamar a Lambda Verificador IPP
-      // const result = await ippService.validateClients(clientList);
+      // ✅ Llamar a Lambda Verificador IPP
+      const result = await ippService.validateClients(clientList);
       
-      // Mock temporal para desarrollo
-      const mockResult = {
-        status: 'partial_valid',
-        validClients: clientList.slice(0, Math.floor(clientList.length * 0.7)),
-        invalidClients: clientList.slice(Math.floor(clientList.length * 0.7)),
-        message: `${Math.floor(clientList.length * 0.7)} de ${clientList.length} clientes tienen configuración`
-      };
+      console.log('Resultado de validación:', result);
       
-      setValidationResult(mockResult);
+      setValidationResult(result);
       setClients(clientList);
       
       // Si hay clientes sin config, mostrar modal de advertencia
-      if (mockResult.status === 'partial_valid' || mockResult.status === 'all_invalid') {
+      if (result.status === 'partial_valid' || result.status === 'all_invalid') {
         setShowWarningModal(true);
       } else {
         // Todos válidos, continuar automáticamente
-        handleContinueWithValidClients(mockResult.validClients);
+        handleContinueWithValidClients(result.validClients);
       }
       
     } catch (err) {
