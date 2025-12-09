@@ -14,7 +14,7 @@ const config = getConfig();
  */
 class IPPService {
   constructor() {
-    this.baseURL = config.apiGatewayBaseUrl;
+    this.baseURL = config.apiGateway.url;
   }
 
   /**
