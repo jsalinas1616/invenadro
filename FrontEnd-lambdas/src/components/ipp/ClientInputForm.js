@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Form, Button, Row, Col, Badge, InputGroup } from 'react-bootstrap';
+import { Card, Form, Button, Row, Col, Badge } from 'react-bootstrap';
 import { FaUsers, FaFileUpload, FaCheckCircle, FaSpinner } from 'react-icons/fa';
 import { useDropzone } from 'react-dropzone';
 
