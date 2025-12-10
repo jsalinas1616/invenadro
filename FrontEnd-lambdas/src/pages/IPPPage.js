@@ -118,7 +118,7 @@ function IPPPage() {
     setShowWarningModal(false);
     
     try {
-      // ✅ Llamar a Lambda Iniciador IPP (trigger Databricks Job 1)
+      //  Llamar a Lambda Iniciador IPP (trigger Databricks Job 1)
       console.log('[IPPPage] Iniciando proceso IPP para clientes:', validClientsList);
       setIppStatus('initiating');
       

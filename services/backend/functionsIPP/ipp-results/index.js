@@ -13,7 +13,11 @@ const { GetCommand, DynamoDBDocumentClient } = require('@aws-sdk/lib-dynamodb');
  */
 
 const dynamoClient = new DynamoDBClient();
-const docClient = DynamoDBDocumentClient.from(dynamoClient);
+const docClient = DynamoDBDocumentClient.from(dynamoClient, {
+  marshallOptions: {
+    removeUndefinedValues: true  // Evitar error con valores undefined
+  }
+});
 
 // Helper para CORS
 const getCorsHeaders = (event) => {
