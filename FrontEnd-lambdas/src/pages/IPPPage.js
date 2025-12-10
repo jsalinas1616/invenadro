@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Alert } from 'react-bootstrap';
 import ClientInputForm from '../components/ipp/ClientInputForm';
 import ClientValidationTable from '../components/ipp/ClientValidationTable';
@@ -27,6 +27,59 @@ function IPPPage() {
   const [ippStatus, setIppStatus] = useState('idle');
   const [ippResult, setIppResult] = useState(null);
   const [error, setError] = useState(null);
+
+  // Ref para el intervalo de polling
+  const pollingIntervalRef = useRef(null);
+
+  // Cleanup: Detener polling al desmontar componente
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Función: Iniciar polling automático del estado
+  const startStatusPolling = (jobId) => {
+    console.log('[IPPPage] Iniciando polling de estado para job:', jobId);
+    
+    // Detener cualquier polling anterior
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+    
+    // Polling cada 5 segundos
+    pollingIntervalRef.current = setInterval(async () => {
+      try {
+        const statusResponse = await ippService.checkProcessStatus(jobId);
+        console.log('[IPPPage] Estado actualizado:', statusResponse);
+        
+        setIppStatus(statusResponse.status);
+        
+        // Si el proceso terminó (success o error), detener polling y obtener resultados
+        if (statusResponse.status === 'completed') {
+          console.log('[IPPPage] Proceso completado, obteniendo resultados...');
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+          
+          // Obtener resultados finales
+          const results = await ippService.getResults(jobId);
+          setIppResult(results);
+          
+        } else if (statusResponse.status === 'failed') {
+          console.error('[IPPPage] Proceso falló');
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+          setError(statusResponse.message || 'El proceso IPP falló. Revisa los logs.');
+        }
+        
+      } catch (err) {
+        console.error('[IPPPage] Error en polling de estado:', err);
+        // No detener el polling por errores temporales de red
+      }
+    }, 5000); // 5 segundos
+  };
 
   // Handler: Usuario envía lista de clientes
   const handleValidateClients = async (clientList) => {
@@ -65,16 +118,27 @@ function IPPPage() {
     setShowWarningModal(false);
     
     try {
-      // TODO: Llamar a Lambda Iniciador IPP (trigger Job 1)
-      // const response = await ippService.initiateIPPProcess(validClientsList);
+      // ✅ Llamar a Lambda Iniciador IPP (trigger Databricks Job 1)
+      console.log('[IPPPage] Iniciando proceso IPP para clientes:', validClientsList);
+      setIppStatus('initiating');
       
-      // Mock temporal
-      console.log('Iniciando proceso IPP con clientes:', validClientsList);
-      setIppStatus('validating');
+      const response = await ippService.initiateIPPProcess(validClientsList);
+      
+      console.log('[IPPPage] Proceso IPP iniciado:', response);
+      
+      // Guardar job_id y estado inicial
+      setIppProcessId(response.job_id);
+      setIppStatus(response.status); // 'job1_running' | 'failed' | etc.
+      
+      // Iniciar polling automático del estado
+      if (response.status !== 'failed') {
+        startStatusPolling(response.job_id);
+      }
       
     } catch (err) {
-      console.error('Error iniciando proceso IPP:', err);
+      console.error('[IPPPage] Error iniciando proceso IPP:', err);
       setError(`Error al iniciar proceso IPP: ${err.message}`);
+      setIppStatus('failed');
     }
   };
 
