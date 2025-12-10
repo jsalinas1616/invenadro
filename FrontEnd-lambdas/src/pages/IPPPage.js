@@ -103,12 +103,12 @@ function IPPPage() {
       setClients(clientList);
       
       // Si hay clientes sin config, mostrar modal de advertencia
+      // Si todos son válidos, solo mostrar tabla (sin auto-iniciar)
       if (result.status === 'partial_valid' || result.status === 'all_invalid') {
         setShowWarningModal(true);
-      } else {
-        // Todos válidos, continuar automáticamente
-        handleContinueWithValidClients(result.validClients);
       }
+      // Si todos válidos (all_valid), la tabla se muestra automáticamente
+      // y el usuario debe dar clic en "Continuar" manualmente
       
     } catch (err) {
       console.error('Error validando clientes:', err);
