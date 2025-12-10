@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, ProgressBar, Badge, Alert, Spinner } from 'react-bootstrap';
-import { FaSpinner, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
+import { Card, ProgressBar, Badge, Alert, Spinner, Button } from 'react-bootstrap';
+import { FaSpinner, FaCheckCircle, FaTimesCircle, FaClock, FaExternalLinkAlt } from 'react-icons/fa';
 
 /**
  * IPPProcessStatus - Componente para mostrar el estado del proceso IPP
@@ -9,8 +9,9 @@ import { FaSpinner, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa
  * - processId: string
  * - status: string ('validating', 'job1_running', 'processing', 'job2_running', 'completed', 'failed')
  * - result: object | null
+ * - databricksRunUrl: string | null
  */
-function IPPProcessStatus({ processId, status, result }) {
+function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
   // Mapeo de estados a porcentajes de progreso
   const progressMap = {
     'validating': { percent: 5, label: 'Validando clientes...' },
@@ -49,6 +50,23 @@ function IPPProcessStatus({ processId, status, result }) {
             animated={status !== 'completed' && status !== 'failed'}
           />
         </div>
+
+        {/* Botón para ver Job en Databricks */}
+        {databricksRunUrl && (
+          <div className="mb-4">
+            <Button
+              variant="outline-primary"
+              size="sm"
+              href={databricksRunUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="d-flex align-items-center gap-2"
+            >
+              <FaExternalLinkAlt />
+              Ver Job en Databricks
+            </Button>
+          </div>
+        )}
 
         {/* Timeline del proceso */}
         <div className="mb-4">

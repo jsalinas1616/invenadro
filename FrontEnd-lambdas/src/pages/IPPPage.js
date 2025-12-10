@@ -26,6 +26,7 @@ function IPPPage() {
   const [ippProcessId, setIppProcessId] = useState(null);
   const [ippStatus, setIppStatus] = useState('idle');
   const [ippResult, setIppResult] = useState(null);
+  const [databricksRunUrl, setDatabricksRunUrl] = useState(null);
   const [error, setError] = useState(null);
 
   // Ref para el intervalo de polling
@@ -56,6 +57,11 @@ function IPPPage() {
         console.log('[IPPPage] Estado actualizado:', statusResponse);
         
         setIppStatus(statusResponse.status);
+        
+        // Guardar URL de Databricks si está disponible
+        if (statusResponse.databricks_run_url) {
+          setDatabricksRunUrl(statusResponse.databricks_run_url);
+        }
         
         // Si el proceso terminó (success o error), detener polling y obtener resultados
         if (statusResponse.status === 'completed') {
@@ -158,6 +164,7 @@ function IPPPage() {
     setIppProcessId(null);
     setIppStatus('idle');
     setIppResult(null);
+    setDatabricksRunUrl(null);
     setError(null);
   };
 
@@ -219,6 +226,7 @@ function IPPPage() {
               processId={ippProcessId}
               status={ippStatus}
               result={ippResult}
+              databricksRunUrl={databricksRunUrl}
             />
           </Col>
         </Row>
