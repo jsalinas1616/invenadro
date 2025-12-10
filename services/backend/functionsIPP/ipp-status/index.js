@@ -132,21 +132,21 @@ const checkDatabricksRunStatus = async (runId) => {
 const mapDatabricksStateToIPP = (databricksState, resultState) => {
   if (databricksState === 'TERMINATED') {
     if (resultState === 'SUCCESS') {
-      return 'JOB1_DONE';
+      return 'processing'; // Job 1 completado, ahora va a procesamiento (factor de redondeo)
     } else {
-      return 'FAILED';
+      return 'failed';
     }
   }
   
   if (databricksState === 'RUNNING' || databricksState === 'PENDING' || databricksState === 'TERMINATING') {
-    return 'JOB1_RUNNING';
+    return 'job1_running';
   }
   
   if (databricksState === 'SKIPPED' || databricksState === 'INTERNAL_ERROR') {
-    return 'FAILED';
+    return 'failed';
   }
   
-  return 'UNKNOWN';
+  return 'unknown';
 };
 
 exports.handler = async (event) => {
@@ -184,14 +184,14 @@ exports.handler = async (event) => {
     console.log(`[IPP-STATUS] Job encontrado. Status actual: ${job.status}`);
     
     // 2. Si el job ya está completado o falló, retornar estado
-    if (job.status === 'COMPLETED' || job.status === 'FAILED') {
+    if (job.status === 'completed' || job.status === 'failed') {
       return {
         statusCode: 200,
         headers: corsHeaders,
         body: JSON.stringify({
           job_id: jobId,
           status: job.status,
-          message: job.status === 'COMPLETED' ? 'Proceso completado' : 'Proceso fallido',
+          message: job.status === 'completed' ? 'Proceso completado' : 'Proceso fallido',
           mostradores_count: job.mostradores_count,
           created_at: job.created_at,
           updated_at: job.updated_at
@@ -200,7 +200,7 @@ exports.handler = async (event) => {
     }
     
     // 3. Si Job 1 está corriendo, consultar Databricks
-    if (job.status === 'JOB1_RUNNING' && job.databricks_run_id) {
+    if (job.status === 'job1_running' && job.databricks_run_id) {
       const databricksStatus = await checkDatabricksRunStatus(job.databricks_run_id);
       const newStatus = mapDatabricksStateToIPP(databricksStatus.state, databricksStatus.resultState);
       
@@ -219,25 +219,24 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           job_id: jobId,
           status: newStatus,
-          message: newStatus === 'JOB1_RUNNING' ? 'Databricks Job 1 en ejecución...' : 
-                   newStatus === 'JOB1_DONE' ? 'Job 1 completado, listo para procesamiento' :
+          message: newStatus === 'job1_running' ? 'Databricks Job 1 en ejecución...' : 
+                   newStatus === 'processing' ? 'Job 1 completado, aplicando factor de redondeo...' :
                    'Job 1 falló',
           databricks_state: databricksStatus.state,
           databricks_run_url: databricksStatus.runPageUrl,
           mostradores_count: job.mostradores_count,
-          progress: newStatus === 'JOB1_RUNNING' ? 25 : newStatus === 'JOB1_DONE' ? 40 : 0
+          progress: newStatus === 'job1_running' ? 25 : newStatus === 'processing' ? 50 : 0
         })
       };
     }
     
-    // 4. Otros estados (PROCESSING, JOB2_RUNNING, etc.)
+    // 4. Otros estados (processing, job2_running, etc.)
     const progressMap = {
-      'JOB1_RUNNING': 25,
-      'JOB1_DONE': 40,
-      'PROCESSING': 60,
-      'JOB2_RUNNING': 80,
-      'COMPLETED': 100,
-      'FAILED': 0
+      'job1_running': 25,
+      'processing': 50,
+      'job2_running': 80,
+      'completed': 100,
+      'failed': 0
     };
     
     return {

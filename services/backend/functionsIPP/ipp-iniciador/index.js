@@ -160,7 +160,7 @@ exports.handler = async (event) => {
     // 4. Guardar job en DynamoDB
     const jobData = {
       job_id: jobId,
-      status: 'JOB1_RUNNING',
+      status: 'job1_running',
       mostradores: mostradores,
       mostradores_count: mostradores.length,
       databricks_run_id: runId,
@@ -190,7 +190,7 @@ exports.handler = async (event) => {
       headers: corsHeaders,
       body: JSON.stringify({
         job_id: jobId,
-        status: 'JOB1_RUNNING',
+        status: 'job1_running',
         message: 'Proceso IPP iniciado exitosamente',
         mostradores_count: mostradores.length,
         databricks_run_id: runId,
