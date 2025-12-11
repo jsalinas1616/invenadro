@@ -7,7 +7,7 @@ import { FaSpinner, FaCheckCircle, FaTimesCircle, FaClock, FaExternalLinkAlt } f
  * 
  * Props:
  * - processId: string
- * - status: string ('validating', 'job1_running', 'processing', 'job2_running', 'completed', 'failed')
+ * - status: string ('validating', 'job1_running', 'completed', 'factor_initiated', 'factor_processing', 'factor_completed', 'failed')
  * - result: object | null
  * - databricksRunUrl: string | null
  */
@@ -15,10 +15,11 @@ function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
   // Mapeo de estados a porcentajes de progreso
   const progressMap = {
     'validating': { percent: 5, label: 'Validando clientes...' },
-    'job1_running': { percent: 25, label: 'Databricks Job 1: Procesando datos tradicionales...' },
-    'processing': { percent: 50, label: 'Aplicando factor de redondeo...' },
-    'job2_running': { percent: 75, label: 'Databricks Job 2: Ejecutando Knoblock...' },
-    'completed': { percent: 100, label: 'Proceso completado' },
+    'job1_running': { percent: 25, label: 'Databricks: Procesando IPP Tradicional y Normalizando...' },
+    'completed': { percent: 50, label: 'Databricks completado, preparando Factor de Redondeo...' },
+    'factor_initiated': { percent: 60, label: 'Factor de Redondeo: Iniciado...' },
+    'factor_processing': { percent: 80, label: 'Factor de Redondeo: Procesando clientes...' },
+    'factor_completed': { percent: 100, label: 'Proceso completado' },
     'failed': { percent: 0, label: 'Proceso fallido' }
   };
 
@@ -73,8 +74,8 @@ function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
           <h6 className="text-muted mb-3">Progreso del flujo:</h6>
           <div className="d-flex flex-column gap-2">
             {/* Validación */}
-            <div className={`d-flex align-items-center ${['validating', 'job1_running', 'processing', 'job2_running', 'completed'].includes(status) ? 'text-success' : 'text-muted'}`}>
-              {['validating', 'job1_running', 'processing', 'job2_running', 'completed'].includes(status) ? (
+            <div className={`d-flex align-items-center ${['job1_running', 'completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? 'text-success' : status === 'validating' ? 'text-primary' : 'text-muted'}`}>
+              {['job1_running', 'completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? (
                 <FaCheckCircle className="me-2" />
               ) : status === 'validating' ? (
                 <Spinner animation="border" size="sm" className="me-2" />
@@ -84,45 +85,45 @@ function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
               <span>1. Validación de clientes</span>
             </div>
 
-            {/* Job 1 */}
-            <div className={`d-flex align-items-center ${['job1_running', 'processing', 'job2_running', 'completed'].includes(status) ? 'text-success' : status === 'validating' ? 'text-muted' : 'text-muted'}`}>
-              {['processing', 'job2_running', 'completed'].includes(status) ? (
+            {/* Databricks Job 1 */}
+            <div className={`d-flex align-items-center ${['completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? 'text-success' : status === 'job1_running' ? 'text-primary' : 'text-muted'}`}>
+              {['completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? (
                 <FaCheckCircle className="me-2" />
               ) : status === 'job1_running' ? (
                 <Spinner animation="border" size="sm" className="me-2" />
               ) : (
                 <FaClock className="me-2" />
               )}
-              <span>2. Calculado Venta de cliente y normalizando información en Databricks</span>
+              <span>2. Databricks: IPP Tradicional + Normalización</span>
             </div>
 
-            {/* Processing */}
-            <div className={`d-flex align-items-center ${['processing', 'job2_running', 'completed'].includes(status) ? 'text-success' : ['validating', 'job1_running'].includes(status) ? 'text-muted' : 'text-muted'}`}>
-              {['job2_running', 'completed'].includes(status) ? (
+            {/* Bridge Automático */}
+            <div className={`d-flex align-items-center ${['factor_processing', 'factor_completed'].includes(status) ? 'text-success' : ['factor_initiated'].includes(status) ? 'text-primary' : 'text-muted'}`}>
+              {['factor_processing', 'factor_completed'].includes(status) ? (
                 <FaCheckCircle className="me-2" />
-              ) : status === 'processing' ? (
+              ) : ['completed', 'factor_initiated'].includes(status) ? (
                 <Spinner animation="border" size="sm" className="me-2" />
               ) : (
                 <FaClock className="me-2" />
               )}
-              <span>3. Aplicación de factor de redondeo</span>
+              <span>3. Preparación para Factor de Redondeo</span>
             </div>
 
-            {/* Job 2 */}
-            <div className={`d-flex align-items-center ${['job2_running', 'completed'].includes(status) ? 'text-success' : ['validating', 'job1_running', 'processing'].includes(status) ? 'text-muted' : 'text-muted'}`}>
-              {status === 'completed' ? (
+            {/* Factor de Redondeo */}
+            <div className={`d-flex align-items-center ${status === 'factor_completed' ? 'text-success' : ['factor_initiated', 'factor_processing'].includes(status) ? 'text-primary' : 'text-muted'}`}>
+              {status === 'factor_completed' ? (
                 <FaCheckCircle className="me-2" />
-              ) : status === 'job2_running' ? (
+              ) : ['factor_initiated', 'factor_processing'].includes(status) ? (
                 <Spinner animation="border" size="sm" className="me-2" />
               ) : (
                 <FaClock className="me-2" />
               )}
-              <span>4. Databricks Job 2 (Knoblock + Resultados)</span>
+              <span>4. Factor de Redondeo (procesando clientes)</span>
             </div>
 
             {/* Completado */}
-            <div className={`d-flex align-items-center ${status === 'completed' ? 'text-success fw-bold' : 'text-muted'}`}>
-              {status === 'completed' ? (
+            <div className={`d-flex align-items-center ${status === 'factor_completed' ? 'text-success fw-bold' : status === 'failed' ? 'text-danger fw-bold' : 'text-muted'}`}>
+              {status === 'factor_completed' ? (
                 <FaCheckCircle className="me-2" />
               ) : status === 'failed' ? (
                 <FaTimesCircle className="me-2 text-danger" />
@@ -135,12 +136,12 @@ function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
         </div>
 
         {/* Alertas según estado */}
-        {status === 'completed' && (
+        {status === 'factor_completed' && (
           <Alert variant="success">
             <FaCheckCircle className="me-2" />
             <strong>Proceso completado exitosamente</strong>
             <p className="mb-0 mt-2 small">
-              Los resultados están disponibles para consulta en Databricks.
+              Los resultados del Factor de Redondeo están disponibles para todos los clientes procesados.
             </p>
           </Alert>
         )}
@@ -155,7 +156,7 @@ function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
           </Alert>
         )}
 
-        {['validating', 'job1_running', 'processing', 'job2_running'].includes(status) && (
+        {['validating', 'job1_running', 'completed', 'factor_initiated', 'factor_processing'].includes(status) && (
           <Alert variant="info">
             <FaSpinner className="me-2 fa-spin" />
             <strong>Procesamiento en curso...</strong>

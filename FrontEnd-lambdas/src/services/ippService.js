@@ -106,7 +106,7 @@ class IPPService {
    * Consultar estado del proceso IPP
    * 
    * @param {string} jobId - ID del proceso IPP
-   * @returns {Promise<{job_id, status, message, progress?}>}
+   * @returns {Promise<{job_id, status, message, progress?, factor_results?}>}
    */
   async checkProcessStatus(jobId) {
     try {
@@ -171,10 +171,11 @@ class IPPService {
   getReadableStatus(status) {
     const statusMap = {
       'validating': 'Validando clientes...',
-      'job1_running': 'Databricks Job 1 en ejecución...',
-      'processing': 'Aplicando factor de redondeo...',
-      'job2_running': 'Databricks Job 2 en ejecución...',
-      'completed': 'Proceso completado',
+      'job1_running': 'Databricks: Procesando IPP Tradicional...',
+      'completed': 'Databricks completado',
+      'factor_initiated': 'Factor de Redondeo: Iniciado',
+      'factor_processing': 'Factor de Redondeo: Procesando clientes...',
+      'factor_completed': 'Proceso completado',
       'failed': 'Proceso fallido'
     };
 

@@ -1,0 +1,12 @@
+{
+  "name": "factor-completion-callback",
+  "version": "1.0.0",
+  "description": "Lambda callback cuando Factor de Redondeo completa un cliente de IPP",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.x",
+    "@aws-sdk/client-dynamodb": "^3.x",
+    "@aws-sdk/lib-dynamodb": "^3.x"
+  }
+}
+

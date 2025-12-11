@@ -118,13 +118,8 @@ exports.handler = async (event) => {
                     key: { S: key } 
                 } 
             },
-            customConfig: { 
-                M: { 
-                    factorRedondeo: { N: String(customConfig?.factorRedondeo || 0.47) },
-                    joroba: { N: String(customConfig?.joroba || 3.5) },
-                    diasInversionDeseados: { N: String(customConfig?.diasInversionDeseados || 27) }
-                } 
-            },
+            // Guardar customConfig completo como JSON (incluye source, ipp_job_id, cliente, etc.)
+            customConfig: { S: JSON.stringify(customConfig || {}) },
             originalname: { S: originalname || 'inventario.xlsx' }
         };
         
