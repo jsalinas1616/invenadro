@@ -93,7 +93,7 @@ function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
               ) : (
                 <FaClock className="me-2" />
               )}
-              <span>2. Databricks Job 1 (Normalizador)</span>
+              <span>2. Calculado Venta de cliente y normalizando información en Databricks</span>
             </div>
 
             {/* Processing */}
