@@ -74,6 +74,7 @@ Resources:
           Value: serverless
         - Key: Stage
           Value: ${self:provider.stage}
+  
 
   # ==========================================
   # S3 BUCKET - IPP PROCESSED DATA (después de factor)

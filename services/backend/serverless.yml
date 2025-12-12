@@ -479,13 +479,6 @@ functions:
         Action:
           - dynamodb:UpdateItem
         Resource: !GetAtt IPPJobsTable.Arn
-    events:
-      - s3:
-          bucket: IPPRawBucket
-          event: s3:ObjectCreated:*
-          rules:
-            - suffix: metadata.json
-          existing: true
   
   factorCompletionCallback:
     name: ${self:service}-${self:provider.stage}-factor-completion-callback
@@ -505,13 +498,6 @@ functions:
           - dynamodb:GetItem
           - dynamodb:UpdateItem
         Resource: !GetAtt IPPJobsTable.Arn
-    events:
-      - s3:
-          bucket: ResultsBucket
-          event: s3:ObjectCreated:*
-          rules:
-            - suffix: resultado.json
-          existing: true
 
 # Recursos adicionales (DynamoDB, S3, IAM, Cognito)
 resources:
