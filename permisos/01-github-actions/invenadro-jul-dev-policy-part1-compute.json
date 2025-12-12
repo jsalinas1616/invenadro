@@ -92,7 +92,9 @@
         "s3:GetBucketOwnershipControls",
         "s3:ListBucket",
         "s3:PutBucketTagging",
-        "s3:GetBucketTagging"
+        "s3:GetBucketTagging",
+        "s3:PutBucketNotification",
+        "s3:GetBucketNotification"
       ],
       "Resource": [
         "arn:aws:s3:::invenadro-backend-jul-dev-*",

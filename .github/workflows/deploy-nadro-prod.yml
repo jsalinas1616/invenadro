@@ -127,6 +127,13 @@ jobs:
             --param="DATABRICKS_IPP_JOB1_ID=${{ secrets.DATABRICKS_IPP_JOB1_ID }}" \
             --verbose
 
+      - name: Configure S3 Event Notifications
+        run: |
+          echo "⚙️ Configurando S3 Event Notifications..."
+          chmod +x ./services/backend/scripts/configure-s3-events.sh
+          ./services/backend/scripts/configure-s3-events.sh ${{ env.STAGE }}
+          echo "✅ S3 Events configurados para IPP y Factor de Redondeo"
+
       # ========================================
       # ACTUALIZAR FRONTEND CON OUTPUTS DEL BACKEND
       # ========================================
