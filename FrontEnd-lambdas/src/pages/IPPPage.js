@@ -240,7 +240,7 @@ function IPPPage() {
       )}
 
       {/* Resultados del Factor de Redondeo */}
-      {ippProcessId && factorResults && (
+      {ippProcessId && (ippStatus === 'factor_processing' || ippStatus === 'factor_completed' || ippStatus === 'factor_initiated') && (
         <Row className="mt-4">
           <Col>
             <IPPFactorResults
