@@ -4,6 +4,7 @@ import ClientInputForm from '../components/ipp/ClientInputForm';
 import ClientValidationTable from '../components/ipp/ClientValidationTable';
 import ValidationWarningModal from '../components/ipp/ValidationWarningModal';
 import IPPProcessStatus from '../components/ipp/IPPProcessStatus';
+import IPPFactorResults from '../components/ipp/IPPFactorResults';
 import ippService from '../services/ippService';
 
 /**
@@ -26,6 +27,7 @@ function IPPPage() {
   const [ippProcessId, setIppProcessId] = useState(null);
   const [ippStatus, setIppStatus] = useState('idle');
   const [ippResult, setIppResult] = useState(null);
+  const [factorResults, setFactorResults] = useState(null);
   const [databricksRunUrl, setDatabricksRunUrl] = useState(null);
   const [error, setError] = useState(null);
 
@@ -63,9 +65,14 @@ function IPPPage() {
           setDatabricksRunUrl(statusResponse.databricks_run_url);
         }
         
-        // Si el proceso terminó (success o error), detener polling y obtener resultados
-        if (statusResponse.status === 'completed') {
-          console.log('[IPPPage] Proceso completado, obteniendo resultados...');
+        // Actualizar resultados del Factor de Redondeo si están disponibles
+        if (statusResponse.factor_results) {
+          setFactorResults(statusResponse.factor_results);
+        }
+        
+        // Si el proceso terminó completamente (Factor de Redondeo terminado), detener polling
+        if (statusResponse.status === 'factor_completed') {
+          console.log('[IPPPage] Proceso completado (Factor de Redondeo), obteniendo resultados...');
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
           
@@ -227,6 +234,19 @@ function IPPPage() {
               status={ippStatus}
               result={ippResult}
               databricksRunUrl={databricksRunUrl}
+            />
+          </Col>
+        </Row>
+      )}
+
+      {/* Resultados del Factor de Redondeo */}
+      {ippProcessId && factorResults && (
+        <Row className="mt-4">
+          <Col>
+            <IPPFactorResults
+              jobId={ippProcessId}
+              factorResults={factorResults}
+              status={ippStatus}
             />
           </Col>
         </Row>

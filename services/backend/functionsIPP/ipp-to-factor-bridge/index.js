@@ -33,23 +33,14 @@ exports.handler = async (event) => {
     
     console.log(`📁 Archivo detectado: s3://${bucket}/${key}`);
     
-    // Solo procesar cuando se crea metadata.json
-    if (!key.endsWith('metadata.json')) {
-      console.log('⏭️  No es metadata.json, ignorando...');
+    // Solo procesar archivos .json en la carpeta metadata/
+    if (!key.startsWith('metadata/') || !key.endsWith('.json')) {
+      console.log('⏭️  No es un archivo metadata, ignorando...');
       return {
         statusCode: 200,
-        body: JSON.stringify({ message: 'Not metadata.json, skipping' })
+        body: JSON.stringify({ message: 'Not a metadata file, skipping' })
       };
     }
-    
-    // Extraer job_id del path
-    const jobIdMatch = key.match(/resultados\/([^\/]+)\/metadata\.json/);
-    if (!jobIdMatch) {
-      console.error('❌ No se pudo extraer job_id del path:', key);
-      throw new Error('Invalid S3 key format');
-    }
-    const jobId = jobIdMatch[1];
-    console.log(`🆔 Job ID: ${jobId}`);
     
     // 2. LEER METADATA.JSON
     console.log('\n📥 Leyendo metadata.json...');
@@ -66,6 +57,8 @@ exports.handler = async (event) => {
     console.log(`   - Total clientes: ${metadata.total_clientes}`);
     console.log(`   - Total registros: ${metadata.total_registros}`);
     
+    const jobId = metadata.job_id;
+    
     // 3. ACTUALIZAR ESTADO EN DYNAMODB IPP
     await actualizarEstadoIPP(jobId, 'factor_initiated', metadata.total_clientes);
     
@@ -80,7 +73,7 @@ exports.handler = async (event) => {
       
       try {
         // 4.1. Leer archivo del cliente desde S3
-        const clienteKey = `resultados/${metadata.job_id}/clientes/cliente_${clienteInfo.cliente}.json`;
+        const clienteKey = `clientes/cliente_${clienteInfo.cliente}.json`;
         console.log(`   📥 Leyendo: s3://${bucket}/${clienteKey}`);
         
         const clienteResponse = await s3Client.send(new GetObjectCommand({
@@ -236,20 +229,20 @@ function transformarIPPaExcel(datosCliente) {
   console.log(`      📊 ${datos.length} registros a transformar`);
   
   // Crear estructura que espera Factor de Redondeo
-  // Formato: | Cliente | Material | Descripción | Inventario | Precio | ...
+  // Mapeo de columnas IPP → Factor de Redondeo
   const datosExcel = datos.map(row => {
     return {
       Cliente: datosCliente.cliente,
-      Material: row.MATERIAL_MG || row.Material || '',
-      Descripcion: row.Descripcion || '',
-      // Factor_4 es el inventario predicho de IPP
-      Inventario: row.Factor_4 || row.Ctd_UMB || 0,
+      Material: row.MATERIAL_mg || row.Material || '',
+      'EAN/UPC': row['EAN/UPC'] || 'NA',
+      'Ctd.UMB': row.Ctd_UMB || row.PRONOSTICO || 0,
+      'Factor F': row.Factor_F || 0,
+      'Ponderación Tradicional': 0, // IPP no calcula este factor
+      'Factor 9': 0, // IPP no calcula este factor
+      'Factor D': row.Factor_D || 0,
       Precio: row.Precio_Farmacia || 0,
-      // Datos adicionales que puede usar Factor de Redondeo
-      Factor_A: row.Factor_A || null,
-      Factor_B: row.Factor_B || null,
-      Factor_C: row.Factor_C || null,
-      Importe: row.Importe || null
+      Inversión: row.Importe || 0,
+      'Monto Venta Mostrador': row.Monto_Venta_Mostrador || 0
     };
   });
   
@@ -261,13 +254,15 @@ function transformarIPPaExcel(datosCliente) {
   const colWidths = [
     { wch: 10 }, // Cliente
     { wch: 15 }, // Material
-    { wch: 40 }, // Descripcion
-    { wch: 12 }, // Inventario
+    { wch: 15 }, // EAN/UPC
+    { wch: 12 }, // Ctd.UMB
+    { wch: 12 }, // Factor F
+    { wch: 20 }, // Ponderación Tradicional
+    { wch: 12 }, // Factor 9
+    { wch: 12 }, // Factor D
     { wch: 12 }, // Precio
-    { wch: 12 }, // Factor_A
-    { wch: 12 }, // Factor_B
-    { wch: 12 }, // Factor_C
-    { wch: 12 }  // Importe
+    { wch: 15 }, // Inversión
+    { wch: 20 }  // Monto Venta Mostrador
   ];
   ws['!cols'] = colWidths;
   

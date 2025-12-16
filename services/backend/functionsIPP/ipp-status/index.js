@@ -184,15 +184,18 @@ exports.handler = async (event) => {
     console.log(`[IPP-STATUS] Job encontrado. Status actual: ${job.status}`);
     
     // 2. Si el job ya está completado o falló, retornar estado
-    if (job.status === 'completed' || job.status === 'failed') {
+    if (job.status === 'completed' || job.status === 'failed' || job.status === 'factor_completed') {
       return {
         statusCode: 200,
         headers: corsHeaders,
         body: JSON.stringify({
           job_id: jobId,
           status: job.status,
-          message: job.status === 'completed' ? 'Proceso completado' : 'Proceso fallido',
+          message: job.status === 'factor_completed' ? 'Proceso completado (con Factor de Redondeo)' : 
+                   job.status === 'completed' ? 'Proceso completado' : 'Proceso fallido',
           mostradores_count: job.mostradores_count,
+          total_clientes: job.total_clientes,
+          factor_results: job.factor_results || null,
           created_at: job.created_at,
           updated_at: job.updated_at
         })
@@ -247,7 +250,10 @@ exports.handler = async (event) => {
         status: job.status,
         message: `Proceso en estado: ${job.status}`,
         mostradores_count: job.mostradores_count,
+        total_clientes: job.total_clientes,
         progress: progressMap[job.status] || 50,
+        factor_results: job.factor_results || null,
+        databricks_run_url: job.databricks_run_url || null,
         created_at: job.created_at,
         updated_at: job.updated_at
       })

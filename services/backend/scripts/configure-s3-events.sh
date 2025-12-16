@@ -72,8 +72,12 @@ cat > /tmp/ipp-raw-notification.json <<EOF
         "Key": {
           "FilterRules": [
             {
+              "Name": "prefix",
+              "Value": "metadata/"
+            },
+            {
               "Name": "suffix",
-              "Value": "metadata.json"
+              "Value": ".json"
             }
           ]
         }

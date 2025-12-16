@@ -198,6 +198,12 @@ functions:
         Action:
           - kms:Decrypt
         Resource: !GetAtt LambdaKMSKey.Arn
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+        Resource: !GetAtt JobsTable.Arn
 
   clientAggregator:
     name: ${self:service}-${self:provider.stage}-client-aggregator
