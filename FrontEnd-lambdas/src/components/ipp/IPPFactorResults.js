@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, Table, Badge, Spinner, Alert, Button, Collapse } from 'react-bootstrap';
-import { FaCheckCircle, FaTimesCircle, FaChevronDown, FaChevronUp, FaDownload, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaChevronDown, FaChevronUp, FaDownload } from 'react-icons/fa';
 import AWS from 'aws-sdk';
 
 // Configurar AWS SDK
@@ -47,7 +47,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
     
     try {
       // Extraer bucket y key del path s3://bucket/key
-      const s3Match = resultPath.match(/s3:\/\/([^\/]+)\/(.+)/);
+      const s3Match = resultPath.match(/s3:\/\/([^/]+)\/(.+)/);
       if (!s3Match) {
         throw new Error('Invalid S3 path format');
       }
@@ -80,7 +80,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
   // Descargar resultado completo de un cliente
   const downloadClientResult = async (cliente, resultPath) => {
     try {
-      const s3Match = resultPath.match(/s3:\/\/([^\/]+)\/(.+)/);
+      const s3Match = resultPath.match(/s3:\/\/([^/]+)\/(.+)/);
       if (!s3Match) {
         throw new Error('Invalid S3 path format');
       }
