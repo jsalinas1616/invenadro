@@ -69,7 +69,11 @@ exports.handler = async (event) => {
         
         const processStartTime = getItemResponse.Item?.startTime?.S;
         const processEndTime = getItemResponse.Item?.endTime?.S || new Date().toISOString();
+        
+        // Extraer cliente de DynamoDB para construir ruta correcta en S3
+        const clienteFromDB = getItemResponse.Item?.cliente?.S || 'sin-cliente';
         console.log('Tiempos del proceso:', { processStartTime, processEndTime });
+        console.log('Cliente identificado:', clienteFromDB);
         
         // Actualizar estado a DOWNLOADING
         console.log('Actualizando estado a DOWNLOADING en DynamoDB...');
@@ -90,7 +94,9 @@ exports.handler = async (event) => {
         console.log('Leyendo resultado procesado desde S3...');
         
         const bucketName = RESULTS_BUCKET;
-        const key = `resultados/${processId}/resultado.json`;
+        // Nueva estructura: resultados/{cliente}/{processId}/resultado.json
+        const key = `resultados/${clienteFromDB}/${processId}/resultado.json`;
+        console.log(`Leyendo desde ruta organizada por cliente: ${key}`);
         
         let resultado;
         try {

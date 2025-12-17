@@ -106,6 +106,11 @@ exports.handler = async (event) => {
         // Guardar estado inicial en DynamoDB
         console.log('Guardando estado en DynamoDB...');
         
+        // Extraer cliente/mostrador de customConfig o del nombre del archivo
+        const cliente = customConfig?.cliente || 
+                       customConfig?.mostrador ||
+                       (originalname ? originalname.split('_')[0] : null);
+        
         // Preparar item de DynamoDB con info del usuario
         const dynamoItem = {
             processId: { S: processId },
@@ -122,6 +127,12 @@ exports.handler = async (event) => {
             customConfig: { S: JSON.stringify(customConfig || {}) },
             originalname: { S: originalname || 'inventario.xlsx' }
         };
+        
+        // Agregar cliente si está disponible (para facilitar búsquedas y construir rutas S3)
+        if (cliente) {
+            dynamoItem.cliente = { S: String(cliente) };
+            console.log(`Cliente identificado: ${cliente}`);
+        }
         
         //AGREGAR INFO DEL USUARIO (para auditoría)
         if (userInfo) {

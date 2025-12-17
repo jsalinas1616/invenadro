@@ -250,12 +250,20 @@ functions:
     handler: functions/excel-generator/index.handler
     timeout: 60
     memorySize: 1024
+    environment:
+      JOBS_TABLE: !Ref JobsTable
     iamRoleStatements:
       - Effect: Allow
         Action:
           - s3:GetObject
+          - s3:ListBucket
         Resource:
+          - !Sub "${ResultsBucket.Arn}"
           - !Sub "${ResultsBucket.Arn}/*"
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: !GetAtt JobsTable.Arn
     events:
       - http:
           path: /excel/{processId}/{clienteId}

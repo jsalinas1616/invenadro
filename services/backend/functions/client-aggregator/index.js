@@ -52,8 +52,10 @@ exports.handler = async (event) => {
         // 🔧 FIX: Guardar en el bucket de RESULTS, no en UPLOADS
         const resultsBucket = RESULTS_BUCKET;
         
-        // Subir reporte consolidado a S3
-        const reporteKey = `resultados/${processId}/resultado.json`;
+        // Subir reporte consolidado a S3 (multi-cliente va en carpeta especial)
+        // Nueva estructura: resultados/multi-cliente/{processId}/
+        const reporteKey = `resultados/multi-cliente/${processId}/resultado.json`;
+        console.log(`Guardando consolidado en: ${reporteKey}`);
         await s3.send(new PutObjectCommand({
             Bucket: resultsBucket,
             Key: reporteKey,
@@ -62,7 +64,7 @@ exports.handler = async (event) => {
         }));
         
         // Subir Excel consolidado a S3
-        const excelKey = `resultados/${processId}/consolidado.xlsx`;
+        const excelKey = `resultados/multi-cliente/${processId}/consolidado.xlsx`;
         await s3.send(new PutObjectCommand({
             Bucket: resultsBucket,
             Key: excelKey,
@@ -146,7 +148,9 @@ async function recopilarResultadosClientes(bucket, executionsInfo, resultsBucket
             }
             
             // Intentar obtener el resultado del cliente
-            const resultadoKey = `resultados/${execution.processId}/resultado.json`;
+            // Nueva estructura: resultados/{cliente}/{processId}/resultado.json
+            const resultadoKey = `resultados/${execution.cliente}/${execution.processId}/resultado.json`;
+            console.log(`Leyendo resultado de: ${resultadoKey}`);
             
             const response = await s3.send(new GetObjectCommand({
                 Bucket: resultsBucket,

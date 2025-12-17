@@ -3,11 +3,17 @@ const XLSX = require('xlsx');
 
 // Configurar AWS SDK
 const s3 = new AWS.S3();
+const dynamoDB = new AWS.DynamoDB();
 
-// VALIDAR VARIABLE DE ENTORNO
+// VALIDAR VARIABLES DE ENTORNO
 const RESULTS_BUCKET = process.env.RESULTS_BUCKET;
+const JOBS_TABLE = process.env.JOBS_TABLE;
+
 if (!RESULTS_BUCKET) {
     throw new Error('ERROR: RESULTS_BUCKET no está configurado en variables de entorno');
+}
+if (!JOBS_TABLE) {
+    throw new Error('ERROR: JOBS_TABLE no está configurado en variables de entorno');
 }
 
 // ORÍGENES PERMITIDOS PARA CORS - Desde variable de entorno por ambiente
@@ -73,7 +79,7 @@ exports.handler = async (event) => {
         if (isMultiClient) {
             console.log('Detectado proceso MULTI-CLIENTE, buscando resultado individual del cliente...');
             
-            // Buscar el resultado individual del cliente en resultados/{processId}-cliente-X/resultado.json
+            // Buscar el resultado individual del cliente en resultados/{clienteId}/{processId}/resultado.json
             const clienteResultado = await buscarResultadoClienteIndividual(processId, clienteId);
             
             if (!clienteResultado || !clienteResultado.datos) {
@@ -150,11 +156,23 @@ exports.handler = async (event) => {
  */
 async function obtenerResultadoDesdeS3(processId) {
     try {
-        console.log(`Descargando resultado desde S3: resultados/${processId}/resultado.json`);
+        // Primero obtener el cliente de DynamoDB
+        console.log(`Consultando DynamoDB para obtener cliente del proceso: ${processId}`);
+        const dynamoParams = {
+            TableName: JOBS_TABLE,
+            Key: { processId: { S: processId } }
+        };
         
+        const dynamoResponse = await dynamoDB.getItem(dynamoParams).promise();
+        const cliente = dynamoResponse.Item?.cliente?.S || 'multi-cliente';
+        
+        console.log(`Cliente identificado: ${cliente}`);
+        console.log(`Descargando resultado desde S3: resultados/${cliente}/${processId}/resultado.json`);
+        
+        // Nueva estructura: resultados/{cliente}/{processId}/resultado.json
         const params = {
             Bucket: RESULTS_BUCKET,
-            Key: `resultados/${processId}/resultado.json`
+            Key: `resultados/${cliente}/${processId}/resultado.json`
         };
 
         const response = await s3.getObject(params).promise();
@@ -174,18 +192,20 @@ async function obtenerResultadoDesdeS3(processId) {
  */
 async function buscarResultadoClienteIndividual(processId, clienteId) {
     try {
-        // Primero, listar todos los subdirectorios para encontrar el cliente
+        // Con la nueva estructura: resultados/{cliente}/{processId}/resultado.json
+        // Listar todos los archivos en la carpeta del cliente
         console.log(`Buscando resultado individual para cliente ${clienteId} en proceso ${processId}`);
         
         const listParams = {
             Bucket: RESULTS_BUCKET,
-            Prefix: `resultados/${processId}-cliente-`,
+            Prefix: `resultados/${clienteId}/`,
             Delimiter: '/'
         };
         
+        console.log(`Listando en: ${listParams.Prefix}`);
         const listResponse = await s3.listObjectsV2(listParams).promise();
         
-        // Buscar la carpeta que corresponde al cliente
+        // Buscar la carpeta que corresponde al processId relacionado
         let clienteFolder = null;
         
         if (listResponse.CommonPrefixes) {
@@ -203,13 +223,11 @@ async function buscarResultadoClienteIndividual(processId, clienteId) {
                     
                     const testData = JSON.parse(testResponse.Body.toString());
                     
-                    // Verificar si los datos pertenecen al cliente buscado
-                    if (testData.datos && testData.datos.length > 0) {
-                        const primerCliente = testData.datos[0].Cliente || testData.datos[0].cliente;
-                        if (String(primerCliente) === String(clienteId)) {
-                            console.log(`Encontrado resultado del cliente ${clienteId} en ${folderName}`);
-                            return testData;
-                        }
+                    // Verificar si los datos pertenecen al proceso buscado
+                    // (puede ser por customConfig o simplemente retornar el primero encontrado)
+                    if (testData.customConfig?.ipp_job_id || testData.processId) {
+                        console.log(`Encontrado resultado del cliente ${clienteId} en ${folderName}`);
+                        return testData;
                     }
                 } catch (err) {
                     console.log(`WARNING: No se pudo leer ${folderName}: ${err.message}`);

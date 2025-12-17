@@ -84,7 +84,11 @@ exports.handler = async (event) => {
         // Guardar resultado completo en S3
         console.log('Guardando resultado en S3...');
         const resultsBucket = RESULTS_BUCKET;
-        const resultKey = `resultados/${processId}/resultado.json`;
+        
+        // Extraer cliente para construir ruta organizada por cliente
+        const cliente = customConfig?.cliente || customConfig?.mostrador || 'sin-cliente';
+        const resultKey = `resultados/${cliente}/${processId}/resultado.json`;
+        console.log(`Guardando en ruta organizada por cliente: ${resultKey}`);
         
         // Preparar datos completos para el frontend (estructura como en BackEnd)
         const resultadoCompleto = {
