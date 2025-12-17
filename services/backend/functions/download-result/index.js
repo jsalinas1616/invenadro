@@ -94,9 +94,9 @@ exports.handler = async (event) => {
         console.log('Leyendo resultado procesado desde S3...');
         
         const bucketName = RESULTS_BUCKET;
-        // Nueva estructura: resultados/{cliente}/{processId}/resultado.json
-        const key = `resultados/${clienteFromDB}/${processId}/resultado.json`;
-        console.log(`Leyendo desde ruta organizada por cliente: ${key}`);
+        // Ruta única por cliente (siempre el último resultado)
+        const key = `resultados/${clienteFromDB}/resultado.json`;
+        console.log(`Leyendo desde ruta única por cliente: ${key}`);
         
         let resultado;
         try {

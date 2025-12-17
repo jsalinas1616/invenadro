@@ -86,9 +86,10 @@ exports.handler = async (event) => {
         const resultsBucket = RESULTS_BUCKET;
         
         // Extraer cliente para construir ruta organizada por cliente
+        // Ruta sin processId: S3 sobrescribirá automáticamente el archivo anterior
         const cliente = customConfig?.cliente || customConfig?.mostrador || 'sin-cliente';
-        const resultKey = `resultados/${cliente}/${processId}/resultado.json`;
-        console.log(`Guardando en ruta organizada por cliente: ${resultKey}`);
+        const resultKey = `resultados/${cliente}/resultado.json`;
+        console.log(`Guardando en ruta única por cliente (sobrescribe anterior): ${resultKey}`);
         
         // Preparar datos completos para el frontend (estructura como en BackEnd)
         const resultadoCompleto = {

@@ -148,8 +148,8 @@ async function recopilarResultadosClientes(bucket, executionsInfo, resultsBucket
             }
             
             // Intentar obtener el resultado del cliente
-            // Nueva estructura: resultados/{cliente}/{processId}/resultado.json
-            const resultadoKey = `resultados/${execution.cliente}/${execution.processId}/resultado.json`;
+            // Ruta única por cliente (siempre el último resultado)
+            const resultadoKey = `resultados/${execution.cliente}/resultado.json`;
             console.log(`Leyendo resultado de: ${resultadoKey}`);
             
             const response = await s3.send(new GetObjectCommand({

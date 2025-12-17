@@ -79,7 +79,7 @@ exports.handler = async (event) => {
         if (isMultiClient) {
             console.log('Detectado proceso MULTI-CLIENTE, buscando resultado individual del cliente...');
             
-            // Buscar el resultado individual del cliente en resultados/{clienteId}/{processId}/resultado.json
+            // Buscar el resultado individual del cliente en resultados/{clienteId}/resultado.json
             const clienteResultado = await buscarResultadoClienteIndividual(processId, clienteId);
             
             if (!clienteResultado || !clienteResultado.datos) {
@@ -167,12 +167,12 @@ async function obtenerResultadoDesdeS3(processId) {
         const cliente = dynamoResponse.Item?.cliente?.S || 'multi-cliente';
         
         console.log(`Cliente identificado: ${cliente}`);
-        console.log(`Descargando resultado desde S3: resultados/${cliente}/${processId}/resultado.json`);
+        console.log(`Descargando resultado desde S3: resultados/${cliente}/resultado.json`);
         
-        // Nueva estructura: resultados/{cliente}/{processId}/resultado.json
+        // Ruta única por cliente (siempre el último resultado)
         const params = {
             Bucket: RESULTS_BUCKET,
-            Key: `resultados/${cliente}/${processId}/resultado.json`
+            Key: `resultados/${cliente}/resultado.json`
         };
 
         const response = await s3.getObject(params).promise();
@@ -192,54 +192,25 @@ async function obtenerResultadoDesdeS3(processId) {
  */
 async function buscarResultadoClienteIndividual(processId, clienteId) {
     try {
-        // Con la nueva estructura: resultados/{cliente}/{processId}/resultado.json
-        // Listar todos los archivos en la carpeta del cliente
-        console.log(`Buscando resultado individual para cliente ${clienteId} en proceso ${processId}`);
+        // Con la nueva estructura: resultados/{cliente}/resultado.json
+        // Ya no hay subcarpertas, acceso directo al archivo del cliente
+        console.log(`Buscando resultado individual para cliente ${clienteId}`);
         
-        const listParams = {
+        const resultKey = `resultados/${clienteId}/resultado.json`;
+        console.log(`Intentando leer: ${resultKey}`);
+        
+        const response = await s3.getObject({
             Bucket: RESULTS_BUCKET,
-            Prefix: `resultados/${clienteId}/`,
-            Delimiter: '/'
-        };
+            Key: resultKey
+        }).promise();
         
-        console.log(`Listando en: ${listParams.Prefix}`);
-        const listResponse = await s3.listObjectsV2(listParams).promise();
-        
-        // Buscar la carpeta que corresponde al processId relacionado
-        let clienteFolder = null;
-        
-        if (listResponse.CommonPrefixes) {
-            for (const prefix of listResponse.CommonPrefixes) {
-                const folderName = prefix.Prefix;
-                console.log(`Revisando carpeta: ${folderName}`);
-                
-                // Intentar leer el resultado de esta carpeta
-                try {
-                    const testKey = `${folderName}resultado.json`;
-                    const testResponse = await s3.getObject({
-                        Bucket: RESULTS_BUCKET,
-                        Key: testKey
-                    }).promise();
-                    
-                    const testData = JSON.parse(testResponse.Body.toString());
-                    
-                    // Verificar si los datos pertenecen al proceso buscado
-                    // (puede ser por customConfig o simplemente retornar el primero encontrado)
-                    if (testData.customConfig?.ipp_job_id || testData.processId) {
-                        console.log(`Encontrado resultado del cliente ${clienteId} en ${folderName}`);
-                        return testData;
-                    }
-                } catch (err) {
-                    console.log(`WARNING: No se pudo leer ${folderName}: ${err.message}`);
-                }
-            }
-        }
-        
-        throw new Error(`No se encontró resultado individual para el cliente ${clienteId}`);
+        const resultData = JSON.parse(response.Body.toString());
+        console.log(`Encontrado resultado del cliente ${clienteId}`);
+        return resultData;
         
     } catch (error) {
-        console.error('ERROR: Error buscando resultado individual del cliente:', error);
-        throw error;
+        console.error(`ERROR: No se encontró resultado para el cliente ${clienteId}:`, error);
+        throw new Error(`No se encontró resultado individual para el cliente ${clienteId}`);
     }
 }
 
