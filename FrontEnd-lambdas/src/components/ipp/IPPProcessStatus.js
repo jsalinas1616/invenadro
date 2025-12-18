@@ -15,7 +15,8 @@ function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
   // Mapeo de estados a porcentajes de progreso
   const progressMap = {
     'validating': { percent: 5, label: 'Validando clientes...' },
-    'job1_running': { percent: 25, label: 'Databricks: Procesando IPP Tradicional y Normalizando...' },
+    'job1_queued': { percent: 15, label: 'Databricks: En cola, esperando recursos...' },
+    'job1_running': { percent: 35, label: 'Databricks: Ejecutando IPP Tradicional + Normalización...' },
     'completed': { percent: 50, label: 'Databricks completado, preparando Factor de Redondeo...' },
     'factor_initiated': { percent: 60, label: 'Factor de Redondeo: Iniciado...' },
     'factor_processing': { percent: 80, label: 'Factor de Redondeo: Procesando clientes...' },
@@ -74,8 +75,8 @@ function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
           <h6 className="text-muted mb-3">Progreso del flujo:</h6>
           <div className="d-flex flex-column gap-2">
             {/* Validación */}
-            <div className={`d-flex align-items-center ${['job1_running', 'completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? 'text-success' : status === 'validating' ? 'text-primary' : 'text-muted'}`}>
-              {['job1_running', 'completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? (
+            <div className={`d-flex align-items-center ${['job1_queued', 'job1_running', 'completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? 'text-success' : status === 'validating' ? 'text-primary' : 'text-muted'}`}>
+              {['job1_queued', 'job1_running', 'completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? (
                 <FaCheckCircle className="me-2" />
               ) : status === 'validating' ? (
                 <Spinner animation="border" size="sm" className="me-2" />
@@ -86,10 +87,10 @@ function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
             </div>
 
             {/* Databricks Job 1 */}
-            <div className={`d-flex align-items-center ${['completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? 'text-success' : status === 'job1_running' ? 'text-primary' : 'text-muted'}`}>
+            <div className={`d-flex align-items-center ${['completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? 'text-success' : ['job1_queued', 'job1_running'].includes(status) ? 'text-primary' : 'text-muted'}`}>
               {['completed', 'factor_initiated', 'factor_processing', 'factor_completed'].includes(status) ? (
                 <FaCheckCircle className="me-2" />
-              ) : status === 'job1_running' ? (
+              ) : ['job1_queued', 'job1_running'].includes(status) ? (
                 <Spinner animation="border" size="sm" className="me-2" />
               ) : (
                 <FaClock className="me-2" />
@@ -156,12 +157,14 @@ function IPPProcessStatus({ processId, status, result, databricksRunUrl }) {
           </Alert>
         )}
 
-        {['validating', 'job1_running', 'completed', 'factor_initiated', 'factor_processing'].includes(status) && (
+        {['validating', 'job1_queued', 'job1_running', 'completed', 'factor_initiated', 'factor_processing'].includes(status) && (
           <Alert variant="info">
             <FaSpinner className="me-2 fa-spin" />
             <strong>Procesamiento en curso...</strong>
             <p className="mb-0 mt-2 small">
-              El proceso puede tardar varios minutos. Por favor espera.
+              {status === 'job1_queued' ? 
+                'El job está en cola esperando recursos de Databricks. Esto puede tardar unos minutos.' :
+                'El proceso puede tardar varios minutos. Por favor espera.'}
             </p>
           </Alert>
         )}

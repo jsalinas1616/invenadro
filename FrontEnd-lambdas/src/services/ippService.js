@@ -203,7 +203,8 @@ class IPPService {
   getReadableStatus(status) {
     const statusMap = {
       'validating': 'Validando clientes...',
-      'job1_running': 'Databricks: Procesando IPP Tradicional...',
+      'job1_queued': 'Databricks: En cola...',
+      'job1_running': 'Databricks: Ejecutando IPP Tradicional...',
       'completed': 'Databricks completado',
       'factor_initiated': 'Factor de Redondeo: Iniciado',
       'factor_processing': 'Factor de Redondeo: Procesando clientes...',

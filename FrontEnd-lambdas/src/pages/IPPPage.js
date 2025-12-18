@@ -140,6 +140,15 @@ function IPPPage() {
     console.log('IPPPage: Continuando con clientes válidos:', validClientsList);
     setShowWarningModal(false);
     
+    // LIMPIAR ESTADOS DE PROCESO ANTERIOR
+    console.log('[IPPPage] Limpiando estados de proceso anterior...');
+    setIppProcessId(null);
+    setIppStatus('idle');
+    setIppResult(null);
+    setFactorResults(null);
+    setDatabricksRunUrl(null);
+    setError(null);
+    
     try {
       //  Llamar a Lambda Iniciador IPP (trigger Databricks Job 1)
       console.log('[IPPPage] Iniciando proceso IPP para clientes:', validClientsList);

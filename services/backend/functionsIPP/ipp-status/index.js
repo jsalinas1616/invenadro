@@ -132,14 +132,19 @@ const checkDatabricksRunStatus = async (runId) => {
 const mapDatabricksStateToIPP = (databricksState, resultState) => {
   if (databricksState === 'TERMINATED') {
     if (resultState === 'SUCCESS') {
-      return 'processing'; // Job 1 completado, ahora va a procesamiento (factor de redondeo)
+      return 'completed'; // Job 1 completado exitosamente
     } else {
       return 'failed';
     }
   }
   
-  if (databricksState === 'RUNNING' || databricksState === 'PENDING' || databricksState === 'TERMINATING') {
-    return 'job1_running';
+  // Diferenciar entre cola y ejecución
+  if (databricksState === 'PENDING') {
+    return 'job1_queued'; // En cola, esperando recursos
+  }
+  
+  if (databricksState === 'RUNNING' || databricksState === 'TERMINATING') {
+    return 'job1_running'; // Ejecutándose
   }
   
   if (databricksState === 'SKIPPED' || databricksState === 'INTERNAL_ERROR') {
@@ -235,13 +240,14 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           job_id: jobId,
           status: newStatus,
-          message: newStatus === 'job1_running' ? 'Databricks Job 1 en ejecución...' : 
-                   newStatus === 'processing' ? 'Job 1 completado, aplicando factor de redondeo...' :
+          message: newStatus === 'job1_queued' ? 'Databricks: En cola, esperando recursos...' :
+                   newStatus === 'job1_running' ? 'Databricks: Ejecutando IPP Tradicional + Normalización...' : 
+                   newStatus === 'completed' ? 'Databricks completado, iniciando Factor de Redondeo...' :
                    'Job 1 falló',
           databricks_state: databricksStatus.state,
           databricks_run_url: databricksStatus.runPageUrl,
           mostradores_count: job.mostradores_count,
-          progress: newStatus === 'job1_running' ? 25 : newStatus === 'processing' ? 50 : 0
+          progress: progressMap[newStatus] || 50
         })
       };
     }
@@ -249,7 +255,8 @@ exports.handler = async (event) => {
     // 4. Otros estados (processing, job2_running, etc.)
     const progressMap = {
       'validating': 5,
-      'job1_running': 25,
+      'job1_queued': 15,      // En cola esperando recursos
+      'job1_running': 35,     // Ejecutándose
       'processing': 50,
       'completed': 50,
       'factor_initiated': 60,
