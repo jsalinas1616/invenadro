@@ -24,7 +24,7 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient, {
 exports.handler = async (event) => {
   try {
     console.log('=' .repeat(80));
-    console.log('🌉 IPP-TO-FACTOR BRIDGE - Iniciando...');
+    console.log('IPP-TO-FACTOR BRIDGE - Iniciando...');
     console.log('=' .repeat(80));
     
     // 1. DETECTAR QUÉ ARCHIVO SE CREÓ EN S3
@@ -235,14 +235,16 @@ function transformarIPPaExcel(datosCliente) {
       Cliente: datosCliente.cliente,
       Material: row.MATERIAL_mg || row.Material || '',
       'EAN/UPC': row['EAN/UPC'] || 'NA',
+      'EAN/UPC/SKU': row['EAN/UPC/SKU'] || '',
       'Ctd.UMB': row.Ctd_UMB || row.PRONOSTICO || 0,
       'Factor F': row.Factor_F || 0,
       'Ponderación Tradicional': 0, // IPP no calcula este factor
       'Factor 9': 0, // IPP no calcula este factor
       'Factor D': row.Factor_D || 0,
-      Precio: row.Precio_Farmacia || 0,
+      'Precio Farmacia': row.Precio_Farmacia || 0,
       Inversión: row.Importe || 0,
-      'Monto Venta Mostrador': row.Monto_Venta_Mostrador || 0
+      'Monto Venta Mostrador': row.Monto_Venta_Mostrador || 0,
+      Categoría: row.CATEGORIA_INVENADRO || ''
     };
   });
   
@@ -255,14 +257,16 @@ function transformarIPPaExcel(datosCliente) {
     { wch: 10 }, // Cliente
     { wch: 15 }, // Material
     { wch: 15 }, // EAN/UPC
+    { wch: 18 }, // EAN/UPC/SKU
     { wch: 12 }, // Ctd.UMB
     { wch: 12 }, // Factor F
     { wch: 20 }, // Ponderación Tradicional
     { wch: 12 }, // Factor 9
     { wch: 12 }, // Factor D
-    { wch: 12 }, // Precio
+    { wch: 15 }, // Precio Farmacia
     { wch: 15 }, // Inversión
-    { wch: 20 }  // Monto Venta Mostrador
+    { wch: 20 }, // Monto Venta Mostrador
+    { wch: 20 }  // Categoría
   ];
   ws['!cols'] = colWidths;
   
