@@ -234,6 +234,7 @@ function transformarIPPaExcel(datosCliente) {
     return {
       Cliente: datosCliente.cliente,
       Material: row.MATERIAL_mg || row.Material || '',
+      Descripción: row.DESCRIPCION || '',
       'EAN/UPC': row['EAN/UPC'] || 'NA',
       'EAN/UPC/SKU': row['EAN/UPC/SKU'] || '',
       'Ctd.UMB': row.Ctd_UMB || row.PRONOSTICO || 0,
@@ -256,6 +257,7 @@ function transformarIPPaExcel(datosCliente) {
   const colWidths = [
     { wch: 10 }, // Cliente
     { wch: 15 }, // Material
+    { wch: 30 }, // Descripción
     { wch: 15 }, // EAN/UPC
     { wch: 18 }, // EAN/UPC/SKU
     { wch: 12 }, // Ctd.UMB
