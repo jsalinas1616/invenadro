@@ -465,6 +465,25 @@ functions:
           cors: true
           authorizer: ${self:custom.auth.default}
   
+  ippDownloadUrl:
+    name: ${self:service}-${self:provider.stage}-ipp-download-url
+    handler: functionsIPP/ipp-download-url/index.handler
+    timeout: 30
+    memorySize: 256
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+        Resource:
+          - !Sub "${ResultsBucket.Arn}/*"
+          - !Sub "${IPPRawBucket.Arn}/*"
+    events:
+      - http:
+          path: /ipp/download-url
+          method: post
+          cors: true
+          authorizer: ${self:custom.auth.default}
+  
   ippToFactorBridge:
     name: ${self:service}-${self:provider.stage}-ipp-to-factor-bridge
     handler: functionsIPP/ipp-to-factor-bridge/index.handler

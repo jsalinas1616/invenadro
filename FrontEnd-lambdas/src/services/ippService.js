@@ -163,6 +163,38 @@ class IPPService {
   }
 
   /**
+   * Obtener URL de descarga pre-firmada para un archivo en S3
+   * 
+   * @param {string} bucket - Nombre del bucket S3
+   * @param {string} key - Key del objeto en S3
+   * @returns {Promise<string>} URL pre-firmada
+   */
+  async getDownloadUrl(bucket, key) {
+    try {
+      console.log('[IPP Service] Obteniendo URL de descarga:', { bucket, key });
+      
+      const response = await fetch(`${this.baseURL}/ipp/download-url`, {
+        method: 'POST',
+        headers: await this.getAuthHeaders(),
+        body: JSON.stringify({ bucket, key })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('[IPP Service] URL obtenida exitosamente');
+      
+      return data.url;
+    } catch (error) {
+      console.error('[IPP Service] Error obteniendo URL de descarga:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtener texto legible del estado
    * 
    * @param {string} status - Estado del proceso

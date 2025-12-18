@@ -1,17 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Table, Badge, Spinner, Alert, Button, Collapse } from 'react-bootstrap';
 import { FaCheckCircle, FaTimesCircle, FaChevronDown, FaChevronUp, FaDownload } from 'react-icons/fa';
-import AWS from 'aws-sdk';
-
-// Configurar AWS SDK
-const getS3Client = () => {
-  return new AWS.S3({
-    region: process.env.REACT_APP_AWS_REGION || 'mx-central-1',
-    credentials: new AWS.CognitoIdentityCredentials({
-      IdentityPoolId: process.env.REACT_APP_COGNITO_IDENTITY_POOL_ID
-    })
-  });
-};
+import ippService from '../../services/ippService';
 
 /**
  * IPPFactorResults - Muestra los resultados del Factor de Redondeo por cliente
@@ -41,7 +31,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
     }
   };
 
-  // Cargar detalles del resultado desde S3
+  // Cargar detalles del resultado desde el backend
   const loadClientDetails = async (cliente, resultPath) => {
     setLoadingDetails(prev => ({ ...prev, [cliente]: true }));
     
@@ -53,14 +43,17 @@ function IPPFactorResults({ jobId, factorResults, status }) {
       }
 
       const [, bucket, key] = s3Match;
-      const s3 = getS3Client();
-
-      const data = await s3.getObject({
-        Bucket: bucket,
-        Key: key
-      }).promise();
-
-      const result = JSON.parse(data.Body.toString('utf-8'));
+      
+      // Usar el servicio del backend para obtener una URL de descarga
+      const downloadUrl = await ippService.getDownloadUrl(bucket, key);
+      
+      // Descargar el contenido del JSON
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
       
       setClientDetails(prev => ({
         ...prev,
@@ -86,15 +79,20 @@ function IPPFactorResults({ jobId, factorResults, status }) {
       }
 
       const [, bucket, key] = s3Match;
-      const s3 = getS3Client();
-
-      const data = await s3.getObject({
-        Bucket: bucket,
-        Key: key
-      }).promise();
+      
+      // Obtener URL de descarga del backend
+      const downloadUrl = await ippService.getDownloadUrl(bucket, key);
+      
+      // Descargar el archivo usando la URL pre-firmada
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
 
       // Crear y descargar archivo
-      const blob = new Blob([data.Body], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -105,7 +103,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(`Error downloading result for client ${cliente}:`, error);
-      alert('Error descargando el resultado');
+      alert(`Error descargando el resultado: ${error.message}`);
     }
   };
 
