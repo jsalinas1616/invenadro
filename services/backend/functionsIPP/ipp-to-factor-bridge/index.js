@@ -31,11 +31,11 @@ exports.handler = async (event) => {
     const bucket = event.Records[0].s3.bucket.name;
     const key = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, ' '));
     
-    console.log(`📁 Archivo detectado: s3://${bucket}/${key}`);
+    console.log(`Archivo detectado: s3://${bucket}/${key}`);
     
     // Solo procesar archivos .json en la carpeta metadata/
     if (!key.startsWith('metadata/') || !key.endsWith('.json')) {
-      console.log('⏭️  No es un archivo metadata, ignorando...');
+      console.log('No es un archivo metadata, ignorando...');
       return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Not a metadata file, skipping' })
@@ -43,7 +43,7 @@ exports.handler = async (event) => {
     }
     
     // 2. LEER METADATA.JSON
-    console.log('\n📥 Leyendo metadata.json...');
+    console.log('\nLeyendo metadata.json...');
     const metadataResponse = await s3Client.send(new GetObjectCommand({
       Bucket: bucket,
       Key: key
@@ -52,7 +52,7 @@ exports.handler = async (event) => {
     const metadataContent = await streamToString(metadataResponse.Body);
     const metadata = JSON.parse(metadataContent);
     
-    console.log(`📊 Metadata leída:`);
+    console.log(`Metadata leída:`);
     console.log(`   - Job ID: ${metadata.job_id}`);
     console.log(`   - Total clientes: ${metadata.total_clientes}`);
     console.log(`   - Total registros: ${metadata.total_registros}`);
@@ -74,7 +74,7 @@ exports.handler = async (event) => {
       try {
         // 4.1. Leer archivo del cliente desde S3
         const clienteKey = `clientes/cliente_${clienteInfo.cliente}.json`;
-        console.log(`   📥 Leyendo: s3://${bucket}/${clienteKey}`);
+        console.log(`   Leyendo: s3://${bucket}/${clienteKey}`);
         
         const clienteResponse = await s3Client.send(new GetObjectCommand({
           Bucket: bucket,
@@ -84,12 +84,12 @@ exports.handler = async (event) => {
         const clienteContent = await streamToString(clienteResponse.Body);
         const datosCliente = JSON.parse(clienteContent);
         
-        console.log(`   ✅ Leído: ${datosCliente.datos.length} registros`);
+        console.log(`   Leído: ${datosCliente.datos.length} registros`);
         
         // 4.2. TRANSFORMAR JSON → EXCEL (formato que espera Factor de Redondeo)
-        console.log(`   🔄 Transformando JSON → Excel...`);
+        console.log(`   Transformando JSON a Excel...`);
         const excelBuffer = transformarIPPaExcel(datosCliente);
-        console.log(`   ✅ Excel generado: ${(excelBuffer.length / 1024).toFixed(2)} KB`);
+        console.log(`   Excel generado: ${(excelBuffer.length / 1024).toFixed(2)} KB`);
         
         // 4.3. SUBIR EXCEL A S3 (bucket de uploads)
         const uploadsBucket = process.env.UPLOADS_BUCKET;
@@ -102,7 +102,7 @@ exports.handler = async (event) => {
           ContentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         }));
         
-        console.log(`   ✅ Excel subido: s3://${uploadsBucket}/${uploadKey}`);
+        console.log(`   Excel subido: s3://${uploadsBucket}/${uploadKey}`);
         
         // 4.4. INVOCAR INITIATOR DEL FACTOR DE REDONDEO (Lambda existente)
         const initiatorPayload = {
@@ -120,7 +120,7 @@ exports.handler = async (event) => {
           originalname: `ipp_${clienteInfo.cliente}.xlsx`
         };
         
-        console.log(`   🚀 Invocando initiator para cliente ${clienteInfo.cliente}...`);
+        console.log(`   Invocando initiator para cliente ${clienteInfo.cliente}...`);
         
         const invokeResponse = await lambdaClient.send(new InvokeCommand({
           FunctionName: process.env.INITIATOR_FUNCTION_NAME,
@@ -128,7 +128,7 @@ exports.handler = async (event) => {
           Payload: JSON.stringify(initiatorPayload)
         }));
         
-        console.log(`   ✅ Initiator invocado (StatusCode: ${invokeResponse.StatusCode})`);
+        console.log(`   Initiator invocado (StatusCode: ${invokeResponse.StatusCode})`);
         
         resultadosProcesamiento.push({
           cliente: clienteInfo.cliente,
@@ -143,7 +143,7 @@ exports.handler = async (event) => {
         }
         
       } catch (clienteError) {
-        console.error(`   ❌ Error procesando cliente ${clienteInfo.cliente}:`, clienteError);
+        console.error(`   ERROR procesando cliente ${clienteInfo.cliente}:`, clienteError);
         
         resultadosProcesamiento.push({
           cliente: clienteInfo.cliente,
@@ -160,11 +160,11 @@ exports.handler = async (event) => {
     const fallidos = resultadosProcesamiento.filter(r => r.status === 'failed').length;
     
     console.log('\n' + '='.repeat(80));
-    console.log('🎉 PROCESO IPP-TO-FACTOR COMPLETADO');
+    console.log('PROCESO IPP-TO-FACTOR COMPLETADO');
     console.log('='.repeat(80));
-    console.log(`✅ Clientes exitosos: ${exitosos}/${metadata.total_clientes}`);
+    console.log(`Clientes exitosos: ${exitosos}/${metadata.total_clientes}`);
     if (fallidos > 0) {
-      console.log(`❌ Clientes fallidos: ${fallidos}`);
+      console.log(`Clientes fallidos: ${fallidos}`);
     }
     console.log('='.repeat(80));
     
@@ -189,7 +189,7 @@ exports.handler = async (event) => {
     };
     
   } catch (error) {
-    console.error('❌ Error en ipp-to-factor-bridge:', error);
+    console.error('ERROR en ipp-to-factor-bridge:', error);
     console.error('Stack trace:', error.stack);
     
     return {
@@ -217,7 +217,7 @@ async function streamToString(stream) {
 // TRANSFORMAR JSON IPP → EXCEL PARA FACTOR DE REDONDEO
 // ==========================================================
 function transformarIPPaExcel(datosCliente) {
-  console.log('      🔧 Iniciando transformación...');
+  console.log('      Iniciando transformación...');
   
   // Extraer datos del cliente
   const datos = datosCliente.datos;
@@ -226,7 +226,11 @@ function transformarIPPaExcel(datosCliente) {
     throw new Error('No hay datos para transformar');
   }
   
-  console.log(`      📊 ${datos.length} registros a transformar`);
+  console.log(`      ${datos.length} registros a transformar`);
+
+  datos.forEach(row => {
+    console.log('julian test', row);
+  });
   
   // Crear estructura que espera Factor de Redondeo
   // Mapeo de columnas IPP → Factor de Redondeo
@@ -277,7 +281,7 @@ function transformarIPPaExcel(datosCliente) {
   // Generar buffer
   const excelBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
   
-  console.log(`      ✅ Transformación completa: ${datosExcel.length} filas`);
+  console.log(`      Transformación completa: ${datosExcel.length} filas`);
   
   return excelBuffer;
 }
@@ -313,9 +317,9 @@ async function actualizarEstadoIPP(jobId, status, totalClientes, detalles = null
       ExpressionAttributeValues: expressionValues
     }));
     
-    console.log(`   🗄️  DynamoDB actualizado: ${jobId} → ${status}`);
+    console.log(`   DynamoDB actualizado: ${jobId} -> ${status}`);
   } catch (error) {
-    console.error(`   ⚠️  Error actualizando DynamoDB:`, error.message);
+    console.error(`   WARNING: Error actualizando DynamoDB:`, error.message);
     // No fallar el proceso si DynamoDB falla
   }
 }
