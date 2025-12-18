@@ -182,9 +182,18 @@ exports.handler = async (event) => {
     const job = await getJobFromDynamoDB(jobId);
     
     console.log(`[IPP-STATUS] Job encontrado. Status actual: ${job.status}`);
+    console.log(`[IPP-STATUS] Factor results disponibles: ${job.factor_results ? 'SI' : 'NO'}`);
+    if (job.factor_results) {
+      console.log(`[IPP-STATUS] Factor results:`, JSON.stringify(job.factor_results, null, 2));
+    }
     
-    // 2. Si el job ya está completado o falló, retornar estado
-    if (job.status === 'completed' || job.status === 'failed' || job.status === 'factor_completed') {
+    // 2. Si el job ya está completado, en factor de redondeo, o falló, retornar estado
+    if (job.status === 'completed' || job.status === 'failed' || 
+        job.status === 'factor_initiated' || job.status === 'factor_processing' || 
+        job.status === 'factor_completed') {
+      
+      console.log(`[IPP-STATUS] Retornando status final/factor para job: ${jobId}`);
+      
       return {
         statusCode: 200,
         headers: corsHeaders,
@@ -192,10 +201,14 @@ exports.handler = async (event) => {
           job_id: jobId,
           status: job.status,
           message: job.status === 'factor_completed' ? 'Proceso completado (con Factor de Redondeo)' : 
-                   job.status === 'completed' ? 'Proceso completado' : 'Proceso fallido',
+                   job.status === 'factor_processing' ? 'Factor de Redondeo procesando clientes...' :
+                   job.status === 'factor_initiated' ? 'Factor de Redondeo iniciado...' :
+                   job.status === 'completed' ? 'Databricks completado, iniciando Factor de Redondeo...' : 
+                   'Proceso fallido',
           mostradores_count: job.mostradores_count,
           total_clientes: job.total_clientes,
           factor_results: job.factor_results || null,
+          databricks_run_url: job.databricks_run_url || null,
           created_at: job.created_at,
           updated_at: job.updated_at
         })
@@ -235,12 +248,19 @@ exports.handler = async (event) => {
     
     // 4. Otros estados (processing, job2_running, etc.)
     const progressMap = {
+      'validating': 5,
       'job1_running': 25,
       'processing': 50,
+      'completed': 50,
+      'factor_initiated': 60,
+      'factor_processing': 80,
+      'factor_completed': 100,
       'job2_running': 80,
-      'completed': 100,
       'failed': 0
     };
+    
+    console.log(`[IPP-STATUS] Estado: ${job.status}, Progreso: ${progressMap[job.status] || 50}%`);
+    console.log(`[IPP-STATUS] Factor results en respuesta:`, job.factor_results ? 'SI' : 'NO');
     
     return {
       statusCode: 200,

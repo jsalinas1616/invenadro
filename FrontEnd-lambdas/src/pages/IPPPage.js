@@ -56,7 +56,14 @@ function IPPPage() {
     pollingIntervalRef.current = setInterval(async () => {
       try {
         const statusResponse = await ippService.checkProcessStatus(jobId);
-        console.log('[IPPPage] Estado actualizado:', statusResponse);
+        console.log('============ [IPPPage] POLLING STATUS ============');
+        console.log('[IPPPage] Job ID:', jobId);
+        console.log('[IPPPage] Status recibido:', statusResponse.status);
+        console.log('[IPPPage] Factor results en respuesta:', statusResponse.factor_results ? 'SI' : 'NO');
+        if (statusResponse.factor_results) {
+          console.log('[IPPPage] Factor results:', JSON.stringify(statusResponse.factor_results, null, 2));
+        }
+        console.log('==================================================');
         
         setIppStatus(statusResponse.status);
         
@@ -67,7 +74,10 @@ function IPPPage() {
         
         // Actualizar resultados del Factor de Redondeo si están disponibles
         if (statusResponse.factor_results) {
+          console.log('[IPPPage] Actualizando factorResults state con:', statusResponse.factor_results);
           setFactorResults(statusResponse.factor_results);
+        } else {
+          console.log('[IPPPage] NO hay factor_results en la respuesta');
         }
         
         // Si el proceso terminó completamente (Factor de Redondeo terminado), detener polling

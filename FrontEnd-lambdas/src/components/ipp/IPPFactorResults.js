@@ -12,6 +12,15 @@ import ippService from '../../services/ippService';
  * - status: string (estado general del proceso)
  */
 function IPPFactorResults({ jobId, factorResults, status }) {
+  console.log('========== [IPPFactorResults] RENDER ==========');
+  console.log('[IPPFactorResults] jobId:', jobId);
+  console.log('[IPPFactorResults] status:', status);
+  console.log('[IPPFactorResults] factorResults:', factorResults);
+  console.log('[IPPFactorResults] factorResults es null?', factorResults === null);
+  console.log('[IPPFactorResults] factorResults es undefined?', factorResults === undefined);
+  console.log('[IPPFactorResults] Clientes en factorResults:', factorResults ? Object.keys(factorResults).length : 0);
+  console.log('===============================================');
+  
   const [expandedClients, setExpandedClients] = useState({});
   const [clientDetails, setClientDetails] = useState({});
   const [loadingDetails, setLoadingDetails] = useState({});
@@ -109,7 +118,9 @@ function IPPFactorResults({ jobId, factorResults, status }) {
 
   // Si no hay resultados aún
   if (!factorResults || Object.keys(factorResults).length === 0) {
-    if (status === 'factor_processing' || status === 'factor_initiated') {
+    console.log('[IPPFactorResults] No hay resultados. Status:', status);
+    if (status === 'completed' || status === 'factor_initiated' || status === 'factor_processing') {
+      console.log('[IPPFactorResults] Mostrando spinner de espera...');
       return (
         <Card className="shadow-sm mt-4">
           <Card.Header style={{ backgroundColor: '#648a26' }} className="text-white">
@@ -118,12 +129,13 @@ function IPPFactorResults({ jobId, factorResults, status }) {
           <Card.Body>
             <Alert variant="info">
               <Spinner animation="border" size="sm" className="me-2" />
-              Esperando resultados del Factor de Redondeo...
+              {status === 'completed' ? 'Iniciando Factor de Redondeo...' : 'Esperando resultados del Factor de Redondeo...'}
             </Alert>
           </Card.Body>
         </Card>
       );
     }
+    console.log('[IPPFactorResults] No mostrar componente (status no aplica)');
     return null;
   }
 
