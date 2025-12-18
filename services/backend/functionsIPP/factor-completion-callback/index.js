@@ -41,17 +41,7 @@ exports.handler = async (event) => {
       };
     }
     
-    // Extraer processId del path (resultados/{processId}/resultado.json)
-    const processIdMatch = key.match(/resultados\/([^\/]+)\/resultado\.json/);
-    if (!processIdMatch) {
-      console.error('ERROR: No se pudo extraer processId del path:', key);
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'Invalid path format' })
-      };
-    }
-    const processId = processIdMatch[1];
-    console.log(`Process ID: ${processId}`);
+    console.log('Archivo resultado.json detectado, procesando...');
     
     // 2. LEER RESULTADO DEL FACTOR DE REDONDEO
     console.log('\nLeyendo resultado del Factor de Redondeo...');
@@ -63,6 +53,17 @@ exports.handler = async (event) => {
     const resultadoContent = await streamToString(resultadoResponse.Body);
     const resultado = JSON.parse(resultadoContent);
     
+    // Extraer processId DEL CONTENIDO (ya no del path)
+    const processId = resultado.processId;
+    if (!processId) {
+      console.error('ERROR: resultado.json no contiene processId');
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'Missing processId in resultado.json' })
+      };
+    }
+    
+    console.log(`Process ID: ${processId}`);
     console.log(`Resultado leído - Status: ${resultado.status}`);
     
     // 3. VERIFICAR SI VIENE DE IPP
