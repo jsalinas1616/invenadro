@@ -139,7 +139,8 @@ const mapDatabricksStateToIPP = (databricksState, resultState) => {
   }
   
   // Diferenciar entre cola y ejecución
-  if (databricksState === 'PENDING') {
+  // Databricks puede devolver PENDING o QUEUED dependiendo de la versión
+  if (databricksState === 'PENDING' || databricksState === 'QUEUED') {
     return 'job1_queued'; // En cola, esperando recursos
   }
   
