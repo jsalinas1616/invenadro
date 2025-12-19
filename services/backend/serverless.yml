@@ -53,6 +53,7 @@ provider:
   runtime: nodejs20.x
   region: mx-central-1
   stage: ${opt:stage, 'dev'}
+  configValidationMode: warn  # Permite regiones custom como mx-central-1
   
   # Configuración de logs
   logs:
@@ -520,6 +521,7 @@ functions:
     memorySize: 256
     environment:
       IPP_JOBS_TABLE: !Ref IPPJobsTable
+    iamRoleStatementsName: invenadro-${self:provider.stage}-factor-cb-role
     iamRoleStatements:
       - Effect: Allow
         Action:
