@@ -119,8 +119,17 @@ function IPPFactorResults({ jobId, factorResults, status }) {
   // Si no hay resultados aún
   if (!factorResults || Object.keys(factorResults).length === 0) {
     console.log('[IPPFactorResults] No hay resultados. Status:', status);
-    if (status === 'completed' || status === 'factor_initiated' || status === 'factor_processing') {
+    if (status === 'completed' || status === 'factor_initiated' || status === 'factor_processing' || status === 'factor_completed') {
       console.log('[IPPFactorResults] Mostrando spinner de espera...');
+      
+      // Determinar mensaje según el estado
+      let mensaje = 'Esperando resultados del Factor de Redondeo...';
+      if (status === 'completed') {
+        mensaje = 'Iniciando Factor de Redondeo...';
+      } else if (status === 'factor_completed') {
+        mensaje = 'Finalizando proceso, obteniendo resultados...';
+      }
+      
       return (
         <Card className="shadow-sm mt-4">
           <Card.Header style={{ backgroundColor: '#648a26' }} className="text-white">
@@ -129,7 +138,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
           <Card.Body>
             <Alert variant="info">
               <Spinner animation="border" size="sm" className="me-2" />
-              {status === 'completed' ? 'Iniciando Factor de Redondeo...' : 'Esperando resultados del Factor de Redondeo...'}
+              {mensaje}
             </Alert>
           </Card.Body>
         </Card>
