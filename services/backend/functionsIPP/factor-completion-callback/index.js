@@ -270,20 +270,32 @@ async function actualizarEstadoFinalIPP(ippJobId) {
   console.log(`\nActualizando estado final del IPP...`);
   
   try {
+    // Leer el job actual para obtener factor_results
+    const currentJob = await docClient.send(new GetCommand({
+      TableName: IPP_JOBS_TABLE,
+      Key: { job_id: ippJobId }
+    }));
+    
+    const factorResults = currentJob.Item?.factor_results || {};
+    
+    // Actualizar status Y reescribir factor_results en el MISMO update
+    // para evitar race conditions donde el frontend lee status=completed pero factor_results=undefined
     await docClient.send(new UpdateCommand({
       TableName: IPP_JOBS_TABLE,
       Key: { job_id: ippJobId },
-      UpdateExpression: 'SET #s = :status, completed_at = :time',
+      UpdateExpression: 'SET #s = :status, completed_at = :time, factor_results = :results',
       ExpressionAttributeNames: {
         '#s': 'status'
       },
       ExpressionAttributeValues: {
         ':status': 'factor_completed',
-        ':time': new Date().toISOString()
+        ':time': new Date().toISOString(),
+        ':results': factorResults
       }
     }));
     
     console.log(`   IPP Job ${ippJobId} marcado como completado`);
+    console.log(`   factor_results reescrito en el mismo update (${Object.keys(factorResults).length} clientes)`);
     
   } catch (error) {
     console.error(`   ERROR actualizando estado final:`, error.message);
