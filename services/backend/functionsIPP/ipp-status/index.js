@@ -1,5 +1,6 @@
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, GetItemCommand, UpdateItemCommand } = require('@aws-sdk/client-dynamodb');
 const { GetCommand, UpdateCommand, DynamoDBDocumentClient } = require('@aws-sdk/lib-dynamodb');
+const { unmarshall } = require('@aws-sdk/util-dynamodb');
 const axios = require('axios');
 
 /**
@@ -39,38 +40,43 @@ const getCorsHeaders = (event) => {
 };
 
 /**
- * Obtener job de DynamoDB
+ * Obtener job de DynamoDB usando cliente RAW para evitar bugs del Document Client
  */
 const getJobFromDynamoDB = async (jobId) => {
   const tableName = process.env.IPP_JOBS_TABLE || 'invenadro-backend-jul-dev-ipp-jobs';
   
   console.log(`[IPP-STATUS] Consultando job: ${jobId}`);
   
-  const command = new GetCommand({
+  // Usar cliente RAW en lugar de Document Client para evitar problemas con objetos anidados grandes
+  const command = new GetItemCommand({
     TableName: tableName,
-    Key: { job_id: jobId }
+    Key: { 
+      job_id: { S: jobId }
+    }
   });
   
-  const response = await docClient.send(command);
+  const response = await dynamoClient.send(command);
   
   if (!response.Item) {
     throw new Error('Job no encontrado');
   }
   
+  // Deserializar manualmente con unmarshall
+  const item = unmarshall(response.Item);
+  
   // LOGS EXHAUSTIVOS para debugging
-  console.log('[IPP-STATUS] ===== ITEM DE DYNAMODB =====');
-  console.log('[IPP-STATUS] Item completo (JSON):', JSON.stringify(response.Item, null, 2));
-  console.log('[IPP-STATUS] Keys presentes en item:', Object.keys(response.Item));
-  console.log('[IPP-STATUS] factor_results existe?', 'factor_results' in response.Item);
-  console.log('[IPP-STATUS] factor_results es null?', response.Item.factor_results === null);
-  console.log('[IPP-STATUS] factor_results es undefined?', response.Item.factor_results === undefined);
-  console.log('[IPP-STATUS] factor_results tipo:', typeof response.Item.factor_results);
-  if (response.Item.factor_results) {
-    console.log('[IPP-STATUS] factor_results contenido:', JSON.stringify(response.Item.factor_results, null, 2));
+  console.log('[IPP-STATUS] ===== ITEM DE DYNAMODB (RAW CLIENT) =====');
+  console.log('[IPP-STATUS] Keys presentes en item:', Object.keys(item));
+  console.log('[IPP-STATUS] factor_results existe?', 'factor_results' in item);
+  console.log('[IPP-STATUS] factor_results es null?', item.factor_results === null);
+  console.log('[IPP-STATUS] factor_results es undefined?', item.factor_results === undefined);
+  console.log('[IPP-STATUS] factor_results tipo:', typeof item.factor_results);
+  if (item.factor_results) {
+    console.log('[IPP-STATUS] factor_results contenido:', JSON.stringify(item.factor_results, null, 2));
   }
   console.log('[IPP-STATUS] ============================');
   
-  return response.Item;
+  return item;
 };
 
 /**
