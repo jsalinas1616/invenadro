@@ -52,6 +52,20 @@ const triggerDatabricksJob1 = async (jobId, mostradores) => {
   }
   
   try {
+    // Obtener bucket y tabla del ambiente actual (dev/prod)
+    const bucketName = process.env.IPP_RAW_BUCKET;
+    const dynamoTable = process.env.IPP_JOBS_TABLE;
+    
+    if (!bucketName || !dynamoTable) {
+      throw new Error('Variables de entorno faltantes: IPP_RAW_BUCKET o IPP_JOBS_TABLE');
+    }
+    
+    console.log(`[IPP-INICIADOR] Parámetros para Databricks:`);
+    console.log(`   - bucket_name: ${bucketName}`);
+    console.log(`   - dynamodb_table: ${dynamoTable}`);
+    console.log(`   - job_id: ${jobId}`);
+    console.log(`   - mostradores: ${mostradores.join(',')}`);
+    
     // Trigger Databricks Job con parámetros
     const response = await axios.post(
       `${workspaceUrl}/api/2.1/jobs/run-now`,
@@ -59,7 +73,9 @@ const triggerDatabricksJob1 = async (jobId, mostradores) => {
         job_id: Number(jobIdDatabricks),
         notebook_params: {
           job_id: jobId,
-          mostradores: mostradores.join(','), // CSV de mostradores
+          mostradores_lambda: mostradores.join(','), // CSV de mostradores
+          bucket_name: bucketName, // Dinámico según ambiente
+          dynamodb_table: dynamoTable, // Dinámico según ambiente
           timestamp: new Date().toISOString()
         }
       },
