@@ -7,7 +7,7 @@ const axios = require('axios');
  * IPP STATUS - Consultar estado del proceso IPP
  * 
  * Responsabilidades:
- * 1. Consultar DynamoDB por job_id
+ * 1. Consultar DynamoDB por job_id (usando RAW client para evitar bug del Document Client)
  * 2. Si Job 1 está running, consultar estado en Databricks
  * 3. Si Job 1 terminó, verificar si processing/job2 está activo
  * 4. Retornar estado actual al frontend
