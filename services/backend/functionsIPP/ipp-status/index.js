@@ -18,6 +18,9 @@ const dynamoClient = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(dynamoClient, {
   marshallOptions: {
     removeUndefinedValues: true  // Evitar error con valores undefined
+  },
+  unmarshallOptions: {
+    wrapNumbers: false  // Convertir Numbers a números JS nativos, no objetos
   }
 });
 
@@ -56,6 +59,7 @@ const getJobFromDynamoDB = async (jobId) => {
   
   // LOGS EXHAUSTIVOS para debugging
   console.log('[IPP-STATUS] ===== ITEM DE DYNAMODB =====');
+  console.log('[IPP-STATUS] Item completo (JSON):', JSON.stringify(response.Item, null, 2));
   console.log('[IPP-STATUS] Keys presentes en item:', Object.keys(response.Item));
   console.log('[IPP-STATUS] factor_results existe?', 'factor_results' in response.Item);
   console.log('[IPP-STATUS] factor_results es null?', response.Item.factor_results === null);
