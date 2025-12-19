@@ -40,38 +40,34 @@ const getCorsHeaders = (event) => {
 };
 
 /**
- * Obtener job de DynamoDB usando cliente RAW para evitar bugs del Document Client
+ * Obtener job de DynamoDB usando Document Client (funciona mejor que RAW + unmarshall)
  */
 const getJobFromDynamoDB = async (jobId) => {
   const tableName = process.env.IPP_JOBS_TABLE || 'invenadro-backend-jul-dev-ipp-jobs';
   
   console.log(`[IPP-STATUS] Consultando job: ${jobId}`);
   
-  // Usar cliente RAW en lugar de Document Client para evitar problemas con objetos anidados grandes
-  const command = new GetItemCommand({
+  // Usar GetCommand del Document Client
+  const command = new GetCommand({
     TableName: tableName,
-    Key: { 
-      job_id: { S: jobId }
-    }
+    Key: { job_id: jobId }
   });
   
-  const response = await dynamoClient.send(command);
+  const response = await docClient.send(command);
   
   if (!response.Item) {
     throw new Error('Job no encontrado');
   }
   
-  // Deserializar manualmente con unmarshall
-  const item = unmarshall(response.Item);
+  const item = response.Item;
   
   // LOGS EXHAUSTIVOS para debugging
-  console.log('[IPP-STATUS] ===== ITEM DE DYNAMODB (RAW CLIENT) =====');
+  console.log('[IPP-STATUS] ===== ITEM DE DYNAMODB =====');
   console.log('[IPP-STATUS] Keys presentes en item:', Object.keys(item));
   console.log('[IPP-STATUS] factor_results existe?', 'factor_results' in item);
-  console.log('[IPP-STATUS] factor_results es null?', item.factor_results === null);
-  console.log('[IPP-STATUS] factor_results es undefined?', item.factor_results === undefined);
   console.log('[IPP-STATUS] factor_results tipo:', typeof item.factor_results);
   if (item.factor_results) {
+    console.log('[IPP-STATUS] factor_results clientes:', Object.keys(item.factor_results));
     console.log('[IPP-STATUS] factor_results contenido:', JSON.stringify(item.factor_results, null, 2));
   }
   console.log('[IPP-STATUS] ============================');
