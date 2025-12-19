@@ -202,8 +202,8 @@ async function buscarResultadoClienteIndividual(processId, clienteId) {
         const response = await s3.getObject({
             Bucket: RESULTS_BUCKET,
             Key: resultKey
-        }).promise();
-        
+                    }).promise();
+                    
         const resultData = JSON.parse(response.Body.toString());
         console.log(`Encontrado resultado del cliente ${clienteId}`);
         return resultData;
