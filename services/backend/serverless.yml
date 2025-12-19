@@ -521,7 +521,7 @@ functions:
     memorySize: 256
     environment:
       IPP_JOBS_TABLE: !Ref IPPJobsTable
-    iamRoleStatementsName: invenadro-${self:provider.stage}-factor-cb-role
+    iamRoleStatementsName: invenadro-backend-${self:provider.stage}-factor-cb-role
     iamRoleStatements:
       - Effect: Allow
         Action:
