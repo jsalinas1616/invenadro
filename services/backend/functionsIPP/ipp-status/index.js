@@ -54,6 +54,18 @@ const getJobFromDynamoDB = async (jobId) => {
     throw new Error('Job no encontrado');
   }
   
+  // LOGS EXHAUSTIVOS para debugging
+  console.log('[IPP-STATUS] ===== ITEM DE DYNAMODB =====');
+  console.log('[IPP-STATUS] Keys presentes en item:', Object.keys(response.Item));
+  console.log('[IPP-STATUS] factor_results existe?', 'factor_results' in response.Item);
+  console.log('[IPP-STATUS] factor_results es null?', response.Item.factor_results === null);
+  console.log('[IPP-STATUS] factor_results es undefined?', response.Item.factor_results === undefined);
+  console.log('[IPP-STATUS] factor_results tipo:', typeof response.Item.factor_results);
+  if (response.Item.factor_results) {
+    console.log('[IPP-STATUS] factor_results contenido:', JSON.stringify(response.Item.factor_results, null, 2));
+  }
+  console.log('[IPP-STATUS] ============================');
+  
   return response.Item;
 };
 
@@ -214,24 +226,33 @@ exports.handler = async (event) => {
       
       console.log(`[IPP-STATUS] Retornando status final/factor para job: ${jobId}`);
       
+      // LOGS EXHAUSTIVOS de la respuesta
+      const responsePayload = {
+        job_id: jobId,
+        status: job.status,
+        message: job.status === 'factor_completed' ? 'Proceso completado (con Factor de Redondeo)' : 
+                 job.status === 'factor_processing' ? 'Factor de Redondeo procesando clientes...' :
+                 job.status === 'factor_initiated' ? 'Factor de Redondeo iniciado...' :
+                 job.status === 'completed' ? 'Databricks completado, iniciando Factor de Redondeo...' : 
+                 'Proceso fallido',
+        mostradores_count: job.mostradores_count,
+        total_clientes: job.total_clientes,
+        factor_results: job.factor_results || null,
+        databricks_run_url: job.databricks_run_url || null,
+        created_at: job.created_at,
+        updated_at: job.updated_at
+      };
+      
+      console.log('[IPP-STATUS] ===== RESPUESTA HTTP =====');
+      console.log('[IPP-STATUS] factor_results en payload?', 'factor_results' in responsePayload);
+      console.log('[IPP-STATUS] factor_results es null?', responsePayload.factor_results === null);
+      console.log('[IPP-STATUS] factor_results contenido:', JSON.stringify(responsePayload.factor_results, null, 2));
+      console.log('[IPP-STATUS] ==========================');
+      
       return {
         statusCode: 200,
         headers: corsHeaders,
-        body: JSON.stringify({
-          job_id: jobId,
-          status: job.status,
-          message: job.status === 'factor_completed' ? 'Proceso completado (con Factor de Redondeo)' : 
-                   job.status === 'factor_processing' ? 'Factor de Redondeo procesando clientes...' :
-                   job.status === 'factor_initiated' ? 'Factor de Redondeo iniciado...' :
-                   job.status === 'completed' ? 'Databricks completado, iniciando Factor de Redondeo...' : 
-                   'Proceso fallido',
-          mostradores_count: job.mostradores_count,
-          total_clientes: job.total_clientes,
-          factor_results: job.factor_results || null,
-          databricks_run_url: job.databricks_run_url || null,
-          created_at: job.created_at,
-          updated_at: job.updated_at
-        })
+        body: JSON.stringify(responsePayload)
       };
     }
     
