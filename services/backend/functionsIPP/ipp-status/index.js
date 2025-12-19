@@ -159,6 +159,20 @@ exports.handler = async (event) => {
   
   const corsHeaders = getCorsHeaders(event);
   
+  // Definir progressMap al inicio para que esté disponible en todo el handler
+  const progressMap = {
+    'validating': 5,
+    'job1_queued': 15,      // En cola esperando recursos
+    'job1_running': 35,     // Ejecutándose
+    'processing': 50,
+    'completed': 50,
+    'factor_initiated': 60,
+    'factor_processing': 80,
+    'factor_completed': 100,
+    'job2_running': 80,
+    'failed': 0
+  };
+  
   // Manejar preflight OPTIONS
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -253,19 +267,6 @@ exports.handler = async (event) => {
     }
     
     // 4. Otros estados (processing, job2_running, etc.)
-    const progressMap = {
-      'validating': 5,
-      'job1_queued': 15,      // En cola esperando recursos
-      'job1_running': 35,     // Ejecutándose
-      'processing': 50,
-      'completed': 50,
-      'factor_initiated': 60,
-      'factor_processing': 80,
-      'factor_completed': 100,
-      'job2_running': 80,
-      'failed': 0
-    };
-    
     console.log(`[IPP-STATUS] Estado: ${job.status}, Progreso: ${progressMap[job.status] || 50}%`);
     console.log(`[IPP-STATUS] Factor results en respuesta:`, job.factor_results ? 'SI' : 'NO');
     
