@@ -84,13 +84,9 @@ function IPPPage() {
         // IMPORTANTE: Solo detener cuando AMBOS status=factor_completed Y factor_results existan
         // para evitar race conditions donde status se actualiza pero factor_results aún no
         if (statusResponse.status === 'factor_completed' && statusResponse.factor_results) {
-          console.log('[IPPPage] Proceso completado (Factor de Redondeo) CON factor_results, obteniendo resultados...');
+          console.log('[IPPPage] Proceso completado (Factor de Redondeo) CON factor_results, deteniendo polling...');
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
-          
-          // Obtener resultados finales
-          const results = await ippService.getResults(jobId);
-          setIppResult(results);
           
         } else if (statusResponse.status === 'factor_completed' && !statusResponse.factor_results) {
           console.log('[IPPPage] Proceso completado pero factor_results aún no disponible, continuando polling...');
