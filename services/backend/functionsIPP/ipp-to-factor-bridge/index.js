@@ -249,7 +249,10 @@ function transformarIPPaExcel(datosCliente) {
       'Precio Farmacia': row.Precio_Farmacia || 0,
       Inversión: row.Importe || 0,
       'Monto Venta Mostrador': row.Monto_Venta_Mostrador || 0,
-      Categoría: row.CATEGORIA_INVENADRO || ''
+      'ID Proveedor': row.ID_PROVEEDOR || '',
+      'Nombre Proveedor': row.NOMBRE_PROVEEDOR || '',
+      'Categoría InveNadro': row.CATEGORIA_INVENADRO || '',
+      'Categoría Materiales': row.CATEGORIA_MATERIALES || ''
     };
   });
   
@@ -272,7 +275,10 @@ function transformarIPPaExcel(datosCliente) {
     { wch: 15 }, // Precio Farmacia
     { wch: 15 }, // Inversión
     { wch: 20 }, // Monto Venta Mostrador
-    { wch: 20 }  // Categoría
+    { wch: 15 }, // ID Proveedor
+    { wch: 25 }, // Nombre Proveedor
+    { wch: 20 }, // Categoría InveNadro
+    { wch: 25 }  // Categoría Materiales
   ];
   ws['!cols'] = colWidths;
   
