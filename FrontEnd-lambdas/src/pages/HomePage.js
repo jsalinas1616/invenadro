@@ -41,14 +41,24 @@ const HomePage = ({ onNavigate, user }) => {
         {/* Logo y Bienvenida */}
         <Row className="justify-content-center mb-5">
           <Col lg={8} className="text-center">
-            <div className="mb-4" style={{ animation: 'fadeInDown 0.8s ease-out' }}>
+            <div 
+              className="mb-4" 
+              style={{ 
+                animation: 'fadeInDown 0.8s ease-out',
+                background: 'linear-gradient(135deg, #648a26 0%, #7ba330 100%)',
+                padding: '2rem 3rem',
+                borderRadius: '20px',
+                display: 'inline-block',
+                boxShadow: '0 8px 20px rgba(100, 138, 38, 0.25)'
+              }}
+            >
               <img 
                 src="/logo-invenadro.png" 
                 alt="Invenadro Logo" 
                 style={{ 
-                  maxWidth: '200px',
+                  maxWidth: '250px',
                   height: 'auto',
-                  filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))'
+                  display: 'block'
                 }}
               />
             </div>
@@ -190,7 +200,13 @@ const HomePage = ({ onNavigate, user }) => {
                     background: '#f8f9fa',
                     borderRadius: '8px'
                   }}>
-                    👤 {user.username || user.email}
+                    👤 {
+                      user.signInDetails?.loginId || 
+                      user.attributes?.email || 
+                      user.attributes?.name || 
+                      user.username || 
+                      'Usuario'
+                    }
                   </div>
                 )}
               </div>
