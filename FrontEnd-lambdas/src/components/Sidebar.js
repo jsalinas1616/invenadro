@@ -5,7 +5,8 @@ import './Sidebar.css';
 
 const Sidebar = ({ activeModule, onModuleChange, visible }) => {
   const [independientesExpanded, setIndependientesExpanded] = useState(false); // Colapsado por default
-  const [farmatodoExpanded, setFarmatodoExpanded] = useState(true); // Expandido por default
+  const [farmatodoExpanded, setFarmatodoExpanded] = useState(false); // Colapsado por default
+  const [configExpanded, setConfigExpanded] = useState(false); // Colapsado por default
 
   return (
     <div className={`sidebar ${visible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
@@ -25,7 +26,7 @@ const Sidebar = ({ activeModule, onModuleChange, visible }) => {
             style={{ fontWeight: '500' }}
           >
             <FaHome className="me-2" />
-            Inicio
+            INICIO
           </Nav.Link>
         </Nav>
       </div>
@@ -91,22 +92,28 @@ const Sidebar = ({ activeModule, onModuleChange, visible }) => {
 
       {/* Configuraciones */}
       <div className="sidebar-section">
-        <div className="sidebar-section-title">
+        <div 
+          className="sidebar-section-title clickable"
+          onClick={() => setConfigExpanded(!configExpanded)}
+        >
           <div className="d-flex align-items-center">
             <FaCog className="me-2" />
             CONFIGURACIONES
           </div>
+          {configExpanded ? <FaChevronDown /> : <FaChevronRight />}
         </div>
         
-        <Nav className="flex-column sidebar-nav">
-          <Nav.Link 
-            className={activeModule === 'configuraciones' ? 'active' : ''}
-            onClick={() => onModuleChange('configuraciones')}
-          >
-            <FaCog className="me-2" />
-            Configuraciones de Mostrador
-          </Nav.Link>
-        </Nav>
+        {configExpanded && (
+          <Nav className="flex-column sidebar-nav">
+            <Nav.Link 
+              className={activeModule === 'configuraciones' ? 'active' : ''}
+              onClick={() => onModuleChange('configuraciones')}
+            >
+              <FaCog className="me-2" />
+              Configuraciones de Mostrador
+            </Nav.Link>
+          </Nav>
+        )}
       </div>
     </div>
   );
