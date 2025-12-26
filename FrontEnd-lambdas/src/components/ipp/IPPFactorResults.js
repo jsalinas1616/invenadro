@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Card, Table, Badge, Spinner, Alert, Button, Collapse } from 'react-bootstrap';
-import { FaCheckCircle, FaTimesCircle, FaChevronDown, FaChevronUp, FaDownload } from 'react-icons/fa';
+import { Card, Table, Badge, Spinner, Alert, Button, Collapse, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { FaCheckCircle, FaTimesCircle, FaChevronDown, FaChevronUp, FaFileExcel, FaFileCode } from 'react-icons/fa';
+import * as XLSX from 'xlsx';
 import ippService from '../../services/ippService';
 
 /**
@@ -79,8 +80,8 @@ function IPPFactorResults({ jobId, factorResults, status }) {
     }
   };
 
-  // Descargar resultado completo de un cliente
-  const downloadClientResult = async (cliente, resultPath) => {
+  // Descargar resultado como JSON (original)
+  const downloadClientResultJSON = async (cliente, resultPath) => {
     try {
       const s3Match = resultPath.match(/s3:\/\/([^/]+)\/(.+)/);
       if (!s3Match) {
@@ -100,7 +101,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
       
       const data = await response.json();
 
-      // Crear y descargar archivo
+      // Crear y descargar archivo JSON
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -111,8 +112,52 @@ function IPPFactorResults({ jobId, factorResults, status }) {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error(`Error downloading result for client ${cliente}:`, error);
-      alert(`Error descargando el resultado: ${error.message}`);
+      console.error(`Error downloading JSON for client ${cliente}:`, error);
+      alert(`Error descargando el resultado JSON: ${error.message}`);
+    }
+  };
+
+  // Descargar resultado como Excel
+  const downloadClientResultExcel = async (cliente, resultPath) => {
+    try {
+      const s3Match = resultPath.match(/s3:\/\/([^/]+)\/(.+)/);
+      if (!s3Match) {
+        throw new Error('Invalid S3 path format');
+      }
+
+      const [, bucket, key] = s3Match;
+      
+      // Obtener URL de descarga del backend
+      const downloadUrl = await ippService.getDownloadUrl(bucket, key);
+      
+      // Descargar el archivo usando la URL pre-firmada
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+
+      // Extraer el campo "datos" del JSON
+      if (!data.datos || !Array.isArray(data.datos) || data.datos.length === 0) {
+        throw new Error('No se encontraron datos para exportar');
+      }
+
+      // Crear libro de Excel
+      const workbook = XLSX.utils.book_new();
+      
+      // Convertir datos a hoja de Excel
+      const worksheet = XLSX.utils.json_to_sheet(data.datos);
+      
+      // Agregar hoja al libro
+      XLSX.utils.book_append_sheet(workbook, worksheet, `Cliente ${cliente}`);
+      
+      // Generar archivo Excel y descargarlo
+      XLSX.writeFile(workbook, `factor_redondeo_cliente_${cliente}.xlsx`);
+      
+    } catch (error) {
+      console.error(`Error downloading Excel for client ${cliente}:`, error);
+      alert(`Error descargando el resultado Excel: ${error.message}`);
     }
   };
 
@@ -202,7 +247,8 @@ function IPPFactorResults({ jobId, factorResults, status }) {
                     {result.completed_at ? new Date(result.completed_at).toLocaleString('es-MX') : '-'}
                   </td>
                   <td>
-                    <div className="d-flex gap-2">
+                    <div className="d-flex gap-2 justify-content-center">
+                      {/* Botón de Ver Detalles oculto por ahora
                       <Button
                         size="sm"
                         variant="outline-primary"
@@ -212,14 +258,51 @@ function IPPFactorResults({ jobId, factorResults, status }) {
                         {expandedClients[cliente] ? <FaChevronUp /> : <FaChevronDown />}
                         {expandedClients[cliente] ? ' Ocultar' : ' Ver Detalles'}
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline-success"
-                        onClick={() => downloadClientResult(cliente, result.result_path)}
-                        disabled={result.status !== 'COMPLETED'}
+                      */}
+                      
+                      {/* Descargar Excel */}
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={<Tooltip>Descargar Excel</Tooltip>}
                       >
-                        <FaDownload /> Descargar
-                      </Button>
+                        <Button
+                          size="sm"
+                          variant="outline-success"
+                          onClick={() => downloadClientResultExcel(cliente, result.result_path)}
+                          disabled={result.status !== 'COMPLETED'}
+                          style={{ 
+                            width: '40px', 
+                            height: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <FaFileExcel size={20} />
+                        </Button>
+                      </OverlayTrigger>
+
+                      {/* Descargar JSON */}
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={<Tooltip>Descargar JSON</Tooltip>}
+                      >
+                        <Button
+                          size="sm"
+                          variant="outline-info"
+                          onClick={() => downloadClientResultJSON(cliente, result.result_path)}
+                          disabled={result.status !== 'COMPLETED'}
+                          style={{ 
+                            width: '40px', 
+                            height: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <FaFileCode size={20} />
+                        </Button>
+                      </OverlayTrigger>
                     </div>
                   </td>
                 </tr>
