@@ -54,6 +54,7 @@ import CustomAuthenticator from './components/CustomAuthenticator';
 import Sidebar from './components/Sidebar';
 import ConfiguracionesPage from './pages/ConfiguracionesPage';
 import IPPPage from './pages/IPPPage';
+import HomePage from './pages/HomePage';
 
 // Registrar componentes de Chart.js
 ChartJS.register(
@@ -683,7 +684,7 @@ function App() {
   const [showConfigPanel, setShowConfigPanel] = useState(true);
 
   // Estado para el módulo activo en el Sidebar
-  const [activeModule, setActiveModule] = useState('farmatodo-spp'); // default: Farmatodo SPP
+  const [activeModule, setActiveModule] = useState('home'); // default: Página de inicio
   
   // Estado para mostrar/ocultar Sidebar
   const [sidebarVisible, setSidebarVisible] = useState(true);
@@ -1193,6 +1194,12 @@ function App() {
               }}
             >
               {/* Contenido según módulo seleccionado */}
+              
+              {/* Página de Inicio */}
+              {activeModule === 'home' && (
+                <HomePage onNavigate={handleModuleChange} user={user} />
+              )}
+
               {activeModule === 'farmatodo-spp' && (
                 <>
       <Container fluid className="py-4">

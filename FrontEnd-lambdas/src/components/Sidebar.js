@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Nav } from 'react-bootstrap';
-import { FaHospital, FaStore, FaChevronRight, FaChevronDown, FaCalculator, FaTh, FaCog } from 'react-icons/fa';
+import { FaHospital, FaStore, FaChevronRight, FaChevronDown, FaCalculator, FaTh, FaCog, FaHome } from 'react-icons/fa';
 import './Sidebar.css';
 
 const Sidebar = ({ activeModule, onModuleChange, visible }) => {
@@ -14,6 +14,20 @@ const Sidebar = ({ activeModule, onModuleChange, visible }) => {
           <FaTh className="sidebar-header-icon" />
           <h6 className="mb-0 sidebar-header-title">MÓDULOS</h6>
         </div>
+      </div>
+
+      {/* Inicio */}
+      <div className="sidebar-section">
+        <Nav className="flex-column sidebar-nav">
+          <Nav.Link 
+            className={activeModule === 'home' ? 'active' : ''}
+            onClick={() => onModuleChange('home')}
+            style={{ fontWeight: '500' }}
+          >
+            <FaHome className="me-2" />
+            Inicio
+          </Nav.Link>
+        </Nav>
       </div>
 
       {/* Farmacias Independientes (Colapsable) */}
