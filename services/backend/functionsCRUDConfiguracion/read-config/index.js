@@ -63,9 +63,18 @@ exports.handler = async (event) => {
 
   try {
     const mostradorId = event.pathParameters?.mostradorId;
+    
+    // Parámetros de paginación y filtros desde query string
+    const queryParams = event.queryStringParameters || {};
+    const page = parseInt(queryParams.page) || 1;
+    const pageSize = parseInt(queryParams.pageSize) || 50;
+    const searchTerm = queryParams.search || '';
+    const tipoFilter = queryParams.tipo || '';
+    
+    const offset = (page - 1) * pageSize;
 
     if (mostradorId) {
-      // BUSCAR POR ID (mostrador)
+      // BUSCAR POR ID (mostrador) - sin cambios
       console.log('Buscando configuración para mostrador:', mostradorId);
       
       const query = `
@@ -79,25 +88,6 @@ exports.handler = async (event) => {
       ];
 
       const result = await executeQuery(query, { parameters });
-      
-      // En Databricks SQL API, los resultados vienen en result.result.data_array (array de arrays) 
-      // O en result.manifest.schema.columns (nombres)
-      // PERO axios devuelve response.data.
-      // executeQuery devuelve response.data
-      
-      // La estructura de respuesta de executeQuery (que viene de la API de Databricks) es compleja.
-      // Normalmente tiene: result: { data_array: [...], schema: {...} }
-      
-      // IMPORTANTE: Databricks SQL Statement API devuelve filas como arrays, no objetos.
-      // Necesitamos mapear columnas a nombres si queremos usar nombres.
-      // O confiar en el orden. El SELECT * no garantiza orden.
-      // Mejor especificar columnas explícitamente o mapear dinámicamente.
-      
-      // Vamos a hacer un SELECT explícito para asegurar el orden y mapeo
-      // O mejor, usar un helper que transforme el resultado de Databricks a objetos.
-      
-      // Vamos a simplificar y asumir que executeQuery devuelve el raw response.
-      // Necesito procesar result para convertirlo a objetos.
       
       const columns = result.manifest.schema.columns.map(c => c.name);
       const rows = result.result.data_array || [];
@@ -127,14 +117,65 @@ exports.handler = async (event) => {
       };
 
     } else {
-      // LISTAR TODAS
-      console.log('Listando todas las configuraciones...');
+      // LISTAR TODAS CON PAGINACIÓN Y FILTROS
+      console.log(`Listando configuraciones - Página: ${page}, Tamaño: ${pageSize}, Búsqueda: ${searchTerm}, Tipo: ${tipoFilter}`);
       
-      const query = `SELECT * FROM invenadro.bronze.invenadro_input_automatizacion`;
-      const result = await executeQuery(query);
+      // Construir condiciones WHERE dinámicamente
+      let whereConditions = [];
+      let parameters = [];
       
-      const columns = result.manifest.schema.columns.map(c => c.name);
-      const rows = result.result.data_array || [];
+      if (searchTerm) {
+        whereConditions.push('(CAST(mostrador AS STRING) LIKE :search)');
+        parameters.push({ 
+          name: 'search', 
+          value: `%${searchTerm}%`, 
+          type: 'STRING' 
+        });
+      }
+      
+      if (tipoFilter && tipoFilter !== 'all') {
+        whereConditions.push('tipo_inventario = :tipo');
+        parameters.push({ 
+          name: 'tipo', 
+          value: tipoFilter, 
+          type: 'STRING' 
+        });
+      }
+      
+      const whereClause = whereConditions.length > 0 
+        ? `WHERE ${whereConditions.join(' AND ')}` 
+        : '';
+      
+      // Query para contar total de registros
+      const countQuery = `
+        SELECT COUNT(*) as total 
+        FROM invenadro.bronze.invenadro_input_automatizacion
+        ${whereClause}
+      `;
+      
+      // Query para obtener datos paginados
+      const dataQuery = `
+        SELECT * 
+        FROM invenadro.bronze.invenadro_input_automatizacion
+        ${whereClause}
+        ORDER BY mostrador ASC
+        LIMIT ${pageSize} OFFSET ${offset}
+      `;
+      
+      // Ejecutar ambas queries
+      const [countResult, dataResult] = await Promise.all([
+        executeQuery(countQuery, parameters.length > 0 ? { parameters } : undefined),
+        executeQuery(dataQuery, parameters.length > 0 ? { parameters } : undefined)
+      ]);
+      
+      // Procesar count
+      const countColumns = countResult.manifest.schema.columns.map(c => c.name);
+      const countRows = countResult.result.data_array || [];
+      const total = countRows[0] ? countRows[0][0] : 0;
+      
+      // Procesar datos
+      const columns = dataResult.manifest.schema.columns.map(c => c.name);
+      const rows = dataResult.result.data_array || [];
       
       const configs = rows.map(row => {
         const rowData = {};
@@ -144,14 +185,23 @@ exports.handler = async (event) => {
         return mapRowToConfig(rowData);
       });
 
-      console.log(`✅ ${configs.length} configuraciones encontradas`);
+      const totalPages = Math.ceil(total / pageSize);
+
+      console.log(`✅ ${configs.length} configuraciones encontradas (${total} total)`);
 
       return {
         statusCode: 200,
         headers: corsHeaders,
         body: JSON.stringify({ 
           configs,
-          count: configs.length
+          pagination: {
+            page,
+            pageSize,
+            total,
+            totalPages,
+            hasNext: page < totalPages,
+            hasPrevious: page > 1
+          }
         })
       };
     }

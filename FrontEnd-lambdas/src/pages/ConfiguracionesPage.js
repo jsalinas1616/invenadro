@@ -16,6 +16,24 @@ const ConfiguracionesPage = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [configToDelete, setConfigToDelete] = useState(null);
   const [toasts, setToasts] = useState([]);
+  
+  // Estados de paginación y filtros
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 50,
+    total: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrevious: false
+  });
+  
+  const [filters, setFilters] = useState({
+    search: '',
+    tipo: 'all'
+  });
+  
+  // Ref para debounce de búsqueda
+  const searchTimerRef = React.useRef(null);
 
   // Funciones de Toast
   const addToast = useCallback((message, variant = 'info') => {
@@ -30,13 +48,20 @@ const ConfiguracionesPage = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
-  // Cargar todas las configuraciones
-  const loadConfigs = useCallback(async () => {
+  // Cargar configuraciones con paginación
+  const loadConfigs = useCallback(async (page = 1, currentFilters = filters) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await configService.getAllConfigs();
-      setConfigs(data || []);
+      const result = await configService.getAllConfigs({
+        page,
+        pageSize: pagination.pageSize,
+        search: currentFilters.search,
+        tipo: currentFilters.tipo
+      });
+      
+      setConfigs(result.configs || []);
+      setPagination(result.pagination);
     } catch (err) {
       console.error('Error cargando configuraciones:', err);
       setError(`Error al cargar configuraciones: ${err.message}`);
@@ -44,12 +69,12 @@ const ConfiguracionesPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [addToast]);
+  }, [pagination.pageSize, addToast]);
 
   // Cargar configuraciones al montar
   useEffect(() => {
-    loadConfigs();
-  }, [loadConfigs]);
+    loadConfigs(1, filters);
+  }, []);
 
   // Abrir modal para crear
   const handleCreate = () => {
@@ -113,7 +138,7 @@ const ConfiguracionesPage = () => {
       addToast('Configuración eliminada exitosamente', 'success');
       setShowDeleteConfirm(false);
       setConfigToDelete(null);
-      await loadConfigs(); // Recargar lista
+      await loadConfigs(pagination.page, filters); // Recargar lista
     } catch (err) {
       console.error('Error eliminando configuración:', err);
       addToast(`Error al eliminar: ${err.message}`, 'danger');
@@ -121,6 +146,49 @@ const ConfiguracionesPage = () => {
       setLoading(false);
     }
   };
+
+  // Handler de cambio de página
+  const handlePageChange = (newPage) => {
+    loadConfigs(newPage, filters);
+  };
+
+  // Handler de cambio de filtros
+  const handleFilterChange = (filterName, value) => {
+    const newFilters = { ...filters, [filterName]: value };
+    setFilters(newFilters);
+    
+    // Si es búsqueda, aplicar debounce
+    if (filterName === 'search') {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+      
+      searchTimerRef.current = setTimeout(() => {
+        loadConfigs(1, newFilters); // Volver a página 1 al buscar
+      }, 500);
+    } else {
+      // Para otros filtros, aplicar inmediatamente
+      loadConfigs(1, newFilters); // Volver a página 1 al filtrar
+    }
+  };
+
+  // Handler de cambio de tamaño de página
+  const handlePageSizeChange = (newPageSize) => {
+    setPagination(prev => ({ ...prev, pageSize: newPageSize }));
+    // Recargar desde página 1 con el nuevo tamaño
+    setTimeout(() => {
+      loadConfigs(1, filters);
+    }, 0);
+  };
+
+  // Limpiar timer al desmontar
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <Container fluid className="py-4">
@@ -169,7 +237,7 @@ const ConfiguracionesPage = () => {
           }}>
             <Card.Body className="text-center py-4">
               <h2 className="fw-bold mb-2" style={{ fontSize: '3rem', color: '#648a26' }}>
-                {configs.length}
+                {pagination.total}
               </h2>
               <div style={{ fontSize: '1.1rem', color: '#6c757d', fontWeight: '500' }}>
                 Configuraciones Totales
@@ -224,6 +292,11 @@ const ConfiguracionesPage = () => {
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
                 loading={loading}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                pagination={pagination}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
               />
             </Card.Body>
           </Card>

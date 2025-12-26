@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
-import { Table, Button, Badge, InputGroup, Form, Row, Col } from 'react-bootstrap';
+import React from 'react';
+import { Table, Button, Badge, InputGroup, Form, Row, Col, Pagination } from 'react-bootstrap';
 import { FaEdit, FaTrash, FaSearch, FaFilter } from 'react-icons/fa';
 
-const ConfigTable = ({ configs, onEdit, onDelete, loading }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [tipoFilter, setTipoFilter] = useState('all');
+const ConfigTable = ({ 
+  configs, 
+  onEdit, 
+  onDelete, 
+  loading,
+  filters,
+  onFilterChange,
+  pagination,
+  onPageChange,
+  onPageSizeChange
+}) => {
 
   // Formatear moneda
   const formatCurrency = (amount) => {
@@ -30,17 +38,6 @@ const ConfigTable = ({ configs, onEdit, onDelete, loading }) => {
     });
   };
 
-  // Filtrar configuraciones
-  const filteredConfigs = configs.filter(config => {
-    const matchesSearch = 
-      config.mostrador?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      config.mostradorId?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesTipo = tipoFilter === 'all' || config.tipoInvenadro === tipoFilter;
-    
-    return matchesSearch && matchesTipo;
-  });
-
   // Contar productos incluidos
   const countIncluidos = (config) => {
     const campos = [
@@ -52,31 +49,62 @@ const ConfigTable = ({ configs, onEdit, onDelete, loading }) => {
     return campos.filter(campo => config[campo] === 'S').length;
   };
 
+  // Generar items de paginación
+  const renderPaginationItems = () => {
+    const items = [];
+    const { page, totalPages } = pagination;
+    
+    let startPage = Math.max(1, page - 2);
+    let endPage = Math.min(totalPages, page + 2);
+    
+    if (endPage - startPage < 4) {
+      if (page < 3) {
+        endPage = Math.min(5, totalPages);
+      } else {
+        startPage = Math.max(1, totalPages - 4);
+      }
+    }
+    
+    for (let number = startPage; number <= endPage; number++) {
+      items.push(
+        <Pagination.Item
+          key={number}
+          active={number === page}
+          onClick={() => onPageChange(number)}
+        >
+          {number}
+        </Pagination.Item>
+      );
+    }
+    
+    return items;
+  };
+
   return (
     <div>
       {/* Filtros y búsqueda */}
-      <Row className="mb-3">
-        <Col md={6}>
+      <Row className="mb-3 align-items-center">
+        <Col md={5}>
           <InputGroup>
             <InputGroup.Text>
               <FaSearch />
             </InputGroup.Text>
             <Form.Control
               type="text"
-              placeholder="Buscar por mostrador o ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar por mostrador..."
+              value={filters.search}
+              onChange={(e) => onFilterChange('search', e.target.value)}
             />
           </InputGroup>
         </Col>
-        <Col md={4}>
+        <Col md={3}>
           <InputGroup>
             <InputGroup.Text>
               <FaFilter />
             </InputGroup.Text>
             <Form.Select 
-              value={tipoFilter}
-              onChange={(e) => setTipoFilter(e.target.value)}
+              value={filters.tipo}
+              onChange={(e) => onFilterChange('tipo', e.target.value)}
             >
               <option value="all">Todos los tipos</option>
               <option value="SPP">SPP</option>
@@ -85,8 +113,18 @@ const ConfigTable = ({ configs, onEdit, onDelete, loading }) => {
           </InputGroup>
         </Col>
         <Col md={2}>
-          <div className="text-muted small">
-            {filteredConfigs.length} de {configs.length} configuraciones
+          <Form.Select 
+            value={pagination.pageSize}
+            onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
+            size="sm"
+          >
+            <option value="50">50 por página</option>
+            <option value="100">100 por página</option>
+          </Form.Select>
+        </Col>
+        <Col md={2}>
+          <div className="text-muted small text-end">
+            {configs.length} de {pagination.total}
           </div>
         </Col>
       </Row>
@@ -114,16 +152,16 @@ const ConfigTable = ({ configs, onEdit, onDelete, loading }) => {
                   </div>
                 </td>
               </tr>
-            ) : filteredConfigs.length === 0 ? (
+            ) : configs.length === 0 ? (
               <tr>
                 <td colSpan="7" className="text-center py-4 text-muted">
-                  {searchTerm || tipoFilter !== 'all' 
+                  {filters.search || filters.tipo !== 'all' 
                     ? 'No se encontraron configuraciones con los filtros aplicados'
                     : 'No hay configuraciones. Crea una nueva para comenzar.'}
                 </td>
               </tr>
             ) : (
-              filteredConfigs.map((config) => (
+              configs.map((config) => (
                 <tr key={config.mostradorId}>
                   <td>
                     <div className="d-flex align-items-center">
@@ -180,6 +218,43 @@ const ConfigTable = ({ configs, onEdit, onDelete, loading }) => {
           </tbody>
         </Table>
       </div>
+
+      {/* Controles de Paginación */}
+      {!loading && pagination.total > 0 && (
+        <Row className="mt-3">
+          <Col className="d-flex justify-content-between align-items-center">
+            <div className="text-muted">
+              Página {pagination.page} de {pagination.totalPages}
+              <span className="ms-2">
+                ({((pagination.page - 1) * pagination.pageSize) + 1} - 
+                {Math.min(pagination.page * pagination.pageSize, pagination.total)} de {pagination.total})
+              </span>
+            </div>
+            
+            <Pagination className="mb-0">
+              <Pagination.First 
+                onClick={() => onPageChange(1)}
+                disabled={!pagination.hasPrevious}
+              />
+              <Pagination.Prev 
+                onClick={() => onPageChange(pagination.page - 1)}
+                disabled={!pagination.hasPrevious}
+              />
+              
+              {renderPaginationItems()}
+              
+              <Pagination.Next 
+                onClick={() => onPageChange(pagination.page + 1)}
+                disabled={!pagination.hasNext}
+              />
+              <Pagination.Last 
+                onClick={() => onPageChange(pagination.totalPages)}
+                disabled={!pagination.hasNext}
+              />
+            </Pagination>
+          </Col>
+        </Row>
+      )}
     </div>
   );
 };

@@ -63,14 +63,27 @@ class ConfigService {
   }
 
   /**
-   * Obtener todas las configuraciones
+   * Obtener configuraciones con paginación y filtros
+   * @param {Object} options - Opciones de paginación y filtros
+   * @param {number} options.page - Número de página (empezando en 1)
+   * @param {number} options.pageSize - Cantidad de registros por página (50 o 100)
+   * @param {string} options.search - Término de búsqueda
+   * @param {string} options.tipo - Filtro por tipo (SPP/IPP/all)
    */
-  async getAllConfigs() {
+  async getAllConfigs(options = {}) {
     try {
-      console.log('📋 Obteniendo todas las configuraciones...');
+      const { page = 1, pageSize = 50, search = '', tipo = '' } = options;
+      
+      const queryParams = new URLSearchParams();
+      queryParams.append('page', page);
+      queryParams.append('pageSize', pageSize);
+      if (search) queryParams.append('search', search);
+      if (tipo && tipo !== 'all') queryParams.append('tipo', tipo);
+      
+      console.log('📋 Obteniendo configuraciones...', { page, pageSize, search, tipo });
       
       const headers = await this.getAuthHeaders();
-      const response = await fetch(`${this.baseURL}/configuraciones`, {
+      const response = await fetch(`${this.baseURL}/configuraciones?${queryParams.toString()}`, {
         method: 'GET',
         headers
       });
@@ -81,8 +94,8 @@ class ConfigService {
       }
 
       const result = await response.json();
-      console.log(`✅ ${result.count} configuraciones obtenidas`);
-      return result.configs;
+      console.log(`✅ ${result.configs.length} de ${result.pagination.total} configuraciones obtenidas`);
+      return result;
       
     } catch (error) {
       console.error('❌ Error obteniendo configuraciones:', error);
