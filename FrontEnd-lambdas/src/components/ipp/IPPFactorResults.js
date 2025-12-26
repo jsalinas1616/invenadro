@@ -249,7 +249,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
                     {result.completed_at ? new Date(result.completed_at).toLocaleString('es-MX') : '-'}
                   </td>
                   <td>
-                    <div className="d-flex gap-2 justify-content-center">
+                    <div className="d-flex gap-2 justify-content-start">
                       {/* Botón de Ver Detalles oculto por ahora
                       <Button
                         size="sm"
