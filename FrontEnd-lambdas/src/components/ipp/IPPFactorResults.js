@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Table, Badge, Spinner, Alert, Button, Collapse, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { FaCheckCircle, FaTimesCircle, FaChevronDown, FaChevronUp, FaFileExcel, FaFileCode } from 'react-icons/fa';
+import { Card, Table, Badge, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { FaCheckCircle, FaTimesCircle, FaFileExcel, FaFileCode } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import ippService from '../../services/ippService';
 
@@ -22,6 +22,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
   console.log('[IPPFactorResults] Clientes en factorResults:', factorResults ? Object.keys(factorResults).length : 0);
   console.log('===============================================');
   
+  /* Estados y funciones para expandir/colapsar detalles - Comentados por ahora
   const [expandedClients, setExpandedClients] = useState({});
   const [clientDetails, setClientDetails] = useState({});
   const [loadingDetails, setLoadingDetails] = useState({});
@@ -79,6 +80,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
       setLoadingDetails(prev => ({ ...prev, [cliente]: false }));
     }
   };
+  */
 
   // Descargar resultado como JSON (original)
   const downloadClientResultJSON = async (cliente, resultPath) => {
@@ -306,6 +308,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
                     </div>
                   </td>
                 </tr>
+                {/* Detalles expandibles comentados por ahora
                 {expandedClients[cliente] && (
                   <tr>
                     <td colSpan="5" style={{ backgroundColor: '#f8f9fa' }}>
@@ -330,6 +333,7 @@ function IPPFactorResults({ jobId, factorResults, status }) {
                     </td>
                   </tr>
                 )}
+                */}
               </React.Fragment>
             ))}
           </tbody>
