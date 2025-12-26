@@ -49,7 +49,7 @@ const ConfiguracionesPage = () => {
   }, []);
 
   // Cargar configuraciones con paginación
-  const loadConfigs = useCallback(async (page = 1, currentFilters = filters) => {
+  const loadConfigs = useCallback(async (page = 1, currentFilters) => {
     setLoading(true);
     setError(null);
     try {
@@ -74,7 +74,8 @@ const ConfiguracionesPage = () => {
   // Cargar configuraciones al montar
   useEffect(() => {
     loadConfigs(1, filters);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo ejecutar al montar
 
   // Abrir modal para crear
   const handleCreate = () => {
