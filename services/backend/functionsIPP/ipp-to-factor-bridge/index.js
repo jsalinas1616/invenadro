@@ -251,7 +251,7 @@ function transformarIPPaExcel(datosCliente) {
       'Factor 9': row.Factor_9 || 0,
       'Ponderación Tradicional': row.PONDERACION_TRADICIONAL || 0,
       'Porcentaje Tradicional': row.PORCENTAJE_TRADICIONAL || 0,
-      'Precio Farmacia': row.Precio_Farmacia || 0,
+      'Precio Farmacia': Math.floor((row.Precio_Farmacia || 0) * 100) / 100, // Truncar a 2 decimales
       Inversión: row.Importe || 0,
       'Monto Venta Mostrador': row.Monto_Venta_Mostrador || 0,
       'Monto Venta Mostrador Cliente': row.Monto_Venta_Mostrador_Cliente || 0,
