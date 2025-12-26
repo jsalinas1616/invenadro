@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Card, Table, Badge, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import React from 'react';
+import { Card, Table, Badge, Button, OverlayTrigger, Tooltip, Alert, Spinner } from 'react-bootstrap';
 import { FaCheckCircle, FaTimesCircle, FaFileExcel, FaFileCode } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import ippService from '../../services/ippService';
@@ -345,7 +345,9 @@ function IPPFactorResults({ jobId, factorResults, status }) {
 
 /**
  * ClientDetailsView - Vista detallada del resultado de un cliente
+ * Comentado por ahora - Se usa cuando se expanden los detalles
  */
+/*
 function ClientDetailsView({ details }) {
   if (!details || !details.resultado) {
     return (
@@ -425,6 +427,7 @@ function ClientDetailsView({ details }) {
     </div>
   );
 }
+*/
 
 export default IPPFactorResults;
 
