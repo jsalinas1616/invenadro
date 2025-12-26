@@ -146,11 +146,20 @@ exports.handler = async (event) => {
         ? `WHERE ${whereConditions.join(' AND ')}` 
         : '';
       
-      // Query para contar total de registros
+      // Query para contar total de registros (con filtros)
       const countQuery = `
         SELECT COUNT(*) as total 
         FROM invenadro.bronze.invenadro_input_automatizacion
         ${whereClause}
+      `;
+      
+      // Query para estadísticas globales (SIN filtros)
+      const statsQuery = `
+        SELECT 
+          COUNT(*) as total,
+          SUM(CASE WHEN tipo_inventario = 'SPP' THEN 1 ELSE 0 END) as total_spp,
+          SUM(CASE WHEN tipo_inventario = 'IPP' THEN 1 ELSE 0 END) as total_ipp
+        FROM invenadro.bronze.invenadro_input_automatizacion
       `;
       
       // Query para obtener datos paginados
@@ -162,16 +171,27 @@ exports.handler = async (event) => {
         LIMIT ${pageSize} OFFSET ${offset}
       `;
       
-      // Ejecutar ambas queries
-      const [countResult, dataResult] = await Promise.all([
+      // Ejecutar las tres queries en paralelo
+      const [countResult, statsResult, dataResult] = await Promise.all([
         executeQuery(countQuery, parameters.length > 0 ? { parameters } : undefined),
+        executeQuery(statsQuery),
         executeQuery(dataQuery, parameters.length > 0 ? { parameters } : undefined)
       ]);
       
-      // Procesar count
+      // Procesar count (con filtros)
       const countColumns = countResult.manifest.schema.columns.map(c => c.name);
       const countRows = countResult.result.data_array || [];
       const total = countRows[0] ? countRows[0][0] : 0;
+      
+      // Procesar stats globales (sin filtros)
+      const statsColumns = statsResult.manifest.schema.columns.map(c => c.name);
+      const statsRows = statsResult.result.data_array || [];
+      const statsData = {};
+      if (statsRows[0]) {
+        statsRows[0].forEach((val, idx) => {
+          statsData[statsColumns[idx]] = val || 0;
+        });
+      }
       
       // Procesar datos
       const columns = dataResult.manifest.schema.columns.map(c => c.name);
@@ -187,7 +207,7 @@ exports.handler = async (event) => {
 
       const totalPages = Math.ceil(total / pageSize);
 
-      console.log(`✅ ${configs.length} configuraciones encontradas (${total} total)`);
+      console.log(`✅ ${configs.length} configuraciones encontradas (${total} filtrados, ${statsData.total} total global)`);
 
       return {
         statusCode: 200,
@@ -201,6 +221,11 @@ exports.handler = async (event) => {
             totalPages,
             hasNext: page < totalPages,
             hasPrevious: page > 1
+          },
+          stats: {
+            total: statsData.total || 0,
+            totalSPP: statsData.total_spp || 0,
+            totalIPP: statsData.total_ipp || 0
           }
         })
       };

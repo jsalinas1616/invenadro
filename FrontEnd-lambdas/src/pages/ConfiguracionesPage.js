@@ -32,6 +32,13 @@ const ConfiguracionesPage = () => {
     tipo: 'all'
   });
   
+  // Estadísticas globales (sin filtros)
+  const [stats, setStats] = useState({
+    total: 0,
+    totalSPP: 0,
+    totalIPP: 0
+  });
+  
   // Ref para debounce de búsqueda
   const searchTimerRef = React.useRef(null);
 
@@ -62,6 +69,11 @@ const ConfiguracionesPage = () => {
       
       setConfigs(result.configs || []);
       setPagination(result.pagination);
+      
+      // Actualizar estadísticas globales (si vienen en la respuesta)
+      if (result.stats) {
+        setStats(result.stats);
+      }
     } catch (err) {
       console.error('Error cargando configuraciones:', err);
       setError(`Error al cargar configuraciones: ${err.message}`);
@@ -238,7 +250,7 @@ const ConfiguracionesPage = () => {
           }}>
             <Card.Body className="text-center py-4">
               <h2 className="fw-bold mb-2" style={{ fontSize: '3rem', color: '#648a26' }}>
-                {pagination.total}
+                {stats.total}
               </h2>
               <div style={{ fontSize: '1.1rem', color: '#6c757d', fontWeight: '500' }}>
                 Configuraciones Totales
@@ -254,7 +266,7 @@ const ConfiguracionesPage = () => {
           }}>
             <Card.Body className="text-center py-4">
               <h2 className="fw-bold mb-2" style={{ fontSize: '3rem', color: '#0d6efd' }}>
-                {configs.filter(c => c.tipoInvenadro === 'SPP').length}
+                {stats.totalSPP}
               </h2>
               <div style={{ fontSize: '1.1rem', color: '#6c757d', fontWeight: '500' }}>
                 Tipo SPP
@@ -270,7 +282,7 @@ const ConfiguracionesPage = () => {
           }}>
             <Card.Body className="text-center py-4">
               <h2 className="fw-bold mb-2" style={{ fontSize: '3rem', color: '#17a2b8' }}>
-                {configs.filter(c => c.tipoInvenadro === 'IPP').length}
+                {stats.totalIPP}
               </h2>
               <div style={{ fontSize: '1.1rem', color: '#6c757d', fontWeight: '500' }}>
                 Tipo IPP
