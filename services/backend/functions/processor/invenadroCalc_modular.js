@@ -119,7 +119,7 @@ const CONFIG_REGLAS_DEFAULT = {
   diasDeInversionParaReglasP: 21, // es difrente valor al de diasInversionDeseados
   precioMaximo: 3500,
   joroba: 3.5,
-  factorForzado: null // Si se configura, usa este factor en lugar del optimizado
+  factorForzado: 0.01 // Si se configura, usa este factor en lugar del optimizado
 };
 
 // Configuración de cálculos de Databricks

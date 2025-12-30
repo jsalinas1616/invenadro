@@ -33,7 +33,7 @@ brew install jq # macOS
 git push origin dev # → jul-dev
 git push origin qa # → jul-qa
 git push origin nadro-qa # → nadro-qa
-git push origin main # → nadro-prod
+git push origin prod # → nadro-prod
 
 # GitHub Actions se encarga de todo automáticamente
 ```
