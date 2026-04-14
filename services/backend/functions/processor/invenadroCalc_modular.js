@@ -21,7 +21,7 @@ const { cargarDatosVentasDatabricks } = require('./data/databricksLoader');
 const { leerDatosExcel } = require('./data/excelReader');
 
 // Importar optimización con Brent's Method
-const { optimizarFactorRedondeo } = require('./optimization/factorOptimizerBrent');
+const { optimizarFactorRedondeo, optimizarFactorPorSKUs } = require('./optimization/factorOptimizerBrent');
 
 
 // Importar utilidades
@@ -119,7 +119,7 @@ const CONFIG_REGLAS_DEFAULT = {
   diasDeInversionParaReglasP: 21, // es difrente valor al de diasInversionDeseados
   precioMaximo: 3500,
   joroba: 3.5,
-  factorForzado: 0.01 // Si se configura, usa este factor en lugar del optimizado
+  factorForzado: null // null = optimización automática con Brent's method
 };
 
 // Configuración de cálculos de Databricks
@@ -247,24 +247,77 @@ const procesarExcelConConfiguracion = async (input, customConfig = {}, tipoProce
       
     } else {
       console.log('[3] [Factor de redondeo] Iniciando optimización automática...');
-      console.log('[3] [DEBUG] Datos para optimización:', {
-        tipo: typeof datosConDatabricks,
-        esArray: Array.isArray(datosConDatabricks),
-        length: datosConDatabricks?.length,
-        factorInicial: configReglas.factorRedondeo
-      });
       
       try {
-        resultadoOptimizacion = await optimizarFactorRedondeo(
-          datosConDatabricks, 
-          configReglas.factorRedondeo, 
-          configReglas,
-          valorParseado
-        );
-        factorFinal = resultadoOptimizacion.factor;
-        historialIteraciones = resultadoOptimizacion.historialIteraciones;  
-        console.log('ESTO ES LO QUE invenadroCalc_modular HISTORIAL ITERACIONES', historialIteraciones);
+        // ═══════════════════════════════════════════════════════
+        // DECISIÓN: ¿Optimizar por MONTO (SPP) o PRODUCTOS (SKUs)?
+        // DETECCIÓN AUTOMÁTICA: Leer columna "Skus" de la primera fila
+        // ═══════════════════════════════════════════════════════
+        const primeraFila = datosConDatabricks[0] || {};
 
+        // Helper: normaliza un nombre de columna a minúsculas sin espacios, guiones y acentos
+        const normalizarCol = (s) => s
+          .toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .replace(/[\s_\-]+/g, '');
+
+        const buscarColumna = (patrones) => {
+          const claves = Object.keys(primeraFila);
+          for (const clave of claves) {
+            const norm = normalizarCol(clave);
+            if (patrones.some(p => norm === normalizarCol(p))) return primeraFila[clave];
+          }
+          return undefined;
+        };
+
+        // LEER dias_inversion POR CLIENTE desde el Excel (sobreescribe customConfig)
+        const diasInversionExcel = buscarColumna([
+          'dias_inversion', 'diasinversion', 'dias de inversion', 'dias de inversión',
+          'diasdeinversion', 'dias_inversion_deseados', 'diasinversiondeseados',
+          'dias de inversion deseados', 'días de inversión deseados'
+        ]);
+        if (diasInversionExcel !== undefined && diasInversionExcel !== '' && !isNaN(diasInversionExcel)) {
+          configReglas.diasInversionDeseados = parseFloat(diasInversionExcel);
+          configReglas.diasDeInversionParaReglasP = parseFloat(diasInversionExcel);
+          console.log(`[CONFIG] dias_inversion leído del Excel: ${configReglas.diasInversionDeseados}`);
+        }
+
+        // LEER porcentaje_joroba POR CLIENTE desde el Excel (sobreescribe customConfig)
+        const jorobaExcel = buscarColumna([
+          'porcentaje_joroba', 'porcentajedejoroba', 'porcentaje de joroba',
+          'pct_joroba', 'pctjoroba', 'joroba', '%joroba', 'porcjoroba',
+          'porcentaje joroba'
+        ]);
+        if (jorobaExcel !== undefined && jorobaExcel !== '' && !isNaN(jorobaExcel)) {
+          configReglas.joroba = parseFloat(jorobaExcel);
+          console.log(`[CONFIG] porcentaje_joroba leído del Excel: ${configReglas.joroba}`);
+        }
+
+        const skusObjetivo = buscarColumna(['skus', 'skusobjetivo', 'skus objetivo']);
+
+        if (skusObjetivo && skusObjetivo !== '' && !isNaN(skusObjetivo)) {
+          // ═══ CÁLCULO POR SKUS ═══
+          const skusNumero = parseInt(skusObjetivo);
+          console.log('[3] [Factor de redondeo] Optimizando por SKUs. Objetivo: ' + skusNumero);
+          resultadoOptimizacion = await optimizarFactorPorSKUs(
+            datosConDatabricks,
+            configReglas.factorRedondeo,
+            configReglas,
+            valorParseado,
+            { skusObjetivo: skusNumero }
+          );
+        } else {
+          // ═══ CÁLCULO POR MONTO DE INVERSIÓN ═══
+          resultadoOptimizacion = await optimizarFactorRedondeo(
+            datosConDatabricks, 
+            configReglas.factorRedondeo, 
+            configReglas,
+            valorParseado
+          );
+        }
+
+        factorFinal = resultadoOptimizacion.factor;
+        historialIteraciones = resultadoOptimizacion.historialIteraciones;
         tipoFactor = 'factor_optimo';
         console.log('[3] [Factor de redondeo] Factor óptimo encontrado: ' + factorFinal);
       } catch (error) {

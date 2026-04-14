@@ -64,7 +64,7 @@ const calcularValorOptimoRedondeado = (datos, configReglas) => {
   
     // Aplicar redondeo
     const parteEntera = Math.floor(valorOptimoSinRedondeado);
-    const decimal = truncateToDecimals(valorOptimoSinRedondeado - parteEntera,2);
+    const decimal = truncateToDecimals(valorOptimoSinRedondeado - parteEntera,3);
 
     let valorOptimoRedondeado;
     if (decimal >= configReglas.factorRedondeo) {
