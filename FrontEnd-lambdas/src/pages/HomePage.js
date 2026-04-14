@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
-import { FaCalculator, FaChartLine, FaCog, FaArrowRight } from 'react-icons/fa';
+import { FaCalculator, FaArrowRight } from 'react-icons/fa';
 
 const HomePage = ({ onNavigate, user }) => {
   const modules = [
@@ -11,22 +11,6 @@ const HomePage = ({ onNavigate, user }) => {
       icon: FaCalculator,
       color: '#648a26',
       gradient: 'linear-gradient(135deg, #648a26 0%, #7ba330 100%)'
-    },
-    {
-      id: 'ind-ipp',
-      title: 'IPP Farmacias Independientes',
-      description: 'Cálculo de inventarios para farmacias independientes',
-      icon: FaChartLine,
-      color: '#0d6efd',
-      gradient: 'linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)'
-    },
-    {
-      id: 'configuraciones',
-      title: 'Configuraciones de Mostrador',
-      description: 'Gestiona las configuraciones de mostradores para cálculos',
-      icon: FaCog,
-      color: '#17a2b8',
-      gradient: 'linear-gradient(135deg, #17a2b8 0%, #138496 100%)'
     }
   ];
 
