@@ -1,13 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Nav } from 'react-bootstrap';
-import { FaHospital, FaStore, FaChevronRight, FaChevronDown, FaCalculator, FaTh, FaCog, FaHome } from 'react-icons/fa';
+import { FaStore, FaCalculator, FaTh, FaHome } from 'react-icons/fa';
 import './Sidebar.css';
 
 const Sidebar = ({ activeModule, onModuleChange, visible }) => {
-  const [independientesExpanded, setIndependientesExpanded] = useState(false); // Colapsado por default
-  const [farmatodoExpanded, setFarmatodoExpanded] = useState(false); // Colapsado por default
-  const [configExpanded, setConfigExpanded] = useState(false); // Colapsado por default
-
   return (
     <div className={`sidebar ${visible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
       <div className="sidebar-header">
@@ -20,7 +16,7 @@ const Sidebar = ({ activeModule, onModuleChange, visible }) => {
       {/* Inicio */}
       <div className="sidebar-section">
         <Nav className="flex-column sidebar-nav">
-          <Nav.Link 
+          <Nav.Link
             className={activeModule === 'home' ? 'active' : ''}
             onClick={() => onModuleChange('home')}
             style={{ fontWeight: '500' }}
@@ -31,89 +27,23 @@ const Sidebar = ({ activeModule, onModuleChange, visible }) => {
         </Nav>
       </div>
 
-      {/* Farmacias Independientes (Colapsable) */}
+      {/* Farmatodo */}
       <div className="sidebar-section">
-        <div 
-          className="sidebar-section-title clickable"
-          onClick={() => setIndependientesExpanded(!independientesExpanded)}
-        >
-          <div className="d-flex align-items-center">
-            <FaHospital className="me-2" />
-            FARMACIAS INDEPENDIENTES
-          </div>
-          {independientesExpanded ? <FaChevronDown /> : <FaChevronRight />}
-        </div>
-        
-        {independientesExpanded && (
-          <Nav className="flex-column sidebar-nav">
-            <Nav.Link 
-              className={activeModule === 'ind-spp' ? 'active' : ''}
-              onClick={() => onModuleChange('ind-spp')}
-            >
-              <FaCalculator className="me-2" />
-              SPP
-            </Nav.Link>
-            <Nav.Link 
-              className={activeModule === 'ind-ipp' ? 'active' : ''}
-              onClick={() => onModuleChange('ind-ipp')}
-            >
-              <FaCalculator className="me-2" />
-              IPP
-            </Nav.Link>
-          </Nav>
-        )}
-      </div>
-
-      {/* Farmatodo (Expandible) */}
-      <div className="sidebar-section">
-        <div 
-          className="sidebar-section-title clickable"
-          onClick={() => setFarmatodoExpanded(!farmatodoExpanded)}
-        >
+        <div className="sidebar-section-title">
           <div className="d-flex align-items-center">
             <FaStore className="me-2" />
             FARMATODO
           </div>
-          {farmatodoExpanded ? <FaChevronDown /> : <FaChevronRight />}
         </div>
-        
-        {farmatodoExpanded && (
-          <Nav className="flex-column sidebar-nav">
-            <Nav.Link 
-              className={activeModule === 'farmatodo-spp' ? 'active' : ''}
-              onClick={() => onModuleChange('farmatodo-spp')}
-            >
-              <FaCalculator className="me-2" />
-              Cálculo Factor de Redondeo SPP
-            </Nav.Link>
-          </Nav>
-        )}
-      </div>
-
-      {/* Configuraciones */}
-      <div className="sidebar-section">
-        <div 
-          className="sidebar-section-title clickable"
-          onClick={() => setConfigExpanded(!configExpanded)}
-        >
-          <div className="d-flex align-items-center">
-            <FaCog className="me-2" />
-            CONFIGURACIONES
-          </div>
-          {configExpanded ? <FaChevronDown /> : <FaChevronRight />}
-        </div>
-        
-        {configExpanded && (
-          <Nav className="flex-column sidebar-nav">
-            <Nav.Link 
-              className={activeModule === 'configuraciones' ? 'active' : ''}
-              onClick={() => onModuleChange('configuraciones')}
-            >
-              <FaCog className="me-2" />
-              Configuraciones de Mostrador
-            </Nav.Link>
-          </Nav>
-        )}
+        <Nav className="flex-column sidebar-nav">
+          <Nav.Link
+            className={activeModule === 'farmatodo-spp' ? 'active' : ''}
+            onClick={() => onModuleChange('farmatodo-spp')}
+          >
+            <FaCalculator className="me-2" />
+            Cálculo Factor de Redondeo
+          </Nav.Link>
+        </Nav>
       </div>
     </div>
   );

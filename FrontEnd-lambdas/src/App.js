@@ -52,8 +52,6 @@ import lambdaService from './services/lambdaService';
 import ConvergenceModal from './components/ConvergenceModal';
 import CustomAuthenticator from './components/CustomAuthenticator';
 import Sidebar from './components/Sidebar';
-import ConfiguracionesPage from './pages/ConfiguracionesPage';
-import IPPPage from './pages/IPPPage';
 import HomePage from './pages/HomePage';
 
 // Registrar componentes de Chart.js
@@ -1710,25 +1708,6 @@ function App() {
                 </>
               )}
 
-              {/* Placeholder para Farmacias Independientes - SPP */}
-              {activeModule === 'ind-spp' && (
-                <Container fluid className="py-4">
-                  <Alert variant="info">
-                    <h4>Farmacias Independientes - SPP</h4>
-                    <p>Módulo en desarrollo. Próximamente podrás calcular el factor de redondeo para farmacias independientes con SPP.</p>
-                  </Alert>
-                </Container>
-              )}
-
-              {/* Módulo de Farmacias Independientes - IPP */}
-              {activeModule === 'ind-ipp' && (
-                <IPPPage />
-              )}
-
-              {/* Módulo de Configuraciones de Mostrador */}
-              {activeModule === 'configuraciones' && (
-                <ConfiguracionesPage />
-              )}
             </div>
           </div>
     </div>
